@@ -1,0 +1,15 @@
+[submodule "Frogman-Engine-Tests/googletest"]
+	path = Frogman-Engine-Tests/googletest
+	url = https://github.com/google/googletest.git
+[submodule "Third-Party-Libraries/boost"]
+	path = Third-Party-Libraries/boost
+	url = https://github.com/boostorg/boost.git
+[submodule "Third-Party-Libraries/oneTBB"]
+	path = Third-Party-Libraries/oneTBB
+	url = https://github.com/oneapi-src/oneTBB.git
+[submodule "Frogman-Engine-Tests/benchmark"]
+	path = Frogman-Engine-Tests/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "Third-Party-Libraries/taskflow"]
+	path = Third-Party-Libraries/taskflow
+	url = https://github.com/taskflow/taskflow.git
