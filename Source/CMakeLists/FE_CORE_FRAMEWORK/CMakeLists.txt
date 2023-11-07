@@ -112,10 +112,6 @@ endif()
 #// Memory tracking routines involve atomic integral sum and add operations, and its tracking frequency can be dynamically adjusted without recompiling the Engine binary.
 #// Excluding this feature can improve an app performance.
 
-#// FE::exception is designed to replace conventional C++ exception models. 
-#// It logs recoverable errors and warnings with timestamps to keep track of suspicious app process flows, and it can return early if it is nested inside an if-statement.
-#// Frogman Engine Exception system can be turned off by assigning "false" to this macro.
-
 #// FE_ASSERT can be disabled by removing the corresponding macro to eliminate error-checking overhead.
 #// Please NOTE that FE_ASSERT aborts when circumstances are unrecoverable and critical. Therefore, precise debugging should be placed first.
 

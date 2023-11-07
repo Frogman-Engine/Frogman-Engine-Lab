@@ -4,8 +4,8 @@ SET(FE_CORE_TEST "FE_CORE_TEST")
 
 
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/googletest/googletest/include)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/benchmark/include)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/include)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/include)
 
 
 SOURCE_GROUP("Third-Party\\City-Hash" FILES ${_THIRD_PARTY_CITY_HASH_})
@@ -101,17 +101,17 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
 
 	SET(UNIT_TEST_LINUX			
-		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Linux-Packages/libgtest.a>
-		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Linux-Packages/libgtest.a>
-		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Linux-Packages/libgtest.a>
-		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Linux-Packages/libgtest.a>
+		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/linux/libgtest.a>
+		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/linux/libgtest.a>
+		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/linux/libgtest.a>
+		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/linux/libgtest.a>
 	)
 
 #	SET(BENCHMARK_TEST_LINUX			
-#		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Linux-Packages/libbenchmark.a>
-#		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Linux-Packages/libbenchmark.a>
-#		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Linux-Packages/libbenchmark.a>
-#		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Linux-Packages/libbenchmark.a>
+#		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/linux/libbenchmark.a>
+#		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/linux/libbenchmark.a>
+#		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/linux/libbenchmark.a>
+#		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/linux/libbenchmark.a>
 #	)
 
 	TARGET_LINK_LIBRARIES(${FE_CORE_TEST} 
@@ -147,17 +147,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
 
 	SET(UNIT_TEST_WINDOWS			
-		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Windows-Packages/lib/Debug/gtest.lib>
-		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Windows-Packages/lib/Release/gtest.lib>
-		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Windows-Packages/lib/Release/gtest.lib>
-		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Unit-Test-Windows-Packages/lib/Release/gtest.lib>
+		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/windows/Debug/gtest.lib>
+		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/windows/RelWithDebInfo/gtest.lib>
+		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/windows/Release/gtest.lib>
+		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Google-Test/windows/MinSizeRel/gtest.lib>
 	)
 
 	SET(BENCHMARK_TEST_WINDOWS			
-		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Windows-Packages/lib/Debug/benchmark.lib>
-		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Windows-Packages/lib/Release/benchmark.lib>
-		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Windows-Packages/lib/Release/benchmark.lib>
-		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark-Windows-Packages/lib/Release/benchmark.lib>
+		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/windows/Debug/benchmark.lib>
+		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/windows/RelWithDebInfo/benchmark.lib>
+		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/windows/Release/benchmark.lib>
+		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/Benchmark/windows/MinSizeRel/benchmark.lib>
 	)
 
 
@@ -188,10 +188,6 @@ endif()
 #// The output file can be visualized as a graph image via Frogman Engine Memory Utilization Analyzer.
 #// Memory tracking routines involve atomic integral sum and add operations, and its tracking frequency can be dynamically adjusted without recompiling the Engine binary.
 #// Excluding this feature can improve an app performance.
-
-#// FE::exception is designed to replace conventional C++ exception models. 
-#// It logs recoverable errors and warnings with timestamps to keep track of suspicious app process flows, and it can return early if it is nested inside an if-statement.
-#// Frogman Engine Exception system can be turned off by assigning "false" to this macro.
 
 #// FE_ASSERT can be disabled by removing the corresponding macro to eliminate error-checking overhead.
 #// Please NOTE that FE_ASSERT aborts when circumstances are unrecoverable and critical.
