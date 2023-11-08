@@ -489,7 +489,7 @@ public:
             if (l_list_iterator->second.is_full() == false)
             {
                 void* l_allocation_result = nullptr;
-                thread_local static pair_type tl_s_memblock_info;
+                pair_type l_memblock_info;
 
                 if (l_list_iterator->second._unused_blocks.is_empty() == false)
                 {
@@ -498,16 +498,16 @@ public:
                     std::pair's second contains the size of the memory block.
                     */
 
-                    __recycle(tl_s_memblock_info, l_list_iterator->second, l_queried_allocation_size_in_bytes);
+                    __recycle(l_memblock_info, l_list_iterator->second, l_queried_allocation_size_in_bytes);
 
-                    if (tl_s_memblock_info.second < l_queried_allocation_size_in_bytes)
+                    if (l_memblock_info.second < l_queried_allocation_size_in_bytes)
                     {
                         l_allocation_result = l_list_iterator->second._page_iterator;
                         l_list_iterator->second._page_iterator += l_queried_allocation_size_in_bytes;
                     }
                     else
                     {
-                        l_allocation_result = tl_s_memblock_info.first;
+                        l_allocation_result = l_memblock_info.first;
                     }
                 }
                 else
@@ -563,7 +563,7 @@ public:
             if (l_list_iterator->is_full() == false)
             {
                 void* l_allocation_result = nullptr;
-                thread_local static pair_type tl_s_memblock_info;
+                pair_type l_memblock_info;
 
                 if (l_list_iterator->_unused_blocks.is_empty() == false)
                 {
@@ -572,16 +572,16 @@ public:
                     std::pair's second contains the size of the memory block.
                     */
 
-                    __recycle(tl_s_memblock_info, *l_list_iterator, l_queried_allocation_size_in_bytes);
+                    __recycle(l_memblock_info, *l_list_iterator, l_queried_allocation_size_in_bytes);
 
-                    if (tl_s_memblock_info.second < l_queried_allocation_size_in_bytes)
+                    if (l_memblock_info.second < l_queried_allocation_size_in_bytes)
                     {
                         l_allocation_result = l_list_iterator->_page_iterator;
                         l_list_iterator->_page_iterator += l_queried_allocation_size_in_bytes;
                     }
                     else
                     {
-                        l_allocation_result = tl_s_memblock_info.first;
+                        l_allocation_result = l_memblock_info.first;
                     }
                 }
                 else

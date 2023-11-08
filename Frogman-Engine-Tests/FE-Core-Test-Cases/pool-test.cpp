@@ -3,7 +3,7 @@
 #include <FE/core/pool.hxx>
 #include <FE/core/pool_allocator.hxx>
 #include <FE/core/algorithm/string.hxx>
-
+#include <tbb/memory_pool.h>
 #include <FE/miscellaneous/undefine_max_min.h>
 #include <boost/pool/object_pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
@@ -265,6 +265,8 @@ void FE_std_style_new_delete_generic_pool_allocator(benchmark::State& state_p) n
 BENCHMARK(FE_std_style_new_delete_generic_pool_allocator);
 
 
+
+
 void boost_fast_pool_allocator(benchmark::State& state_p) noexcept
 {
 	boost::fast_pool_allocator<std::string> l_allocator;
@@ -315,6 +317,36 @@ void boost_pool_allocator_with_tbb(benchmark::State& state_p) noexcept
 	}
 }
 BENCHMARK(boost_pool_allocator_with_tbb);
+
+
+
+
+void tbb_pool_allocator(benchmark::State& state_p) noexcept
+{
+	tbb::memory_pool<tbb::scalable_allocator<std::string>> l_memory_pool;
+	tbb::memory_pool_allocator<std::string> l_allocator(l_memory_pool);
+	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p, 1); };
+	
+	for (auto _ : state_p)
+	{
+		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(1), l_deleter);
+	}
+}
+BENCHMARK(tbb_pool_allocator);
+
+
+void tbb_pool_allocator_vector(benchmark::State& state_p) noexcept
+{
+	tbb::memory_pool<tbb::scalable_allocator<std::string>> l_memory_pool;
+	tbb::memory_pool_allocator<std::string> l_allocator(l_memory_pool);
+
+	for (auto _ : state_p)
+	{
+		std::vector<std::string, tbb::memory_pool_allocator<std::string>> l_vector(l_allocator);
+		l_vector.reserve(64);
+	}
+}
+BENCHMARK(tbb_pool_allocator_vector);
 
 
 
