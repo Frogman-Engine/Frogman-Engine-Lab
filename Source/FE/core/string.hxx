@@ -461,7 +461,7 @@ public:
 
     _NODISCARD_ _FORCE_INLINE_ boolean is_empty() const noexcept { return this->m_length == 0; }
     _NODISCARD_ _FORCE_INLINE_ length_type length() const noexcept { return this->m_length; }
-    _NODISCARD_ _FORCE_INLINE_ length_type max_length() const noexcept { return FE::max_value<length_type>; }
+    _NODISCARD_ _FORCE_INLINE_ length_type max_length() const noexcept { return FE::max_value<length_type> / sizeof(CharT); }
 
     _CONSTEXPR20_ void reserve(const length_type new_capacity_p) noexcept
     {

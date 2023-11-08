@@ -76,8 +76,8 @@ TEST(memset, _)
 
 void FE_aligned_memcpy_benchmark(benchmark::State& state_p) noexcept
 {
-	alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
-	alignas(64) std::byte l_source[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_source[_MAGICAL_SIZE_];
 
 	for (auto _ : state_p)
 	{
@@ -89,8 +89,8 @@ BENCHMARK(FE_aligned_memcpy_benchmark);
 
 void std_memcpy_benchmark(benchmark::State& state_p) noexcept
 {
-	alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
-	alignas(64) std::byte l_source[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_source[_MAGICAL_SIZE_];
 
 	for (auto _ : state_p)
 	{
@@ -103,7 +103,7 @@ BENCHMARK(std_memcpy_benchmark);
 
 void FE_aligned_memmove_benchmark(benchmark::State& state_p) noexcept
 {
-	alignas(64) std::byte l_mem[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_mem[_MAGICAL_SIZE_];
 
 	for (auto _ : state_p)
 	{
@@ -114,7 +114,7 @@ BENCHMARK(FE_aligned_memmove_benchmark);
 
 void std_memmove_benchmark(benchmark::State& state_p) noexcept
 {
-	alignas(64) std::byte l_mem[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_mem[_MAGICAL_SIZE_];
 
 	for (auto _ : state_p)
 	{
@@ -126,7 +126,7 @@ BENCHMARK(std_memmove_benchmark);
 
 void FE_aligned_memset_benchmark(benchmark::State& state_p) noexcept
 {
-	alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
 
 	for (auto _ : state_p)
 	{
@@ -138,7 +138,7 @@ BENCHMARK(FE_aligned_memset_benchmark);
 
 void std_memset_benchmark(benchmark::State& state_p) noexcept
 {
-	alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
+	static alignas(64) std::byte l_dest[_MAGICAL_SIZE_];
 
 	for (auto _ : state_p)
 	{

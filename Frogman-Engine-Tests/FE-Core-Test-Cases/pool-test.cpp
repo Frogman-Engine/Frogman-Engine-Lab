@@ -150,6 +150,8 @@ TEST(pool, generic_block_allocation)
 
 		FE::generic_pool_ptr<FE::var::int64> l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
+
+
 }
 
 
@@ -173,6 +175,17 @@ TEST(new_delete_pool_allocator, all)
 		l_ptr = l_allocator.reallocate(l_ptr, 1, 2);
 
 		l_allocator.deallocate(l_ptr, 2);
+	}
+}
+
+
+
+
+TEST(pool_allocator, all)
+{
+	{
+		std::vector<std::string, FE::std_style::pool_allocator<std::string>> l_vector;
+		l_vector.reserve(64);
 	}
 }
 
@@ -289,3 +302,51 @@ void boost_pool_allocator(benchmark::State& state_p) noexcept
 	}
 }
 BENCHMARK(boost_pool_allocator);
+
+
+void boost_pool_allocator_with_tbb(benchmark::State& state_p) noexcept
+{
+	boost::pool_allocator<std::string, FE::boost_pool_tbb_scalable_align_allocator, boost::details::pool::null_mutex, 128> l_allocator;
+	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p, 1); };
+
+	for (auto _ : state_p)
+	{
+		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(1), l_deleter);
+	}
+}
+BENCHMARK(boost_pool_allocator_with_tbb);
+
+
+
+
+void boost_pool_allocator_vector(benchmark::State& state_p) noexcept
+{
+	for (auto _ : state_p)
+	{
+		std::vector<std::string, boost::pool_allocator<std::string>> l_vector;
+		l_vector.reserve(64);
+	}
+}
+BENCHMARK(boost_pool_allocator_vector);
+
+
+void boost_pool_allocator_vector_with_tbb(benchmark::State& state_p) noexcept
+{
+	for (auto _ : state_p)
+	{
+		std::vector<std::string, boost::pool_allocator<std::string, FE::boost_pool_tbb_scalable_align_allocator, boost::details::pool::null_mutex, 128>> l_vector;
+		l_vector.reserve(64);
+	}
+}
+BENCHMARK(boost_pool_allocator_vector_with_tbb);
+
+
+void FE_pool_allocator_vector(benchmark::State& state_p) noexcept
+{
+	for (auto _ : state_p)
+	{
+		std::vector<std::string, FE::std_style::pool_allocator<std::string>> l_vector;
+		l_vector.reserve(64);
+	}
+}
+BENCHMARK(FE_pool_allocator_vector);

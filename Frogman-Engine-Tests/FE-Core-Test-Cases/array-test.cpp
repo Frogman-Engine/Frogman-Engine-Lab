@@ -6,6 +6,18 @@
 
 
 
+TEST(farray, all)
+{
+	{
+		FE::farray<const char*, 64> l_array;
+		l_array.push_back("Pizza");
+		
+		EXPECT_TRUE(FE::algorithm::string::compare(l_array.back(), "Pizza"));
+		l_array.pop_back();
+	}
+}
+
+
 //TEST(array, constructor_and_destructor)
 //{
 //	{

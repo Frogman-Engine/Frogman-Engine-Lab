@@ -59,12 +59,7 @@ _FORCE_INLINE_ constexpr HASH_INPUT_DATA_TYPE evaluate_hash_input_data_type()
 
 
 template<typename T, HASH_INPUT_DATA_TYPE hash_input_data_type = FE::evaluate_hash_input_data_type<T>()>
-struct hash
-{
-	hash() noexcept = delete;
-	~hash() noexcept = delete;
-};
-
+struct hash;
 
 struct hash_base
 {

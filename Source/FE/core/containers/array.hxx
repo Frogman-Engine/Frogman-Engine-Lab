@@ -4,17 +4,131 @@
 #include <FE/core/prerequisites.h>
 #include <FE/core/allocator.hxx>
 #include <FE/core/algorithm/utility.hxx>
+#include <FE/core/container_storage.hxx>
 #include <FE/core/iterator.hxx>
 #include <FE/core/memory.hxx>
-#include <FE/core/memory_storage.hxx>
 #include <FE/core/smart_pointers/smart_ptrs.h>
-#include <atomic>
+#include <array>
 #include <initializer_list>
 
 
 
 
 BEGIN_NAMESPACE(FE)
+
+
+template <typename T, size_t Capacity>
+class farray : public std::array<T, Capacity>
+{
+public:
+	using base_type = std::array<T, Capacity>;
+	using value_type = T;
+	using size_type = var::size_t;
+	using difference_type = var::ptrdiff_t;
+	using reference = value_type&;
+	using const_reference = const reference;
+	using pointer = value_type*;
+	using const_pointer = const pointer;
+	using iterator = FE::iterator<FE::contiguous_iterator<T>>;
+	using const_iterator = FE::const_iterator<FE::contiguous_iterator<T>>;
+	using reverse_iterator = FE::reverse_iterator<FE::contiguous_iterator<T>>;
+	using const_reverse_iterator = FE::const_reverse_iterator<FE::contiguous_iterator<T>>;
+
+private:
+	size_type m_array_size = 0;
+	
+public:
+	_FORCE_INLINE_ void push_back(T&& value_p) noexcept
+	{
+		FE_ASSERT(this->m_array_size == Capacity, "${%s@0}: FE::farray is out of capacity. Unable to push an element to the back of the container.");
+
+		base_type::operator[](this->m_array_size) = std::move(value_p);
+		++this->m_array_size;
+	}
+
+	_FORCE_INLINE_ void push_back(const T& value_p) noexcept
+	{
+		FE_ASSERT(this->m_array_size == Capacity, "${%s@0}: FE::farray is out of capacity. Unable to push an element to the back of the container.");
+
+		base_type::operator[](this->m_array_size) = value_p;
+		++this->m_array_size;
+	}
+
+	template<typename... Arguments>
+	_FORCE_INLINE_ void emplace_back(Arguments&&... arguments_p) noexcept
+	{
+		FE_ASSERT(this->m_array_size == Capacity, "${%s@0}: FE::farray is out of capacity. Unable to emplace an element to the back of the container.");
+		this->push_back(arguments_p...);
+	}
+
+
+	_FORCE_INLINE_ void pop_back() noexcept
+	{
+		FE_ASSERT(this->m_array_size == 0, "${%s@0}: Unable to pop an empty FE::farray.");
+
+		--this->m_array_size;
+	}
+
+
+	_FORCE_INLINE_ void capacity() noexcept
+	{
+		return base_type::size();
+	}
+
+
+	_FORCE_INLINE_ reference back() noexcept
+	{
+		return base_type::operator[](this->m_array_size - 1);
+	}
+
+	_FORCE_INLINE_ const_reference back() const noexcept
+	{
+		return base_type::operator[](this->m_array_size - 1);
+	}
+	
+
+	_FORCE_INLINE_ iterator begin() noexcept 
+	{
+		return base_type::begin().operator->();
+	}
+
+	_FORCE_INLINE_ const_iterator cbegin() const noexcept 
+	{
+		return base_type::cbegin().operator->();
+	}
+
+	_FORCE_INLINE_ iterator end() noexcept 
+	{
+		return this->begin() + this->m_array_size;
+	}
+
+	_FORCE_INLINE_ const_iterator cend() const noexcept 
+	{
+		return this->cbegin() + this->m_array_size;
+	}
+
+	_FORCE_INLINE_ reverse_iterator rbegin() noexcept 
+	{
+		return (this->begin() + this->m_array_size) - 1;
+	}
+
+	_FORCE_INLINE_ const_reverse_iterator crbegin() const noexcept 
+	{
+		return (this->cbegin() + this->m_array_size) - 1;
+	}
+
+	_FORCE_INLINE_ reverse_iterator rend() noexcept 
+	{
+		return this->begin() - 1;
+	}
+
+	_FORCE_INLINE_ const_reverse_iterator crend() const noexcept 
+	{
+		return this->cbegin() - 1;
+	}
+};
+
+
 
 
 template <typename T, class Allocator = FE::scalable_aligned_allocator<T>>
@@ -329,8 +443,6 @@ public:
 		return !FE::memcmp(this->cbegin(), this->cend(), other_p.cbegin(), other_p.cend());
 	}
 };
-
-
 
 
 END_NAMESPACE

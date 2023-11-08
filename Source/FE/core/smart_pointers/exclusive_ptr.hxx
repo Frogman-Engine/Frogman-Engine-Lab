@@ -2,6 +2,7 @@
 #define _FE_CORE_EXCLUSIVE_PTR_HXX_
 #include <FE/core/prerequisites.h>
 #include <FE/core/smart_pointers/private/ref_table.hxx>
+#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/allocator.hxx>
 #include <FE/core/algorithm/utility.hxx>
 #include <FE/core/iterator.hxx>

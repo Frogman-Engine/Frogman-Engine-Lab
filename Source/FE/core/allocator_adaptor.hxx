@@ -30,8 +30,8 @@ namespace std_style
 
 		constexpr new_delete_proxy_allocator() noexcept {}
 
-		template <typename another_implementation>
-		constexpr new_delete_proxy_allocator(_MAYBE_UNUSED_ const new_delete_proxy_allocator<another_implementation>& standard_allocator_p) noexcept {}
+		template <typename AnotherImplementation>
+		constexpr new_delete_proxy_allocator(_MAYBE_UNUSED_ const new_delete_proxy_allocator<AnotherImplementation>& standard_allocator_p) noexcept {}
 
 
 		_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
@@ -141,7 +141,7 @@ namespace std_style
 		}
 	};
 
-	// trackable cache_aligned_allocator
+	
 	template<typename T>
 	class cache_aligned_allocator final
 	{
@@ -187,6 +187,23 @@ namespace std_style
 		}
 	};
 }
+
+
+struct boost_pool_tbb_scalable_align_allocator final
+{
+	using size_type = var::size_t;
+	using difference_type = var::ptrdiff_t;
+
+	static char* malloc(const size_type bytes_p) noexcept
+	{
+		return (char*)scalable_aligned_malloc(bytes_p, FE::SIMD_auto_alignment::alignment_type::size);
+	}
+
+	static void free(void* const block_p) noexcept
+	{
+		scalable_aligned_free(block_p);
+	}
+};
 
 
 END_NAMESPACE

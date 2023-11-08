@@ -880,6 +880,13 @@ template<typename T, size_t ChunkCapacity = 10240, class Alignment = FE::align_8
 using generic_pool_ptr = std::unique_ptr<T, pool_deleter<T, FE::POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>;
 
 
+template<uint64 Capacity>
+struct capacity final
+{
+    _MAYBE_UNUSED_ static constexpr inline size_t size = Capacity;
+};
+
+
 END_NAMESPACE
 #pragma warning (pop)
 #endif

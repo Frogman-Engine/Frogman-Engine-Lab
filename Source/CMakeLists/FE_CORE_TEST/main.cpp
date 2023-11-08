@@ -19,11 +19,11 @@ class test final : public FE::framework::application
 
 		if (argv_p == nullptr)
 		{
-			char arg0_default[] = "benchmark";
-			char* args_default = arg0_default;
+			char l_arg0_default[] = "benchmark";
+			char* l_args_default = l_arg0_default;
 
 			argc_p = 1;
-			argv_p = &args_default;
+			argv_p = &l_args_default;
 		}
 		benchmark::Initialize(&argc_p, argv_p);
 		FE_ASSERT(benchmark::ReportUnrecognizedArguments(argc_p, argv_p) == true, "Assertion Failed: Unrecognized Benchmark Arguments Detected.");

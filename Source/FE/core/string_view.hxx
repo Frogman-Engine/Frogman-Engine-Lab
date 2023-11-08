@@ -201,7 +201,7 @@ public:
 		return this->m_end - this->m_begin; 
 	}
 
-	_NODISCARD_ _FORCE_INLINE_ length_type max_length() const noexcept { return FE::max_value<length_type>; }
+	_NODISCARD_ _FORCE_INLINE_ length_type max_length() const noexcept { return FE::max_value<length_type> / sizeof(CharT); }
 	_NODISCARD_ _FORCE_INLINE_ boolean is_empty() const noexcept { return this->m_begin == this->m_end; }
 	_NODISCARD_ _FORCE_INLINE_ boolean is_valid() const noexcept { return !(this->m_watcher.is_expired()); }
 

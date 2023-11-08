@@ -156,11 +156,10 @@ struct align_CPU_L1_cache_line final
 };
 
 
-// it contains memory padding size.
 template<uint64 PaddingSize>
 struct align_custom_bytes final
 {
-	_MAYBE_UNUSED_ static constexpr inline uint16 size = PaddingSize;
+	_MAYBE_UNUSED_ static constexpr inline uint64 size = PaddingSize;
 };
 
 
