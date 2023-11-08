@@ -761,6 +761,8 @@ public:
                         ++pointer_p;
                     }
                 }
+                FE_ASSERT((FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) < element_count_p), "Assertion Failure: Detected an invalid argument value. ${%s@0} was ${%lu@1}.", TO_STRING(element_count_p), &element_count_p);
+
                 l_list_iterator->second._unused_blocks.push(pair_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
                 return;
             }
@@ -782,7 +784,8 @@ private:
             
             auto l_next = unused_scattered_blocks_p.top();
 
-            FE_ASSERT(l_prev.first >= l_next.first, "Assertion Failure: The priority queue has illegal address order. ${%s@0} always has lower address value than ${%s@1}.", TO_STRING(l_prev), TO_STRING(l_next));
+            FE_ASSERT(l_prev.first >= l_next.first, "Assertion Failure: The priority queue has illegal address order. ${%s@0} always has lower address value than ${%s@1}.", TO_STRING(l_prev.first), TO_STRING(l_next.first));
+            FE_ASSERT(l_prev.first + l_prev.second > l_next.first, "${%s@0}: Free-ed memory block range collision detected!\nPlease check if the count value passed to generic_pool<>::deallocate<T, Alignment>(T* ptr_p, count_t element_count_p) was incorrect or not.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_ACCESS_VIOLATION));
 
             if ((l_prev.first + l_prev.second) == l_next.first)
             {

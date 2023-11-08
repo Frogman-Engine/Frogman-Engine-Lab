@@ -75,13 +75,13 @@ public:
 
 
 
-class assertion_failure_log : public logger
+class fatal_error_log : public logger
 {
 public:
     using base_type = logger;
 
-    assertion_failure_log() noexcept;
-    ~assertion_failure_log() noexcept;
+    fatal_error_log() noexcept;
+    ~fatal_error_log() noexcept;
 
     void do_log(character* const message_p, character* const file_name_p, character* const function_name_p, uint32 line_p) noexcept;
 };
@@ -106,10 +106,10 @@ _FORCE_INLINE_ void __FE_LOG_IMPLEMENTATION(const char* const message_p, const c
 }
 #endif
 
-#ifdef _ENABLE_ASSERT_
-_FORCE_INLINE_ void __FE_ASSERT_IMPLEMENTATION(const char* const message_p, const char* const file_name_p, const char* const function_name_p, FE::uint32 line_p) noexcept
+#if defined(_ENABLE_ASSERT_) || defined(_ENABLE_EXIT_)
+_FORCE_INLINE_ void __FE_ABORT_IMPLEMENTATION(const char* const message_p, const char* const file_name_p, const char* const function_name_p, FE::uint32 line_p) noexcept
 {
-    thread_local static ::FE::log::assertion_failure_log tl_s_init;
+    thread_local static ::FE::log::fatal_error_log tl_s_init;
     FE::log::logger::log([&]() { tl_s_init.do_log(message_p, file_name_p, function_name_p, line_p); });
 }
 #endif

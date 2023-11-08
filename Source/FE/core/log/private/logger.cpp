@@ -115,7 +115,7 @@ void logger::__reserve() noexcept
 
 
 
-assertion_failure_log::assertion_failure_log() noexcept : base_type()
+fatal_error_log::fatal_error_log() noexcept : base_type()
 {
 #ifdef _WINDOWS_64BIT_OS_
     var::wchar l_current_local_time_buffer[FE::clock::current_local_time_buffer_size] = L"\0";
@@ -175,12 +175,12 @@ assertion_failure_log::assertion_failure_log() noexcept : base_type()
     this->m_file_logger << "\n-------------------------------------------------- BEGIN LOG --------------------------------------------------\n\n";
 }
 
-assertion_failure_log::~assertion_failure_log() noexcept
+fatal_error_log::~fatal_error_log() noexcept
 {
     this->m_file_guard.close();
 }
 
-void assertion_failure_log::do_log(character* const message_p, character* const file_name_p, character* const function_name_p, uint32 line_p) noexcept
+void fatal_error_log::do_log(character* const message_p, character* const file_name_p, character* const function_name_p, uint32 line_p) noexcept
 {
     if (this->m_log_buffer.capacity() <= default_buffer_size) _UNLIKELY_
     {

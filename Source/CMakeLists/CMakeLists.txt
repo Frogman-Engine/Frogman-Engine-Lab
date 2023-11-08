@@ -51,6 +51,8 @@ SET(_LOG_PRIVATE_
 SET(_CONTAINERS_
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/array.hxx 	
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/index_map.hxx
+	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/hash_map.hxx 
+	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/heap.hxx 
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/queue.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/stack.hxx
 	)

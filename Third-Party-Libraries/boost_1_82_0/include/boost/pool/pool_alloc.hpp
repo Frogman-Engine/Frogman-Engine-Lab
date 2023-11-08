@@ -439,8 +439,6 @@ class fast_pool_allocator
           static_cast<pointer>(
               singleton_pool<fast_pool_allocator_tag, sizeof(T),
                   UserAllocator, Mutex, NextSize, MaxSize>::ordered_malloc(n) );
-      if (ret == 0)
-        boost::throw_exception(std::bad_alloc());
       return ret;
     }
     static pointer allocate(const size_type n, const void * const)
@@ -452,8 +450,6 @@ class fast_pool_allocator
       const pointer ret = static_cast<pointer>(
           (singleton_pool<fast_pool_allocator_tag, sizeof(T),
               UserAllocator, Mutex, NextSize, MaxSize>::malloc)() );
-      if (ret == 0)
-        boost::throw_exception(std::bad_alloc());
       return ret;
     }
     static void deallocate(const pointer ptr, const size_type n)

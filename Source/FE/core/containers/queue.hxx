@@ -18,6 +18,13 @@
 BEGIN_NAMESPACE(FE)
 
 
+template<class T, class Comparison, class Allocator>
+class priority_queue
+{
+	// heap
+};
+
+
 template<class T, size_t Capacity, class Comparison = std::less<T>>
 class fpriority_queue : public std::priority_queue<T, std::pmr::vector<T>, Comparison>
 {

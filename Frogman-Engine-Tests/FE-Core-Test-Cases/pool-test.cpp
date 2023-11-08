@@ -5,6 +5,7 @@
 #include <FE/core/algorithm/string.hxx>
 
 #include <FE/miscellaneous/undefine_max_min.h>
+#include <boost/pool/object_pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <FE/miscellaneous/define_max_min.h>
 
@@ -218,44 +219,40 @@ void FE_generic_pool(benchmark::State& state_p) noexcept
 BENCHMARK(FE_generic_pool);
 
 
-//void FE_new_delete_generic_pool_allocator(benchmark::State& state_p) noexcept
-//{
-//	FE::generic_pool<>::create_pages(1);
-//
-//	for (auto _ : state_p)
-//	{
-//		auto l_ptr = FE::new_delete_pool_allocator<std::string>::allocate(1);
-//
-//		l_ptr = FE::new_delete_pool_allocator<std::string>::reallocate(l_ptr, 1, 2);
-//
-//		FE::new_delete_pool_allocator<std::string>::deallocate(l_ptr, 2);
-//	}
-//
-//	FE::generic_pool<>::shrink_to_fit();
-//}
-//BENCHMARK(FE_new_delete_generic_pool_allocator);
-//
-//
-//void FE_std_style_new_delete_generic_pool_allocator(benchmark::State& state_p) noexcept
-//{
-//	FE::generic_pool<>::create_pages(1);
-//	FE::std_style::new_delete_pool_allocator<std::string> l_allocator;
-//
-//	for (auto _ : state_p)
-//	{
-//		auto l_ptr = l_allocator.allocate(1);
-//
-//		l_ptr = l_allocator.reallocate(l_ptr, 1, 2);
-//
-//		l_allocator.deallocate(l_ptr, 2);
-//	}
-//
-//	FE::generic_pool<>::shrink_to_fit();
-//}
-//BENCHMARK(FE_std_style_new_delete_generic_pool_allocator);
+void FE_new_delete_generic_pool_allocator(benchmark::State& state_p) noexcept
+{
+	FE::generic_pool<>::create_pages(1);
+
+	for (auto _ : state_p)
+	{
+		auto l_ptr = FE::new_delete_pool_allocator<std::string>::allocate(1);
+
+		FE::new_delete_pool_allocator<std::string>::deallocate(l_ptr, 1);
+	}
+
+	FE::generic_pool<>::shrink_to_fit();
+}
+BENCHMARK(FE_new_delete_generic_pool_allocator);
 
 
-void boost_block_pool(benchmark::State& state_p) noexcept
+void FE_std_style_new_delete_generic_pool_allocator(benchmark::State& state_p) noexcept
+{
+	FE::generic_pool<>::create_pages(1);
+	FE::std_style::new_delete_pool_allocator<std::string> l_allocator;
+
+	for (auto _ : state_p)
+	{
+		auto l_ptr = l_allocator.allocate(1);
+
+		l_allocator.deallocate(l_ptr, 1);
+	}
+
+	FE::generic_pool<>::shrink_to_fit();
+}
+BENCHMARK(FE_std_style_new_delete_generic_pool_allocator);
+
+
+void boost_fast_pool_allocator(benchmark::State& state_p) noexcept
 {
 	boost::fast_pool_allocator<std::string> l_allocator;
 	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p); };
@@ -265,4 +262,30 @@ void boost_block_pool(benchmark::State& state_p) noexcept
 		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(), l_deleter);
 	}
 }
-BENCHMARK(boost_block_pool);
+BENCHMARK(boost_fast_pool_allocator);
+
+
+void boost_object_pool(benchmark::State& state_p) noexcept
+{
+	boost::object_pool<std::string> l_allocator;
+	auto l_deleter = [&](std::string* p) { l_allocator.free(p); };
+
+	for (auto _ : state_p)
+	{
+		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.malloc(), l_deleter);
+	}
+}
+BENCHMARK(boost_object_pool);
+
+
+void boost_pool_allocator(benchmark::State& state_p) noexcept
+{
+	boost::pool_allocator<std::string> l_allocator;
+	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p, 1); };
+
+	for (auto _ : state_p)
+	{
+		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(1), l_deleter);
+	}
+}
+BENCHMARK(boost_pool_allocator);

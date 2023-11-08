@@ -7,10 +7,15 @@
 #ifdef FE_ASSERT
 #error FE_ASSERT is a reserved Frogman Engine macro keyword.
 #endif 
+#ifdef FE_EXIT
+#error FE_EXIT is a reserved Frogman Engine macro keyword.
+#endif 
+
 #include <FE/core/log/logger.hpp>
 #include <FE/core/log/format_string.h>
 #include <FE/core/macros/attributes.h>
 #include <cassert>
+#include <cstdlib>
 
 
 
@@ -55,12 +60,39 @@ if(expression) _UNLIKELY_ \
 	const char* __FE_ASSERT_SOURCE_DIR__ = __FILE__; \
 	const char* __FE_ASSERT_FUNCTION_NAME__ = __func__; \
 	::FE::uint32 __FE_ASSERT_CODE_LINE__ = __LINE__; \
-	::FE::log::__FE_ASSERT_IMPLEMENTATION(::FE::log::buffered_string_formatter({ __VA_ARGS__ }), __FE_ASSERT_SOURCE_DIR__, __FE_ASSERT_FUNCTION_NAME__, __FE_ASSERT_CODE_LINE__); \
+	::FE::log::__FE_ABORT_IMPLEMENTATION(::FE::log::buffered_string_formatter({ __VA_ARGS__ }), __FE_ASSERT_SOURCE_DIR__, __FE_ASSERT_FUNCTION_NAME__, __FE_ASSERT_CODE_LINE__); \
 	assert(!(expression)); \
 }
 #else
 #define FE_ASSERT(expression, ...)
 #endif
+
+
+#ifdef _ENABLE_EXIT_
+// ${%d at n} - int32
+// ${%u at n} - uint32
+// ${%ld at n} - int64
+// ${%lu at n} - uint64
+// ${%lf at n} - float64
+// ${%f at n} - float32
+// ${%b at n} - bool
+// ${%c at n} - char
+// ${%s at n} - string
+// ${%p at n} - hexadecimal 64bit pointer  |  FE_EXIT() invokes abort() if the expression is true.
+#define FE_EXIT(expression, error_code, ...) \
+if(expression) _UNLIKELY_ \
+{ \
+	const char* __FE_EXIT_SOURCE_DIR__ = __FILE__; \
+	const char* __FE_EXIT_FUNCTION_NAME__ = __func__; \
+	::FE::uint32 __FE_EXIT_CODE_LINE__ = __LINE__; \
+	::FE::log::__FE_ABORT_IMPLEMENTATION(::FE::log::buffered_string_formatter({ __VA_ARGS__ }), __FE_EXIT_SOURCE_DIR__, __FE_EXIT_FUNCTION_NAME__, __FE_EXIT_CODE_LINE__); \
+	::std::exit(reinterpret_cast<::FE::var::int64>(error_code)) \
+}
+#else
+#define FE_EXIT(expression, error_code, ...)
+#endif
+
+
 
 
 #define TO_STRING(p) #p
