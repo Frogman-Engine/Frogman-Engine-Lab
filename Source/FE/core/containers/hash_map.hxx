@@ -2,15 +2,12 @@
 #define _FE_CORE_HASH_MAP_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/algorithm/math.h>
+#include <FE/core/allocator_adaptor.hxx>
+#include <FE/core/containers/array.hxx> 
 #include <FE/core/hash.hpp>
 #include <FE/core/iterator.hxx>
-
-#include <FE/core/containers/array.hxx> 
-#include <vector>
-#include <deque>
-#include <list>
+#include <tbb/memory_pool.h>
 
 
 
