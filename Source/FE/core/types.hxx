@@ -334,6 +334,15 @@ public:
 };
 
 
+template<typename First, typename Second>
+struct pair
+{
+	using first_type = First;
+	using second_type = Second;
+	
+	First _first;
+	Second _second;
+};
 
 
 namespace container

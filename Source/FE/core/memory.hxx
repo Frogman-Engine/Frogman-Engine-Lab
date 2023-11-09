@@ -120,11 +120,6 @@ struct count final
 };
 
 
-struct align_4bytes final
-{
-	_MAYBE_UNUSED_ static constexpr size_t size = 4;
-};
-
 struct align_8bytes final
 {
 	_MAYBE_UNUSED_ static constexpr size_t size = 8;

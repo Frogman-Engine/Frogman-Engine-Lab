@@ -16,10 +16,10 @@
 
 TEST(pool, block_allocation)
 {
-	FE::block_pool<std::string>::create_pages(1);
+	FE::block_pool<std::string, 64>::create_pages(1);
 
 	{
-		FE::block_pool_ptr<std::string> l_smart_ptr = FE::block_pool<std::string>::allocate();
+		FE::block_pool_ptr<std::string, 64> l_smart_ptr = FE::block_pool<std::string, 64>::allocate();
 
 		l_smart_ptr->reserve(20);
 		l_smart_ptr->assign("Memory Pool!");
@@ -28,7 +28,7 @@ TEST(pool, block_allocation)
 	}
 
 
-	FE::block_pool<std::string>::create_pages(1, FE::memory_region_t{ "Restaurant" });
+	/*FE::block_pool<std::string>::create_pages(1, FE::memory_region_t{ "Restaurant" });
 
 	{
 		FE::block_pool_ptr<std::string> l_smart_ptr1 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
@@ -50,15 +50,15 @@ TEST(pool, block_allocation)
 		FE::block_pool_ptr<std::string> l_smart_ptr5 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
 		l_smart_ptr5->reserve(20);
 		l_smart_ptr5->assign("Arrabbiata!");
-	}
+	}*/
 
 
 	{
-		FE::block_pool_ptr<FE::var::int64> l_smart_ptr[10];
+		FE::block_pool_ptr<FE::var::int64, 64> l_smart_ptr[10];
 
 		for (FE::var::uint32 i = 0; i < 10; ++i)
 		{
-			l_smart_ptr[i] = FE::block_pool<FE::var::int64>::allocate();
+			l_smart_ptr[i] = FE::block_pool<FE::var::int64, 64>::allocate();
 		}
 
 
@@ -66,92 +66,92 @@ TEST(pool, block_allocation)
 
 	
 	
-	FE::block_pool<std::string>::shrink_to_fit();
-	FE::block_pool<std::string>::shrink_to_fit(FE::memory_region_t{ "Restaurant" });
-	FE::block_pool<FE::var::int64>::shrink_to_fit();
+	FE::block_pool<std::string, 64>::shrink_to_fit();
+	//FE::block_pool<std::string>::shrink_to_fit(FE::memory_region_t{ "Restaurant" });
+	FE::block_pool<FE::var::int64, 64>::shrink_to_fit();
 }
 
 
 
 
-class mesh
-{
-};
+//class mesh
+//{
+//};
+//
+//class animaiton
+//{
+//};
+//
+//class mags
+//{
+//};
 
-class animaiton
-{
-};
-
-class mags
-{
-};
-
-class player_character
-{
-	FE::generic_pool_ptr<animaiton> m_animation;
-	FE::generic_pool_ptr<mesh> m_mesh;
-	FE::generic_pool_ptr<mags> m_mags;
-
-public:
-	player_character() noexcept
-	{
-		FE::generic_pool<>::create_pages(1, { "Client Player Character's Properties" });
-
-		this->m_animation = FE::generic_pool<>::allocate<animaiton>(1, { "Client Player Character's Properties" });
-		this->m_mesh = FE::generic_pool<>::allocate<mesh>(1, { "Client Player Character's Properties" });
-		this->m_mags = FE::generic_pool<>::allocate<mags>(10, { "Client Player Character's Properties" });
-	}
-
-	~player_character() noexcept = default;
-};
+//class player_character
+//{
+//	FE::generic_pool_ptr<animaiton> m_animation;
+//	FE::generic_pool_ptr<mesh> m_mesh;
+//	FE::generic_pool_ptr<mags> m_mags;
+//
+//public:
+//	player_character() noexcept
+//	{
+//		FE::generic_pool<>::create_pages(1, { "Client Player Character's Properties" });
+//
+//		this->m_animation = FE::generic_pool<>::allocate<animaiton>(1, { "Client Player Character's Properties" });
+//		this->m_mesh = FE::generic_pool<>::allocate<mesh>(1, { "Client Player Character's Properties" });
+//		this->m_mags = FE::generic_pool<>::allocate<mags>(10, { "Client Player Character's Properties" });
+//	}
+//
+//	~player_character() noexcept = default;
+//};
 
 TEST(pool, generic_block_allocation)
 {
-	FE::generic_pool<>::create_pages(1);
+	FE::generic_pool<1 MB>::create_pages(1);
 
 	{
-		FE::generic_pool_ptr<std::vector<FE::var::int32>> l_smart_ptr = FE::generic_pool<>::allocate<std::vector<FE::var::int32>>();
+		FE::generic_pool_ptr<std::vector<FE::var::int32>, 1 MB> l_smart_ptr = FE::generic_pool<1 MB>::allocate<std::vector<FE::var::int32>>();
 	}
 
 	{
-		FE::generic_pool_ptr<std::string> l_smart_ptr = FE::generic_pool<>::allocate<std::string>();
+		FE::generic_pool_ptr<std::string, 1 MB> l_smart_ptr = FE::generic_pool<1 MB>::allocate<std::string>();
 	}
 
 
-	{
-		player_character l_my_character;
-	}
+	//{
+	//	player_character l_my_character;
+	//}
+
+	//{
+	//	player_character l_my_character;
+	//}
+
+	//FE::generic_pool<>::shrink_to_fit({ "Client Player Character's Properties" });
 
 	{
-		player_character l_my_character;
-	}
-
-	FE::generic_pool<>::shrink_to_fit({ "Client Player Character's Properties" });
-
-	{
-		FE::generic_pool_ptr<FE::var::int64> l_smart_ptr[8];
+		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_smart_ptr[8];
 
 		for (FE::var::uint32 i = 0; i < 8; ++i)
 		{
-			l_smart_ptr[i] = FE::generic_pool<>::allocate<FE::var::int64>();
+			l_smart_ptr[i] = FE::generic_pool<1 MB>::allocate<FE::var::int64>();
 		}
 
-		FE::generic_pool_ptr<FE::var::int64> l_another_smart_ptr;
+		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_another_smart_ptr;
 		l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
 
 	{
-		FE::generic_pool_ptr<FE::var::int64> l_smart_ptr[4];
+		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_smart_ptr[4];
 
 		for (FE::var::uint32 i = 0; i < 4; ++i)
 		{
-			l_smart_ptr[i] = FE::generic_pool<>::allocate<FE::var::int64>();
+			l_smart_ptr[i] = FE::generic_pool<1 MB>::allocate<FE::var::int64>();
 		}
 
-		FE::generic_pool_ptr<FE::var::int64> l_another_smart_ptr = std::move(l_smart_ptr[0]);
+		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
 
-
+	FE::generic_pool<>::shrink_to_fit();
 }
 
 
@@ -159,16 +159,17 @@ TEST(pool, generic_block_allocation)
 
 TEST(new_delete_pool_allocator, all)
 {
+	FE::new_delete_pool_allocator<std::string, 1 MB>::create_pages(1);
 	{
-		auto l_ptr = FE::new_delete_pool_allocator<std::string>::allocate(1);
+		auto l_ptr = FE::new_delete_pool_allocator<std::string, 1 MB>::allocate(1);
 
-		l_ptr = FE::new_delete_pool_allocator<std::string>::reallocate(l_ptr, 1, 2);
+		l_ptr = FE::new_delete_pool_allocator<std::string, 1 MB>::reallocate(l_ptr, 1, 2);
 
-		FE::new_delete_pool_allocator<std::string>::deallocate(l_ptr, 2);
+		FE::new_delete_pool_allocator<std::string, 1 MB>::deallocate(l_ptr, 2);
 	}
 
 	{
-		FE::std_style::new_delete_pool_allocator<std::string> l_allocator;
+		FE::std_style::new_delete_pool_allocator<std::string, FE::capacity<1 MB>> l_allocator;
 
 		auto l_ptr = l_allocator.allocate(1);
 
@@ -176,6 +177,8 @@ TEST(new_delete_pool_allocator, all)
 
 		l_allocator.deallocate(l_ptr, 2);
 	}
+
+	FE::new_delete_pool_allocator<std::string, 1 MB>::shrink_to_fit();
 }
 
 
@@ -184,201 +187,101 @@ TEST(new_delete_pool_allocator, all)
 TEST(pool_allocator, all)
 {
 	{
-		std::vector<std::string, FE::std_style::pool_allocator<std::string>> l_vector;
+		std::vector<std::string, FE::std_style::pool_allocator<std::string, FE::capacity<1 MB>>> l_vector;
+		l_vector.get_allocator().create_pages(1);
+
 		l_vector.reserve(64);
+		l_vector.shrink_to_fit();
+
+		l_vector.get_allocator().shrink_to_fit();
 	}
 }
 
 
 
 
-void FE_block_pool(benchmark::State& state_p) noexcept
+#define _MAX_ITERATION_ 10000
+void boost_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
-	FE::block_pool<std::string>::create_pages(1);
-
-	for(auto _ : state_p)
-	{
-		FE::block_pool_ptr<std::string> l_smart_ptr = FE::block_pool<std::string>::allocate();
-	}
-}
-BENCHMARK(FE_block_pool);
-
-
-void FE_block_region_pool(benchmark::State& state_p) noexcept
-{
-	FE::block_pool<std::string>::create_pages(1, { "Area B" });
-
+	static std::string* l_s_strings[_MAX_ITERATION_];
 	for (auto _ : state_p)
 	{
-		FE::block_pool_ptr<std::string> l_smart_ptr = FE::block_pool<std::string>::allocate({"Area B"});
-	}
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			l_s_strings[i] = boost::pool_allocator<std::string>::allocate(1);
+		}
 
-	FE::block_pool<std::string>::shrink_to_fit({ "Area B" });
-}
-BENCHMARK(FE_block_region_pool);
-
-
-void FE_generic_pool(benchmark::State& state_p) noexcept
-{
-	FE::generic_pool<>::create_pages(1);
-
-	for (auto _ : state_p)
-	{
-		FE::generic_pool_ptr<std::string> l_smart_ptr = FE::generic_pool<>::allocate<std::string>();
-	}
-
-	FE::generic_pool<>::shrink_to_fit();
-}
-BENCHMARK(FE_generic_pool);
-
-
-void FE_new_delete_generic_pool_allocator(benchmark::State& state_p) noexcept
-{
-	FE::generic_pool<>::create_pages(1);
-
-	for (auto _ : state_p)
-	{
-		auto l_ptr = FE::new_delete_pool_allocator<std::string>::allocate(1);
-
-		FE::new_delete_pool_allocator<std::string>::deallocate(l_ptr, 1);
-	}
-
-	FE::generic_pool<>::shrink_to_fit();
-}
-BENCHMARK(FE_new_delete_generic_pool_allocator);
-
-
-void FE_std_style_new_delete_generic_pool_allocator(benchmark::State& state_p) noexcept
-{
-	FE::generic_pool<>::create_pages(1);
-	FE::std_style::new_delete_pool_allocator<std::string> l_allocator;
-
-	for (auto _ : state_p)
-	{
-		auto l_ptr = l_allocator.allocate(1);
-
-		l_allocator.deallocate(l_ptr, 1);
-	}
-
-	FE::generic_pool<>::shrink_to_fit();
-}
-BENCHMARK(FE_std_style_new_delete_generic_pool_allocator);
-
-
-
-
-void boost_fast_pool_allocator(benchmark::State& state_p) noexcept
-{
-	boost::fast_pool_allocator<std::string> l_allocator;
-	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p); };
-	
-	for (auto _ : state_p)
-	{
-		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(), l_deleter);
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			boost::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
+		}
 	}
 }
-BENCHMARK(boost_fast_pool_allocator);
+BENCHMARK(boost_pool_allocator_extreme_test);
 
 
-void boost_object_pool(benchmark::State& state_p) noexcept
+void boost_object_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
+	static std::string* l_s_strings[_MAX_ITERATION_];
 	boost::object_pool<std::string> l_allocator;
-	auto l_deleter = [&](std::string* p) { l_allocator.free(p); };
 
 	for (auto _ : state_p)
 	{
-		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.malloc(), l_deleter);
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			l_s_strings[i] = l_allocator.malloc();
+		}
+
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			l_allocator.free(l_s_strings[i]);
+		}
 	}
 }
-BENCHMARK(boost_object_pool);
+BENCHMARK(boost_object_pool_allocator_extreme_test);
 
 
-void boost_pool_allocator(benchmark::State& state_p) noexcept
+void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
-	boost::pool_allocator<std::string> l_allocator;
-	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p, 1); };
+	static std::string* l_s_strings[_MAX_ITERATION_];
+	FE::pool_allocator<std::string>::create_pages(2);
 
 	for (auto _ : state_p)
 	{
-		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(1), l_deleter);
+		for(FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			l_s_strings[i] = FE::pool_allocator<std::string>::allocate(1);
+		}
+
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			FE::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
+		}
 	}
+
+	FE::pool_allocator<std::string>::shrink_to_fit();
 }
-BENCHMARK(boost_pool_allocator);
+BENCHMARK(FE_pool_allocator_extreme_test);
 
 
-void boost_pool_allocator_with_tbb(benchmark::State& state_p) noexcept
+void tbb_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
-	boost::pool_allocator<std::string, FE::boost_pool_tbb_scalable_align_allocator, boost::details::pool::null_mutex, 128> l_allocator;
-	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p, 1); };
-
-	for (auto _ : state_p)
-	{
-		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(1), l_deleter);
-	}
-}
-BENCHMARK(boost_pool_allocator_with_tbb);
-
-
-
-
-void tbb_pool_allocator(benchmark::State& state_p) noexcept
-{
-	tbb::memory_pool<tbb::scalable_allocator<std::string>> l_memory_pool;
-	tbb::memory_pool_allocator<std::string> l_allocator(l_memory_pool);
-	auto l_deleter = [&](std::string* p) { l_allocator.deallocate(p, 1); };
-	
-	for (auto _ : state_p)
-	{
-		std::unique_ptr<std::string, decltype(l_deleter)>l_smart_ptr(l_allocator.allocate(1), l_deleter);
-	}
-}
-BENCHMARK(tbb_pool_allocator);
-
-
-void tbb_pool_allocator_vector(benchmark::State& state_p) noexcept
-{
+	static std::string* l_s_strings[_MAX_ITERATION_];
 	tbb::memory_pool<tbb::scalable_allocator<std::string>> l_memory_pool;
 	tbb::memory_pool_allocator<std::string> l_allocator(l_memory_pool);
 
 	for (auto _ : state_p)
 	{
-		std::vector<std::string, tbb::memory_pool_allocator<std::string>> l_vector(l_allocator);
-		l_vector.reserve(64);
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			l_s_strings[i] = l_allocator.allocate(1);
+		}
+
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			l_allocator.deallocate(l_s_strings[i], 1);
+		}
 	}
 }
-BENCHMARK(tbb_pool_allocator_vector);
-
-
-
-
-void boost_pool_allocator_vector(benchmark::State& state_p) noexcept
-{
-	for (auto _ : state_p)
-	{
-		std::vector<std::string, boost::pool_allocator<std::string>> l_vector;
-		l_vector.reserve(64);
-	}
-}
-BENCHMARK(boost_pool_allocator_vector);
-
-
-void boost_pool_allocator_vector_with_tbb(benchmark::State& state_p) noexcept
-{
-	for (auto _ : state_p)
-	{
-		std::vector<std::string, boost::pool_allocator<std::string, FE::boost_pool_tbb_scalable_align_allocator, boost::details::pool::null_mutex, 128>> l_vector;
-		l_vector.reserve(64);
-	}
-}
-BENCHMARK(boost_pool_allocator_vector_with_tbb);
-
-
-void FE_pool_allocator_vector(benchmark::State& state_p) noexcept
-{
-	for (auto _ : state_p)
-	{
-		std::vector<std::string, FE::std_style::pool_allocator<std::string>> l_vector;
-		l_vector.reserve(64);
-	}
-}
-BENCHMARK(FE_pool_allocator_vector);
+BENCHMARK(tbb_pool_allocator_extreme_test);
+#undef _MAX_ITERATION_

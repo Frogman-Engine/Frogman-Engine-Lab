@@ -30,13 +30,13 @@ List of compatible containers:
 	- FE::fpriority_queue
 	- FE::array (not implemented yet)
 */
-template<class Key, class T, class Hasher = FE::hash<Key>, class KeyEqual = std::equal_to<Key>, class BucketStructure = FE::farray<std::pair<const Key, T>, 64>, class StatefulBucketAllocator = FE::std_style::scalable_aligned_allocator<BucketStructure>>
+template<class Key, class T, class Hasher = FE::hash<Key>, class KeyEqual = std::equal_to<Key>, class BucketStructure = FE::farray<FE::pair<const Key, T>, 64>, class StatefulBucketAllocator = FE::std_style::scalable_aligned_allocator<BucketStructure>>
 class hash_map
 {
 public:
 	using key_type = Key;
 	using mapped_type = T;
-	using value_type = std::pair<const Key, T>;
+	using value_type = FE::pair<const Key, T>;
 	using size_type = var::size_t;
 	using difference_type = var::ptrdiff_t;
 	using hasher = Hasher;
