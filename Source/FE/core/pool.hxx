@@ -229,11 +229,11 @@ public:
 
 
 
-template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class GlobalAllocator = FE::std_style::scalable_aligned_allocator<chunk<T, PoolType, ChunkCapacity>>, class RegionAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const char* const, chunk<T, PoolType, ChunkCapacity>>>>
+template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<chunk<T, PoolType, ChunkCapacity>>, class StatefulRegionAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const char* const, chunk<T, PoolType, ChunkCapacity>>>>
 class pool;
 
-template<typename T, size_t ChunkCapacity, class GlobalAllocator, class RegionAllocator>
-class pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, GlobalAllocator, RegionAllocator>
+template<typename T, size_t ChunkCapacity, class StatefulGlobalAllocator, class StatefulRegionAllocator>
+class pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>
 {
     FE_STATIC_ASSERT(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
     FE_STATIC_ASSERT(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
@@ -242,8 +242,8 @@ public:
     using chunk_type = chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity>;
     using deleter_type = pool_deleter<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>;
 
-    using global = std::list<chunk_type, GlobalAllocator>;
-    using regions = std::unordered_map<const char*, chunk_type, FE::hash<const char*>, algorithm::string::equal_to<char>, RegionAllocator>;
+    using global = std::list<chunk_type, StatefulGlobalAllocator>;
+    using regions = std::unordered_map<const char*, chunk_type, FE::hash<const char*>, algorithm::string::equal_to<char>, StatefulRegionAllocator>;
 
     constexpr static count_t chunk_capacity = ChunkCapacity;
 
@@ -434,17 +434,17 @@ public:
 };
 
 
-template<typename T, size_t ChunkCapacity, class GlobalAllocator, class RegionAllocator>
-thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, GlobalAllocator, RegionAllocator>::global pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, GlobalAllocator, RegionAllocator>::tl_s_global_memory;
+template<typename T, size_t ChunkCapacity, class StatefulGlobalAllocator, class StatefulRegionAllocator>
+thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::global pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::tl_s_global_memory;
 
-template<typename T, size_t ChunkCapacity, class GlobalAllocator, class RegionAllocator>
-thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, GlobalAllocator, RegionAllocator>::regions pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, GlobalAllocator, RegionAllocator>::tl_s_memory_regions;
-
-
+template<typename T, size_t ChunkCapacity, class StatefulGlobalAllocator, class StatefulRegionAllocator>
+thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::regions pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::tl_s_memory_regions;
 
 
-template<size_t ChunkCapacity, class GlobalAllocator, class RegionAllocator>
-class pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, GlobalAllocator, RegionAllocator>
+
+
+template<size_t ChunkCapacity, class StatefulGlobalAllocator, class StatefulRegionAllocator>
+class pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>
 {
 public:
     using chunk_type = chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity>;
@@ -452,8 +452,8 @@ public:
     template<typename U, class Alignment>
     using deleter_type = pool_deleter<U, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>;
 
-    using global = std::list<chunk_type, GlobalAllocator>;
-    using regions = std::unordered_map<const char*, chunk_type, FE::hash<const char*>, algorithm::string::equal_to<char>, RegionAllocator>;
+    using global = std::list<chunk_type, StatefulGlobalAllocator>;
+    using regions = std::unordered_map<const char*, chunk_type, FE::hash<const char*>, algorithm::string::equal_to<char>, StatefulRegionAllocator>;
     using pair_type = std::pair<std::byte*, var::size_t>;
 
     constexpr static size_t chunk_capacity = ChunkCapacity;
@@ -857,20 +857,20 @@ private:
 };
 
 
-template<size_t ChunkCapacity, class GlobalAllocator, class RegionAllocator>
-thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, GlobalAllocator, RegionAllocator>::global pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, GlobalAllocator, RegionAllocator>::tl_s_global_memory;
+template<size_t ChunkCapacity, class StatefulGlobalAllocator, class StatefulRegionAllocator>
+thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::global pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::tl_s_global_memory;
 
-template<size_t ChunkCapacity, class GlobalAllocator, class RegionAllocator>
-thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, GlobalAllocator, RegionAllocator>::regions pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, GlobalAllocator, RegionAllocator>::tl_s_memory_regions;
-
-
+template<size_t ChunkCapacity, class StatefulGlobalAllocator, class StatefulRegionAllocator>
+thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::regions pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>::tl_s_memory_regions;
 
 
-template<typename T, size_t ChunkCapacity = 1024, class GlobalAllocator = FE::std_style::scalable_aligned_allocator<chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity>>, class RegionAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const char* const, chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity>>>>
-using block_pool = pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, GlobalAllocator, RegionAllocator>;
 
-template<size_t ChunkCapacity = 10240, class GlobalAllocator = FE::std_style::scalable_aligned_allocator<chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity>>, class RegionAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const char* const, chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity>>>>
-using generic_pool = pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, GlobalAllocator, RegionAllocator>;
+
+template<typename T, size_t ChunkCapacity = 1024, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity>>, class StatefulRegionAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const char* const, chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity>>>>
+using block_pool = pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>;
+
+template<size_t ChunkCapacity = 10240, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity>>, class StatefulRegionAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const char* const, chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity>>>>
+using generic_pool = pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, StatefulGlobalAllocator, StatefulRegionAllocator>;
 
 
 template<typename T, size_t ChunkCapacity = 1024>

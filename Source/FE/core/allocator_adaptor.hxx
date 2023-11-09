@@ -2,6 +2,7 @@
 #define _FE_CORE_ALLOCATOR_ADAPTORS_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/allocator.hxx>
+#include <tbb/memory_pool.h>
 
 
 
@@ -109,9 +110,8 @@ namespace std_style
 		using difference_type = typename allocator::difference_type;
 		using size_type = typename allocator::size_type;
 
-
 		_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_ALIGNED;
+		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = allocator::is_address_aligned;
 
 
 		constexpr scalable_aligned_allocator() noexcept {}
@@ -157,7 +157,7 @@ namespace std_style
 	
 
 		_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_ALIGNED;
+		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = allocator::is_address_aligned;
 
 
 		constexpr cache_aligned_allocator() noexcept {}
@@ -186,7 +186,78 @@ namespace std_style
 			allocator::deallocate(pointer_p, count_p);
 		}
 	};
+
 }
+
+
+
+
+namespace engine_style
+{
+	template<class StatefulAllocator>
+	class tbb_memory_pool_allocator final
+	{
+	public:
+		using allocator = StatefulAllocator;
+		using value_type = typename allocator::value_type;
+		using pointer = typename allocator::pointer;
+		using const_pointer = typename allocator::const_pointer;
+		using reference = typename allocator::reference;
+		using const_reference = typename allocator::const_reference;
+		using difference_type = typename allocator::difference_type;
+		using size_type = typename allocator::size_type;
+
+
+		_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
+		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = StatefulAllocator::is_address_aligned;
+
+		static tbb::memory_pool<StatefulAllocator> s_memory_pool;
+		static tbb::memory_pool_allocator<value_type> s_memory_pool_allocator;
+
+
+		_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
+		{
+			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+
+			return s_memory_pool_allocator.allocate(count_p);
+		}
+
+		_NODISCARD_ _FORCE_INLINE_ static pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
+		{
+			if (new_count_p == 0)
+			{
+				s_memory_pool_allocator.deallocate(pointer_p, prev_count_p);
+				return nullptr;
+			}
+
+			pointer const l_result = static_cast<pointer>(s_memory_pool_allocator.allocate(new_count_p));
+			FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
+
+			if (l_result != pointer_p) _LIKELY_
+			{
+				FE::memcpy<is_address_aligned, is_address_aligned>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
+				s_memory_pool_allocator.deallocate(pointer_p, prev_count_p);
+			}
+			return l_result;
+		}
+
+		_FORCE_INLINE_ static void deallocate(pointer pointer_p, size_type count_p) noexcept
+		{
+			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
+
+			s_memory_pool_allocator.deallocate(pointer_p, count_p);
+		}
+	};
+
+	template<class StatefulAllocator>
+	tbb::memory_pool<StatefulAllocator> tbb_memory_pool_allocator<StatefulAllocator>::s_memory_pool;
+
+	template<class StatefulAllocator>
+	tbb::memory_pool_allocator<typename StatefulAllocator::value_type> tbb_memory_pool_allocator<StatefulAllocator>::s_memory_pool_allocator{s_memory_pool};
+}
+
+
 
 
 struct boost_pool_tbb_scalable_align_allocator final

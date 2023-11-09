@@ -16,11 +16,11 @@ BEGIN_NAMESPACE(FE)
 
 
 //https://en.cppreference.com/w/cpp/container/stack
-template<class T, class Allocator = std_style::scalable_aligned_allocator<T>>
-class stack : public std::stack<T, std::vector<T, Allocator>>
+template<class T, class StatefulAllocator = std_style::scalable_aligned_allocator<T>>
+class stack : public std::stack<T, std::vector<T, StatefulAllocator>>
 {
 public:
-	using container_type = std::vector<T, Allocator>;
+	using container_type = std::vector<T, StatefulAllocator>;
 	using value_type = typename container_type::value_type;
 	using size_type = typename container_type::size_type;
 	using reference = typename container_type::reference;

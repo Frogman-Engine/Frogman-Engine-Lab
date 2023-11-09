@@ -15,18 +15,18 @@
 BEGIN_NAMESPACE(FE)
 
 
-template<typename T, class Allocator = FE::std_style::scalable_aligned_allocator<T>>
+template<typename T, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<T>>
 class index_map final
 {
-	FE_STATIC_ASSERT((std::is_same<T, Allocator::value_type>::value == false), "Static Assertion Failed: The template argument T and Allocator's value_type have be the same type.");
-	FE_STATIC_ASSERT(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_ASSERT((std::is_same<T, StatefulAllocator::value_type>::value == false), "Static Assertion Failed: The template argument T and StatefulAllocator's value_type have be the same type.");
+	FE_STATIC_ASSERT(std::is_class<StatefulAllocator>::value == false, "Static Assertion Failed: The template argument StatefulAllocator is not a class or a struct type.");
 
 public:
-	using key_type = typename std::vector<T, Allocator>::size_type;
+	using key_type = typename std::vector<T, StatefulAllocator>::size_type;
 	using mapped_type = T;
 	using size_type = key_type;
 	using difference_type = var::ptrdiff_t;
-	using allocator_type = Allocator;
+	using allocator_type = StatefulAllocator;
 	using reference = mapped_type&;
 	using const_reference = const mapped_type&;
 	using pointer = mapped_type*;
@@ -152,17 +152,17 @@ public:
 
 namespace concurrency
 {
-	template<typename T, class Allocator = FE::std_style::cache_aligned_allocator<T>>
+	template<typename T, class StatefulAllocator = FE::std_style::cache_aligned_allocator<T>>
 	class index_map final
 	{
-		FE_STATIC_ASSERT((std::is_same<T, Allocator::value_type>::value == false), "Static Assertion Failed: The template argument T and Allocator's value_type have be the same type.");
+		FE_STATIC_ASSERT((std::is_same<T, StatefulAllocator::value_type>::value == false), "Static Assertion Failed: The template argument T and StatefulAllocator's value_type have be the same type.");
 
 	public:
-		using key_type = typename tbb::concurrent_vector<T, Allocator>::size_type;
+		using key_type = typename tbb::concurrent_vector<T, StatefulAllocator>::size_type;
 		using mapped_type = T;
 		using size_type = key_type;
 		using difference_type = var::ptrdiff_t;
-		using allocator_type = Allocator;
+		using allocator_type = StatefulAllocator;
 		using reference = mapped_type&;
 		using const_reference = const mapped_type&;
 		using pointer = mapped_type*;
@@ -266,8 +266,8 @@ namespace concurrency
 }
 
 
-template<typename T, class Allocator = FE::std_style::cache_aligned_allocator<T>>
-using concurrent_index_map = concurrency::index_map<T, Allocator>;
+template<typename T, class StatefulAllocator = FE::std_style::cache_aligned_allocator<T>>
+using concurrent_index_map = concurrency::index_map<T, StatefulAllocator>;
 
 
 END_NAMESPACE

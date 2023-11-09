@@ -30,7 +30,7 @@ List of compatible containers:
 	- FE::fpriority_queue
 	- FE::array (not implemented yet)
 */
-template<class Key, class T, class Hasher = FE::hash<Key>, class KeyEqual = std::equal_to<Key>, class BucketStructure = FE::farray<std::pair<const Key, T>, 64>, class BucketAllocator = FE::std_style::scalable_aligned_allocator<BucketStructure>>
+template<class Key, class T, class Hasher = FE::hash<Key>, class KeyEqual = std::equal_to<Key>, class BucketStructure = FE::farray<std::pair<const Key, T>, 64>, class StatefulBucketAllocator = FE::std_style::scalable_aligned_allocator<BucketStructure>>
 class hash_map
 {
 public:
@@ -41,7 +41,7 @@ public:
 	using difference_type = var::ptrdiff_t;
 	using hasher = Hasher;
 	using key_equal = KeyEqual;
-	using bucket_allocator_type = BucketAllocator;
+	using bucket_allocator_type = StatefulBucketAllocator;
 	using reference = value_type&;
 	using const_reference = const reference;
 	using pointer = value_type*;
@@ -55,7 +55,7 @@ public:
 	FE_STATIC_ASSERT((std::is_same<value_type, typename BucketStructure::value_type>::value), "BucketStructure::value_type must be the same as value_type");
 
 private:
-	std::vector<BucketStructure, BucketAllocator> m_buckets;
+	std::vector<BucketStructure, StatefulBucketAllocator> m_buckets;
 	hasher m_hasher;
 	key_equal m_key_equal;
 
