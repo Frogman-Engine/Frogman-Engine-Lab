@@ -164,7 +164,7 @@ namespace std_style
 		constexpr new_delete_pool_allocator() noexcept {}
 
 		template <typename U>
-		constexpr new_delete_pool_allocator(_MAYBE_UNUSED_ const new_delete_pool_allocator<U>& standard_allocator_p) noexcept {}
+		constexpr new_delete_pool_allocator(_MAYBE_UNUSED_ const new_delete_pool_allocator<U, ChunkCapacity, Alignment, StatefulAllocator>& standard_allocator_p) noexcept {}
 
 
 		_FORCE_INLINE_ void create_pages(const size_type count_p) noexcept
@@ -236,7 +236,7 @@ namespace std_style
 		constexpr pool_allocator() noexcept {}
 
 		template <typename U>
-		constexpr pool_allocator(_MAYBE_UNUSED_ const pool_allocator<U>& standard_allocator_p) noexcept {}
+		constexpr pool_allocator(_MAYBE_UNUSED_ const pool_allocator<U, ChunkCapacity, Alignment, StatefulAllocator>& standard_allocator_p) noexcept {}
 
 
 		_FORCE_INLINE_ void create_pages(const size_type count_p) noexcept

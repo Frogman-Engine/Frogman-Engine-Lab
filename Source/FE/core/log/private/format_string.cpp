@@ -193,10 +193,10 @@ const char* buffered_string_formatter(std::initializer_list<const void*> argumen
 {
     constexpr static auto _SKIP_STRING_FORMAT_ = 1;
 
-    thread_local static char tl_s_buffer[10 KB] = { "\0" };
+    thread_local static char tl_s_buffer[4 KB] = { "\0" };
     std::memset(tl_s_buffer, _NULL_, internal::strlen(tl_s_buffer));
 
-    format_string(tl_s_buffer, static_cast<const char*>(*arguments_p.begin()), 10 KB, const_cast<const void**>(arguments_p.begin()) + _SKIP_STRING_FORMAT_, arguments_p.size());
+    format_string(tl_s_buffer, static_cast<const char*>(*arguments_p.begin()), 4 KB, const_cast<const void**>(arguments_p.begin()) + _SKIP_STRING_FORMAT_, arguments_p.size());
     return tl_s_buffer;
 }
 

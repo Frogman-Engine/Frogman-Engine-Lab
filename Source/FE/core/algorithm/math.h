@@ -49,7 +49,7 @@ _CONSTEXPR17_ boolean is_nearly_equal(float64 left_p, float64 right_p, float64 o
 
 
 template<typename T>
-_CONSTEXPR17_ const T& select_minimum(const T& left_p, const T& right_p) noexcept
+_CONSTEXPR17_ _FORCE_INLINE_ const T& select_minimum(const T& left_p, const T& right_p) noexcept
 {
 	return MIN(left_p, right_p);
 }
@@ -73,7 +73,7 @@ _CONSTEXPR17_ T select_minimum(std::initializer_list<T>&& initializer_list_p) no
 }
 
 template<typename T>
-_CONSTEXPR17_ const T& select_maximum(const T& left_p, const T& right_p) noexcept
+_CONSTEXPR17_ _FORCE_INLINE_ const T& select_maximum(const T& left_p, const T& right_p) noexcept
 {
 	return MAX(left_p, right_p);
 }

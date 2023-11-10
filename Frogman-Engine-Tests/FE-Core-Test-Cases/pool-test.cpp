@@ -16,10 +16,10 @@
 
 TEST(pool, block_allocation)
 {
-	FE::block_pool<std::string, 64>::create_pages(1);
+	FE::block_pool<std::string, 32>::create_pages(1);
 
 	{
-		FE::block_pool_ptr<std::string, 64> l_smart_ptr = FE::block_pool<std::string, 64>::allocate();
+		FE::block_pool_ptr<std::string, 32> l_smart_ptr = FE::block_pool<std::string, 32>::allocate();
 
 		l_smart_ptr->reserve(20);
 		l_smart_ptr->assign("Memory Pool!");
@@ -54,11 +54,11 @@ TEST(pool, block_allocation)
 
 
 	{
-		FE::block_pool_ptr<FE::var::int64, 64> l_smart_ptr[10];
+		FE::block_pool_ptr<FE::var::int64, 32> l_smart_ptr[10];
 
 		for (FE::var::uint32 i = 0; i < 10; ++i)
 		{
-			l_smart_ptr[i] = FE::block_pool<FE::var::int64, 64>::allocate();
+			l_smart_ptr[i] = FE::block_pool<FE::var::int64, 32>::allocate();
 		}
 
 
@@ -66,9 +66,9 @@ TEST(pool, block_allocation)
 
 	
 	
-	FE::block_pool<std::string, 64>::shrink_to_fit();
+	FE::block_pool<std::string, 32>::shrink_to_fit();
 	//FE::block_pool<std::string>::shrink_to_fit(FE::memory_region_t{ "Restaurant" });
-	FE::block_pool<FE::var::int64, 64>::shrink_to_fit();
+	FE::block_pool<FE::var::int64, 32>::shrink_to_fit();
 }
 
 
@@ -107,14 +107,14 @@ TEST(pool, block_allocation)
 
 TEST(pool, generic_block_allocation)
 {
-	FE::generic_pool<1 MB>::create_pages(1);
+	FE::generic_pool<1 KB>::create_pages(1);
 
 	{
-		FE::generic_pool_ptr<std::vector<FE::var::int32>, 1 MB> l_smart_ptr = FE::generic_pool<1 MB>::allocate<std::vector<FE::var::int32>>();
+		FE::generic_pool_ptr<std::vector<FE::var::int32>, 1 KB> l_smart_ptr = FE::generic_pool<1 KB>::allocate<std::vector<FE::var::int32>>();
 	}
 
 	{
-		FE::generic_pool_ptr<std::string, 1 MB> l_smart_ptr = FE::generic_pool<1 MB>::allocate<std::string>();
+		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr = FE::generic_pool<1 KB>::allocate<std::string>();
 	}
 
 
@@ -129,26 +129,26 @@ TEST(pool, generic_block_allocation)
 	//FE::generic_pool<>::shrink_to_fit({ "Client Player Character's Properties" });
 
 	{
-		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_smart_ptr[8];
+		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_smart_ptr[8];
 
 		for (FE::var::uint32 i = 0; i < 8; ++i)
 		{
-			l_smart_ptr[i] = FE::generic_pool<1 MB>::allocate<FE::var::int64>();
+			l_smart_ptr[i] = FE::generic_pool<1 KB>::allocate<FE::var::int64>();
 		}
 
-		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_another_smart_ptr;
+		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_another_smart_ptr;
 		l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
 
 	{
-		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_smart_ptr[4];
+		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_smart_ptr[4];
 
 		for (FE::var::uint32 i = 0; i < 4; ++i)
 		{
-			l_smart_ptr[i] = FE::generic_pool<1 MB>::allocate<FE::var::int64>();
+			l_smart_ptr[i] = FE::generic_pool<1 KB>::allocate<FE::var::int64>();
 		}
 
-		FE::generic_pool_ptr<FE::var::int64, 1 MB> l_another_smart_ptr = std::move(l_smart_ptr[0]);
+		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
 
 	FE::generic_pool<>::shrink_to_fit();
@@ -159,17 +159,17 @@ TEST(pool, generic_block_allocation)
 
 TEST(new_delete_pool_allocator, all)
 {
-	FE::new_delete_pool_allocator<std::string, 1 MB>::create_pages(1);
+	FE::new_delete_pool_allocator<std::string, 1 KB>::create_pages(1);
 	{
-		auto l_ptr = FE::new_delete_pool_allocator<std::string, 1 MB>::allocate(1);
+		auto l_ptr = FE::new_delete_pool_allocator<std::string, 1 KB>::allocate(1);
 
-		l_ptr = FE::new_delete_pool_allocator<std::string, 1 MB>::reallocate(l_ptr, 1, 2);
+		l_ptr = FE::new_delete_pool_allocator<std::string, 1 KB>::reallocate(l_ptr, 1, 2);
 
-		FE::new_delete_pool_allocator<std::string, 1 MB>::deallocate(l_ptr, 2);
+		FE::new_delete_pool_allocator<std::string, 1 KB>::deallocate(l_ptr, 2);
 	}
 
 	{
-		FE::std_style::new_delete_pool_allocator<std::string, FE::capacity<1 MB>> l_allocator;
+		FE::std_style::new_delete_pool_allocator<std::string, FE::capacity<1 KB>> l_allocator;
 
 		auto l_ptr = l_allocator.allocate(1);
 
@@ -178,7 +178,7 @@ TEST(new_delete_pool_allocator, all)
 		l_allocator.deallocate(l_ptr, 2);
 	}
 
-	FE::new_delete_pool_allocator<std::string, 1 MB>::shrink_to_fit();
+	FE::new_delete_pool_allocator<std::string, 1 KB>::shrink_to_fit();
 }
 
 
@@ -187,7 +187,7 @@ TEST(new_delete_pool_allocator, all)
 TEST(pool_allocator, all)
 {
 	{
-		std::vector<std::string, FE::std_style::pool_allocator<std::string, FE::capacity<1 MB>>> l_vector;
+		std::vector<std::string, FE::std_style::pool_allocator<std::string, FE::capacity<1 KB>>> l_vector;
 		l_vector.get_allocator().create_pages(1);
 
 		l_vector.reserve(64);

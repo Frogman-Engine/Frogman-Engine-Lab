@@ -41,7 +41,6 @@ ADD_LIBRARY(${FE_CORE_AVX} STATIC
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	MESSAGE("Configurating The Build Environment for Linux X86-64 Distributions")
 
-	#ADD_COMPILE_DEFINITIONS(__AVX__=1)
 
 	if(GNU_CPP)
 		TARGET_COMPILE_OPTIONS(${FE_CORE_AVX} PRIVATE
@@ -81,8 +80,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	MESSAGE("Configurating The Build Environment for Windows X86-64 Distributions")
 
-	ADD_COMPILE_DEFINITIONS(_HAS_EXCEPTIONS=0)
-
 	TARGET_COMPILE_OPTIONS(${FE_CORE_AVX} PRIVATE
         $<$<CONFIG:DEBUG>:			${DEBUG_COMPILE_OPTIONS} 			/arch:AVX>
         $<$<CONFIG:RELWITHDEBINFO>:	${RELWITHDEBINFO_COMPILE_OPTIONS} 	/arch:AVX>
@@ -106,9 +103,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	)
 
 
-ADD_COMPILE_DEFINITIONS(_USE_CMAKE_MACRO_=true)
-
-
 endif()
 
 
@@ -127,7 +121,6 @@ endif()
 #// FE_ASSERT can be disabled by removing the corresponding macro to eliminate error-checking overhead.
 #// Please NOTE that FE_ASSERT aborts when circumstances are unrecoverable and critical. Therefore, precise debugging should be placed first.
 
-ADD_COMPILE_DEFINITIONS(_USE_CMAKE_MACRO_=true)
 
 TARGET_COMPILE_DEFINITIONS(${FE_CORE_AVX} PRIVATE
 	$<$<CONFIG:DEBUG>:			TBB_PREVIEW_MEMORY_POOL _HAS_EXCEPTIONS=0 TBB_USE_EXCEPTIONS=0 BOOST_NO_EXCEPTIONS _DEBUG_					_ENABLE_ASSERT_ _ENABLE_ABORT_IF_ _ENABLE_LOG_ _ENABLE_EXIT_ _ENABLE_FE_CHECK_ONCE_ > #_ENABLE_MEMORY_TRACKER_

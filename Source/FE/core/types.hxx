@@ -282,23 +282,20 @@ public:
 
 	_CONSTEXPR17_ _FORCE_INLINE_ ref(T& ref_p) noexcept : m_ref_ptr(&ref_p) {}
 
-	_CONSTEXPR17_ _FORCE_INLINE_ ref(const ref& cref_p) noexcept : m_ref_ptr(cref_p.m_ref_ptr) {}
+	_CONSTEXPR17_ _FORCE_INLINE_ ref(const ref& ref_p) noexcept : m_ref_ptr(ref_p.m_ref_ptr) {}
 	_CONSTEXPR17_ _FORCE_INLINE_ ref(ref&& ref_p) noexcept : m_ref_ptr(ref_p.m_ref_ptr) { ref_p.m_ref_ptr = nullptr; }
 
 	_FORCE_INLINE_ ref& operator=(T& ref_p) noexcept
 	{
 		this->m_ref_ptr = &ref_p;
-	}
-
-	_FORCE_INLINE_ ref& operator=(const ref& cref_p) noexcept
-	{
-		this->m_ref_ptr = cref_p.m_ref_ptr;
+		return *this;
 	}
 
 	_FORCE_INLINE_ ref& operator=(ref&& ref_p) noexcept
 	{
 		this->m_ref_ptr = ref_p.m_ref_ptr;
 		ref_p.m_ref_ptr = nullptr; 
+		return *this;
 	}
 
 	_FORCE_INLINE_ explicit operator bool() const noexcept
@@ -342,6 +339,29 @@ struct pair
 	
 	First _first;
 	Second _second;
+
+	_FORCE_INLINE_ pair() noexcept = default;
+	_FORCE_INLINE_ pair(First first_p, Second second_p) noexcept : _first(std::move(first_p)), _second(std::move(second_p)) {};
+	_FORCE_INLINE_ ~pair() noexcept = default;
+
+	_FORCE_INLINE_ pair(const pair&) noexcept = default;
+	_FORCE_INLINE_ pair(pair&&) noexcept = default;
+
+	_FORCE_INLINE_ pair& operator=(const pair& other_p) noexcept
+	{
+		this->_first = other_p._first;
+		this->_second = other_p._second;
+
+		return *this;
+	}
+
+	_FORCE_INLINE_ pair& operator=(pair&& rvalue_p) noexcept
+	{
+		this->_first = std::move(rvalue_p._first);
+		this->_second = std::move(rvalue_p._second);
+
+		return *this;
+	}
 };
 
 
@@ -354,6 +374,17 @@ namespace container
 		typename Container::size_type _begin;
 		typename Container::size_type _end;
 	};
+
+	template<class Container>
+	_FORCE_INLINE_ container::range<Container> make_range(Container& source_p, index_t begin_p, index_t end_p) noexcept
+	{
+		assert(begin_p < end_p);
+		container::range<Container> l_value;
+		l_value._container = source_p;
+		l_value._begin = begin_p;
+		l_value._end = end_p;
+		return l_value;
+	}
 }
 
 

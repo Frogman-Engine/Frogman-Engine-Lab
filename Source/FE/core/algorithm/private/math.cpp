@@ -43,25 +43,25 @@ _CONSTEXPR17_ uint64 to_prime(uint64 number_p) noexcept
 		return number_p;
 
 	default:
-	{
-		var::uint64 l_number = number_p;
-
-		if (MODULO_BY_2(l_number) == 0)
 		{
-			l_number ^= l_magical_seven;
-
+			var::uint64 l_number = number_p;
+	
 			if (MODULO_BY_2(l_number) == 0)
+			{
+				l_number ^= l_magical_seven;
+	
+				if (MODULO_BY_2(l_number) == 0)
+				{
+					++l_number;
+				}
+			}
+	
+			while (is_prime(l_number) == false)
 			{
 				++l_number;
 			}
+			return l_number;
 		}
-
-		while (is_prime(l_number) == false)
-		{
-			++l_number;
-		}
-		return l_number;
-	}
 	}
 }
 

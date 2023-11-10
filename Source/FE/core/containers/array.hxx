@@ -55,10 +55,11 @@ public:
 	}
 
 	template<typename... Arguments>
-	_FORCE_INLINE_ void emplace_back(Arguments&&... arguments_p) noexcept
+	_FORCE_INLINE_ reference emplace_back(Arguments&&... arguments_p) noexcept
 	{
 		FE_ASSERT(this->m_array_size == Capacity, "${%s@0}: FE::farray is out of capacity. Unable to emplace an element to the back of the container.");
-		this->push_back(arguments_p...);
+		this->push_back(std::forward<Arguments&&>(arguments_p)...);
+		return this->back();
 	}
 
 
