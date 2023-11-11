@@ -107,7 +107,7 @@ public:
 	using difference_type = var::ptrdiff_t;
 
 	_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_ALIGNED;
+	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = (std::is_same<FE::SIMD_auto_alignment::alignment_type, Alignment>::value == true) ? ADDRESS::_ALIGNED : ADDRESS::_NOT_ALIGNED;
 
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept

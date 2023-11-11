@@ -7,6 +7,7 @@
 #include <FE/core/containers/queue.hxx>
 #include <FE/core/hash.hpp>
 #include <array>
+#include <cstdlib>
 #include <memory>
 #include <unordered_map>
 #pragma warning (push)
@@ -260,7 +261,7 @@ public:
             }
         }
 
-        FE_ASSERT(this->m_size_in_bytes == 0, "Assertion Failed: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
+        FE_EXIT(this->m_size_in_bytes == 0, MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE, "FATAL ERROR: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
         this->m_host_chunk->_unused_blocks.push(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
 
         if (this->m_host_chunk->_unused_blocks.size() > 1)
@@ -363,7 +364,11 @@ public:
     {
         typename global_pool_type::iterator l_list_iterator = tl_s_global_memory.begin();
         typename global_pool_type::const_iterator l_cend = tl_s_global_memory.cend();
-        FE_ASSERT(l_list_iterator == l_cend, "Assertion Failure: Unable to shrink_to_fit an empty memory pool");
+        if(l_list_iterator == l_cend) 
+        {
+            FE_ASSERT(true, "Unable to shrink_to_fit() an empty pool.");
+            return; 
+        }
 
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
@@ -433,6 +438,8 @@ public:
         FE_STATIC_ASSERT(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
         FE_STATIC_ASSERT(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
         FE_ASSERT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
+        FE_EXIT(size_p > ChunkCapacity, MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY, "Fatal Error: Unable to allocate the size of memmory that exceeds the pool chunk's capacity.");
+
 
         size_t l_queried_allocation_size_in_bytes = FE::calculate_aligned_memory_size_in_bytes<U, Alignment>(size_p);
 
@@ -532,7 +539,12 @@ public:
     {
         typename global_pool_type::iterator  l_list_iterator = tl_s_global_memory.begin();
         typename global_pool_type::const_iterator l_cend = tl_s_global_memory.cend();
-        FE_ASSERT(l_list_iterator == l_cend, "Assertion Failure: Unable to shrink_to_fit an empty memory pool");
+        if (l_list_iterator == l_cend) 
+        { 
+            FE_ASSERT(true, "Unable to shrink_to_fit() an empty pool.");
+            return; 
+        }
+
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
@@ -568,8 +580,10 @@ public:
     {
         typename global_pool_type::iterator  l_list_iterator = tl_s_global_memory.begin();
         typename global_pool_type::const_iterator l_cend = tl_s_global_memory.cend();
-        FE_ASSERT(l_list_iterator == l_cend, "Assertion Failure: Unable to return an address to an empty memory pool.");
-        
+
+        FE_EXIT(l_list_iterator == l_cend, MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR, "Unable to shrink_to_fit() an empty pool.");
+
+
         std::byte* const l_value = reinterpret_cast<std::byte*>(pointer_p);
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
@@ -609,9 +623,9 @@ private:
             unused_scattered_blocks_p.pop();
             
             auto l_next = unused_scattered_blocks_p.top();
-
-            FE_ASSERT(l_prev._address >= l_next._address, "Assertion Failure: The priority queue has illegal address order. ${%s@0} always has lower address value than ${%s@1}.", TO_STRING(l_prev._address), TO_STRING(l_next._address));
-            FE_ASSERT(l_prev._address + l_prev._size_in_bytes > l_next._address, "${%s@0}: Free-ed memory block range collision detected!\nPlease check if the count value passed to generic_pool<>::deallocate<T, Alignment>(T* ptr_p, count_t element_count_p) was incorrect or not.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_ACCESS_VIOLATION));
+        
+            FE_ASSERT(l_prev._address >= l_next._address, "${%s@0}: The priority queue has illegal address order. ${%s@1} always has lower address value than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION), TO_STRING(l_prev._address), TO_STRING(l_next._address));
+            FE_ASSERT(l_prev._address + l_prev._size_in_bytes > l_next._address, "${%s@0}: Free-ed memory block range collision detected!\nPlease check if the count value passed to generic_pool<>::deallocate<T>(T* ptr_p, count_t element_count_p) was incorrect or not.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION));
 
             if ((l_prev._address + l_prev._size_in_bytes) == l_next._address)
             {
@@ -689,10 +703,10 @@ thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, 
 
 
 
-template<typename T, size_t ChunkCapacity = 1024, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>
+template<typename T, size_t ChunkCapacity = 128, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>
 using block_pool = pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>, StatefulAllocator>;
 
-template<typename T, size_t ChunkCapacity = 1024, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>
+template<typename T, size_t ChunkCapacity = 128, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>
 using block_pool_ptr = std::unique_ptr<T, pool_deleter<T, FE::POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>, StatefulAllocator>>;
 
 
@@ -712,6 +726,29 @@ struct capacity final
 };
 
 
+
+
+template<class PoolType>
+class scoped_pool_resource final
+{
+public:
+    using pool_type = PoolType;
+
+    _FORCE_INLINE_ scoped_pool_resource(count_t pages_p) noexcept
+    {
+        pool_type::create_pages(pages_p);
+    }
+
+    scoped_pool_resource(const scoped_pool_resource& other_p) noexcept = delete;
+    scoped_pool_resource(scoped_pool_resource&& rvalue_p) noexcept = delete;
+    scoped_pool_resource& operator=(const scoped_pool_resource& other_p) noexcept = delete;
+    scoped_pool_resource& operator=(scoped_pool_resource&& rvalue_p) noexcept = delete;
+
+    _FORCE_INLINE_ ~scoped_pool_resource() noexcept
+    {
+        pool_type::shrink_to_fit();
+    }
+};
 
 
 END_NAMESPACE

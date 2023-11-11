@@ -10,7 +10,7 @@
 BEGIN_NAMESPACE(FE)
 
 
-template <typename T, size_t ChunkCapacity = 512 MB, class Alignment = FE::align_8bytes, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>
+template <typename T, size_t ChunkCapacity = 512 MB, class Alignment = FE::SIMD_auto_alignment::alignment_type, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>
 class new_delete_pool_allocator final
 {
 public:
@@ -23,7 +23,7 @@ public:
 	using difference_type = var::ptrdiff_t;
 
 	_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_NOT_ALIGNED;
+	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = (std::is_same<FE::SIMD_auto_alignment::alignment_type, Alignment>::value == true) ? ADDRESS::_ALIGNED : ADDRESS::_NOT_ALIGNED;
 
 
 	_FORCE_INLINE_ static void create_pages(const size_type count_p) noexcept
@@ -49,16 +49,16 @@ public:
 	{
 		if (new_count_p == 0)
 		{
-			new_delete_pool_allocator<T, ChunkCapacity, Alignment, StatefulAllocator>::deallocate(pointer_p, prev_count_p);
+			FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<value_type>(pointer_p, prev_count_p);
 			return nullptr;
 		}
 
-		pointer l_result = (T*)new_delete_pool_allocator<std::byte, ChunkCapacity, Alignment, StatefulAllocator>::allocate(sizeof(T) * new_count_p);
+		pointer l_result = (T*)FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 	
 		if (l_result != pointer_p) _LIKELY_
 		{
-			FE::memcpy<ADDRESS::_NOT_ALIGNED, ADDRESS::_NOT_ALIGNED>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
-			new_delete_pool_allocator<std::byte, ChunkCapacity, Alignment, StatefulAllocator>::deallocate(reinterpret_cast<std::byte*>(pointer_p), sizeof(T) * prev_count_p);
+			FE::memcpy<is_address_aligned, is_address_aligned>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
+			FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte*>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 		}
 
 		return l_result;
@@ -77,7 +77,7 @@ public:
 
 
 
-template <typename T, size_t ChunkCapacity = 512 MB, class Alignment = FE::align_8bytes, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>
+template <typename T, size_t ChunkCapacity = 512 MB, class Alignment = FE::SIMD_auto_alignment::alignment_type, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>
 class pool_allocator final
 {
 public:
@@ -90,7 +90,7 @@ public:
 	using difference_type = var::ptrdiff_t;
 
 	_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_NOT_ALIGNED;
+	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = (std::is_same<FE::SIMD_auto_alignment::alignment_type, Alignment>::value == true) ? ADDRESS::_ALIGNED : ADDRESS::_NOT_ALIGNED;
 
 
 	_FORCE_INLINE_ static void create_pages(const size_type count_p) noexcept
@@ -108,23 +108,23 @@ public:
 	{
 		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
-		return (T*)FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::allocate<std::byte>(sizeof(T) * count_p).release();
+		return (T*)FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer reallocate(pointer const pointer_p, const size_type prev_count_p, const size_type new_count_p) noexcept
 	{
 		if (new_count_p == 0)
 		{
-			FE::pool_allocator<T, ChunkCapacity, Alignment, StatefulAllocator>::deallocate(pointer_p, sizeof(T) * prev_count_p);
+			FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 			return nullptr;
 		}
 
-		pointer l_result = FE::pool_allocator<T, ChunkCapacity, Alignment, StatefulAllocator>::allocate(sizeof(T) * new_count_p);
+		pointer l_result = (T*)FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 		if (l_result != pointer_p) _LIKELY_
 		{
-			FE::memcpy<ADDRESS::_NOT_ALIGNED, ADDRESS::_NOT_ALIGNED>(l_result, sizeof(T) * new_count_p, pointer_p, sizeof(T) * prev_count_p);
-			FE::pool_allocator<T, ChunkCapacity, Alignment, StatefulAllocator>::deallocate(pointer_p, sizeof(T) * prev_count_p);
+			FE::memcpy<is_address_aligned, is_address_aligned>(l_result, sizeof(T) * new_count_p, pointer_p, sizeof(T) * prev_count_p);
+			FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 		}
 
 		return l_result;
@@ -135,7 +135,7 @@ public:
 		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
-		FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), sizeof(T) * count_p);
+		FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
 	}
 };
 
@@ -144,7 +144,7 @@ public:
 
 namespace std_style
 {
-	template <typename T, class ChunkCapacity = capacity<512 MB>, class Alignment = FE::align_8bytes, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity::size, Alignment>>>
+	template <typename T, class ChunkCapacity = capacity<512 MB>, class Alignment = FE::SIMD_auto_alignment::alignment_type, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity::size, Alignment>>>
 	class new_delete_pool_allocator final
 	{
 	public:
@@ -158,7 +158,7 @@ namespace std_style
 		using size_type = typename allocator::size_type;
 
 		_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_NOT_ALIGNED;
+		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = (std::is_same<FE::SIMD_auto_alignment::alignment_type, Alignment>::value == true) ? ADDRESS::_ALIGNED : ADDRESS::_NOT_ALIGNED;
 
 
 		constexpr new_delete_pool_allocator() noexcept {}
@@ -178,33 +178,35 @@ namespace std_style
 		}
 
 
-		_NODISCARD_ _FORCE_INLINE_ pointer allocate(const size_type count_p) noexcept
+		_NODISCARD_ _FORCE_INLINE_ static pointer allocate(const size_type count_p) noexcept
 		{
 			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			return FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<value_type>(count_p).release();
 		}
 
-		_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer const pointer_p, const size_type prev_count_p, const size_type new_count_p) noexcept
+
+		_NODISCARD_ _FORCE_INLINE_ static pointer reallocate(pointer const pointer_p, const size_type prev_count_p, const size_type new_count_p) noexcept
 		{
 			if (new_count_p == 0)
 			{
-				FE::new_delete_pool_allocator<T, ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate(pointer_p, prev_count_p);
+				FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<value_type>(pointer_p, prev_count_p);
 				return nullptr;
 			}
 
-			pointer l_result = (T*)FE::new_delete_pool_allocator<std::byte, ChunkCapacity::size, Alignment, StatefulAllocator>::allocate(sizeof(T) * new_count_p);
+			pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 			if (l_result != pointer_p) _LIKELY_
 			{
-				FE::memcpy<ADDRESS::_NOT_ALIGNED, ADDRESS::_NOT_ALIGNED>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
-				FE::new_delete_pool_allocator<std::byte, ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate(reinterpret_cast<std::byte*>(pointer_p), sizeof(T) * prev_count_p);
+				FE::memcpy<is_address_aligned, is_address_aligned>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
+				FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte*>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 			}
 
 			return l_result;
 		}
 
-		_FORCE_INLINE_ void deallocate(pointer const pointer_p, _MAYBE_UNUSED_ const size_type count_p) noexcept
+
+		_FORCE_INLINE_ static void deallocate(pointer const pointer_p, _MAYBE_UNUSED_ const size_type count_p) noexcept
 		{
 			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 			FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
@@ -216,7 +218,7 @@ namespace std_style
 
 
 
-	template <typename T, class ChunkCapacity = capacity<512 MB>, class Alignment = FE::align_8bytes, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity::size, Alignment>>>
+	template <typename T, class ChunkCapacity = capacity<512 MB>, class Alignment = FE::SIMD_auto_alignment::alignment_type, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity::size, Alignment>>>
 	class pool_allocator final
 	{
 	public:
@@ -230,7 +232,7 @@ namespace std_style
 		using size_type = typename allocator::size_type;
 
 		_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
-		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_NOT_ALIGNED;
+		_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = (std::is_same<FE::SIMD_auto_alignment::alignment_type, Alignment>::value == true) ? ADDRESS::_ALIGNED : ADDRESS::_NOT_ALIGNED;
 
 
 		constexpr pool_allocator() noexcept {}
@@ -254,23 +256,23 @@ namespace std_style
 		{
 			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
-			return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<std::byte>(sizeof(T) * count_p).release();
+			return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
 		}
 
 		_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer const pointer_p, const size_type prev_count_p, const size_type new_count_p) noexcept
 		{
 			if (new_count_p == 0)
 			{
-				FE::pool_allocator<T, ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate(pointer_p, sizeof(T) * prev_count_p);
+				FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 				return nullptr;
 			}
 
-			pointer l_result = FE::pool_allocator<T, ChunkCapacity::size, Alignment, StatefulAllocator>::allocate(sizeof(T) * new_count_p);
+			pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 			if (l_result != pointer_p) _LIKELY_
 			{
-				FE::memcpy<ADDRESS::_NOT_ALIGNED, ADDRESS::_NOT_ALIGNED>(l_result, sizeof(T) * new_count_p, pointer_p, sizeof(T) * prev_count_p);
-				FE::pool_allocator<T, ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate(pointer_p, sizeof(T) * prev_count_p);
+				FE::memcpy<is_address_aligned, is_address_aligned>(l_result, sizeof(T) * new_count_p, pointer_p, sizeof(T) * prev_count_p);
+				FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 			}
 
 			return l_result;
@@ -281,7 +283,7 @@ namespace std_style
 			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 			FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
-			FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), sizeof(T) * count_p);
+			FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
 		}
 	};
 }

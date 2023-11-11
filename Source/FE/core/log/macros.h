@@ -86,7 +86,7 @@ if(expression) _UNLIKELY_ \
 	const char* __FE_EXIT_FUNCTION_NAME__ = __func__; \
 	::FE::uint32 __FE_EXIT_CODE_LINE__ = __LINE__; \
 	::FE::log::__FE_ABORT_IMPLEMENTATION(::FE::log::buffered_string_formatter({ __VA_ARGS__ }), __FE_EXIT_SOURCE_DIR__, __FE_EXIT_FUNCTION_NAME__, __FE_EXIT_CODE_LINE__); \
-	::std::exit(reinterpret_cast<::FE::var::int64>(error_code)) \
+	::std::exit(static_cast<::FE::var::int32>(error_code)); \
 }
 #else
 #define FE_EXIT(expression, error_code, ...)

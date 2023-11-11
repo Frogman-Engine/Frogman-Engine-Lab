@@ -4,6 +4,7 @@
 
 
 
+
 TEST(hash_map, constructors)
 {
 	//{

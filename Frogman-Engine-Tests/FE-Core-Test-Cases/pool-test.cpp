@@ -16,17 +16,7 @@
 
 TEST(pool, block_allocation)
 {
-	FE::block_pool<std::string, 32>::create_pages(1);
-
-	{
-		FE::block_pool_ptr<std::string, 32> l_smart_ptr = FE::block_pool<std::string, 32>::allocate();
-
-		l_smart_ptr->reserve(20);
-		l_smart_ptr->assign("Memory Pool!");
-
-		EXPECT_TRUE(FE::algorithm::string::compare(l_smart_ptr->c_str(), "Memory Pool!"));
-	}
-
+	FE::scoped_pool_resource<FE::block_pool<FE::var::int64, 32>> l_pool_lifecycle(1);
 
 	/*FE::block_pool<std::string>::create_pages(1, FE::memory_region_t{ "Restaurant" });
 
@@ -60,54 +50,13 @@ TEST(pool, block_allocation)
 		{
 			l_smart_ptr[i] = FE::block_pool<FE::var::int64, 32>::allocate();
 		}
-
-
 	}
-
-	
-	
-	FE::block_pool<std::string, 32>::shrink_to_fit();
-	//FE::block_pool<std::string>::shrink_to_fit(FE::memory_region_t{ "Restaurant" });
-	FE::block_pool<FE::var::int64, 32>::shrink_to_fit();
 }
 
 
-
-
-//class mesh
-//{
-//};
-//
-//class animaiton
-//{
-//};
-//
-//class mags
-//{
-//};
-
-//class player_character
-//{
-//	FE::generic_pool_ptr<animaiton> m_animation;
-//	FE::generic_pool_ptr<mesh> m_mesh;
-//	FE::generic_pool_ptr<mags> m_mags;
-//
-//public:
-//	player_character() noexcept
-//	{
-//		FE::generic_pool<>::create_pages(1, { "Client Player Character's Properties" });
-//
-//		this->m_animation = FE::generic_pool<>::allocate<animaiton>(1, { "Client Player Character's Properties" });
-//		this->m_mesh = FE::generic_pool<>::allocate<mesh>(1, { "Client Player Character's Properties" });
-//		this->m_mags = FE::generic_pool<>::allocate<mags>(10, { "Client Player Character's Properties" });
-//	}
-//
-//	~player_character() noexcept = default;
-//};
-
 TEST(pool, generic_block_allocation)
 {
-	FE::generic_pool<1 KB>::create_pages(1);
+	FE::scoped_pool_resource<FE::generic_pool<1 KB>> l_pool_lifecycle(1);
 
 	{
 		FE::generic_pool_ptr<std::vector<FE::var::int32>, 1 KB> l_smart_ptr = FE::generic_pool<1 KB>::allocate<std::vector<FE::var::int32>>();
@@ -116,17 +65,6 @@ TEST(pool, generic_block_allocation)
 	{
 		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr = FE::generic_pool<1 KB>::allocate<std::string>();
 	}
-
-
-	//{
-	//	player_character l_my_character;
-	//}
-
-	//{
-	//	player_character l_my_character;
-	//}
-
-	//FE::generic_pool<>::shrink_to_fit({ "Client Player Character's Properties" });
 
 	{
 		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_smart_ptr[8];
@@ -151,7 +89,6 @@ TEST(pool, generic_block_allocation)
 		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
 
-	FE::generic_pool<>::shrink_to_fit();
 }
 
 
@@ -159,7 +96,8 @@ TEST(pool, generic_block_allocation)
 
 TEST(new_delete_pool_allocator, all)
 {
-	FE::new_delete_pool_allocator<std::string, 1 KB>::create_pages(1);
+	FE::scoped_pool_resource<FE::new_delete_pool_allocator<std::string, 1 KB>> l_pool_lifecycle(1);
+
 	{
 		auto l_ptr = FE::new_delete_pool_allocator<std::string, 1 KB>::allocate(1);
 
@@ -177,8 +115,6 @@ TEST(new_delete_pool_allocator, all)
 
 		l_allocator.deallocate(l_ptr, 2);
 	}
-
-	FE::new_delete_pool_allocator<std::string, 1 KB>::shrink_to_fit();
 }
 
 
@@ -187,7 +123,7 @@ TEST(new_delete_pool_allocator, all)
 TEST(pool_allocator, all)
 {
 	{
-		std::vector<std::string, FE::std_style::pool_allocator<std::string, FE::capacity<1 KB>>> l_vector;
+		std::vector<std::string, FE::std_style::pool_allocator<std::string, FE::capacity<4 KB>>> l_vector;
 		l_vector.get_allocator().create_pages(1);
 
 		l_vector.reserve(64);
@@ -244,7 +180,7 @@ BENCHMARK(boost_object_pool_allocator_extreme_test);
 void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
 	static std::string* l_s_strings[_MAX_ITERATION_];
-	FE::pool_allocator<std::string>::create_pages(2);
+	FE::scoped_pool_resource<FE::pool_allocator<std::string>> l_manager(2);
 
 	for (auto _ : state_p)
 	{
@@ -258,8 +194,6 @@ void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 			FE::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
 		}
 	}
-
-	FE::pool_allocator<std::string>::shrink_to_fit();
 }
 BENCHMARK(FE_pool_allocator_extreme_test);
 
