@@ -172,8 +172,8 @@ _NODISCARD_ _FORCE_INLINE_ T* trackable_calloc(length_t count_p, size_t bytes_p)
 	T* const l_result = (T*)::scalable_aligned_malloc(count_p * bytes_p, Alignment::size);
 	ALIGNED_MEMSET(l_result, _NULL_, count_p * bytes_p);
 
-	FE_CHECK(l_result == nullptr, "${%s@0}: Failed to allocate memory from scalable_aligned_malloc()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-	FE_CHECK((reinterpret_cast<uintptr_t>(l_result) % Alignment::size) != 0, "${%s@0}: The allocated heap memory address not aligned by ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), &Alignment::size);
+	FE_SUSPECT(l_result == nullptr, "${%s@0}: Failed to allocate memory from scalable_aligned_malloc()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+	FE_SUSPECT((reinterpret_cast<uintptr_t>(l_result) % Alignment::size) != 0, "${%s@0}: The allocated heap memory address not aligned by ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), &Alignment::size);
 	
 #if defined(_ENABLE_MEMORY_TRACKER_)
 	::FE::heap_memory_tracker<T, Alignment>::__log_heap_memory_allocation(count_p * bytes_p, TO_STRING(trackable_calloc), l_result, typeid(T).name());
@@ -204,7 +204,7 @@ _NODISCARD_ _FORCE_INLINE_ T* trackable_realloc(T* const memblock_pointer_p, len
 		l_realloc_result = (T*)::scalable_aligned_malloc(new_bytes_p * new_bytes_p, Alignment::size);
 		ALIGNED_MEMSET(l_realloc_result, _NULL_, new_bytes_p * new_bytes_p);
 
-		FE_CHECK(l_realloc_result == nullptr, "${%s@0}: Failed to re-allocate memory from scalable_aligned_malloc()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_SUSPECT(l_realloc_result == nullptr, "${%s@0}: Failed to re-allocate memory from scalable_aligned_malloc()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
 		FE::memcpy<ADDRESS::_ALIGNED, ADDRESS::_ALIGNED>(l_realloc_result, sizeof(T) * new_bytes_p, memblock_pointer_p, sizeof(T) * prev_bytes_p);
 		
@@ -214,7 +214,7 @@ _NODISCARD_ _FORCE_INLINE_ T* trackable_realloc(T* const memblock_pointer_p, len
 		}
 	}
 
-	FE_CHECK((reinterpret_cast<uintptr_t>(l_realloc_result) % Alignment::size) != 0, "${%s@0}: The allocated heap memory address not aligned by ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), &Alignment::size);
+	FE_SUSPECT((reinterpret_cast<uintptr_t>(l_realloc_result) % Alignment::size) != 0, "${%s@0}: The allocated heap memory address not aligned by ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), &Alignment::size);
 	
 #if defined(_ENABLE_MEMORY_TRACKER_)
 	::FE::heap_memory_tracker<T, Alignment>::__log_heap_memory_reallocation(prev_bytes_p * prev_bytes_p, new_bytes_p * new_bytes_p, TO_STRING(trackable_realloc), l_realloc_result, typeid(T).name());

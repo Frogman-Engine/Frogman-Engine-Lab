@@ -44,7 +44,7 @@ private:
 
 public:
 	_FORCE_INLINE_ fpriority_queue() noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
-	_FORCE_INLINE_ fpriority_queue(const fpriority_queue& other_p) noexcept : m_actual_memory(other_p.m_actual_memory), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(other_p.c, std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
+	_FORCE_INLINE_ fpriority_queue(const fpriority_queue& other_p) noexcept : m_actual_memory(other_p.m_actual_memory), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(comparison(), other_p.c, std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
 	_FORCE_INLINE_ fpriority_queue(fpriority_queue&& rvalue_p) noexcept : m_actual_memory(std::move(rvalue_p.m_actual_memory)), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(comparison(), std::move(rvalue_p.c), std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
 
 	_FORCE_INLINE_ boolean is_empty() const noexcept
@@ -100,8 +100,8 @@ public:
 
 	_CONSTEXPR20_ fqueue(std::initializer_list<value_type>&& initializer_list_p) noexcept : m_memory(), m_front_ptr(reinterpret_cast<pointer>(m_memory)), m_back_ptr(m_front_ptr + initializer_list_p.size()), m_absolute_begin_pointer(m_front_ptr), m_element_count(initializer_list_p.size())
 	{
-		FE_CHECK(initializer_list_p.size() > Capacity, "${%s@0}!: The length of std::initializer_list exceeds the Capacity", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
-		FE_CHECK(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+		FE_SUSPECT(initializer_list_p.size() > Capacity, "${%s@0}!: The length of std::initializer_list exceeds the Capacity", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+		FE_SUSPECT(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
 
 		Traits::move_construct(this->m_front_ptr, const_cast<value_type*>(initializer_list_p.begin()), initializer_list_p.size());
 	}
@@ -112,8 +112,8 @@ public:
 		FE_STATIC_CHECK(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
 		FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fqueue's value_type.");
 
-		FE_CHECK(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
-		FE_CHECK((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fqueue capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+		FE_SUSPECT(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
+		FE_SUSPECT((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fqueue capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
 		Traits::copy_construct(InputIterator{ this->m_absolute_begin_pointer }, first_p, last_p - first_p);
 	}
@@ -148,8 +148,8 @@ public:
 
 	_CONSTEXPR20_ fqueue& operator=(std::initializer_list<value_type>&& initializer_list_p) noexcept
 	{
-		FE_CHECK(initializer_list_p.size() > Capacity, "${%s@0}!: The length of std::initializer_list exceeds the Capacity", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
-		FE_CHECK(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+		FE_SUSPECT(initializer_list_p.size() > Capacity, "${%s@0}!: The length of std::initializer_list exceeds the Capacity", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+		FE_SUSPECT(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
 
 		this->~fqueue();
 		new(this) fqueue(std::move(initializer_list_p));
@@ -185,7 +185,7 @@ public:
 		if (this->m_back_ptr >= this->m_absolute_begin_pointer + Capacity)
 		{
 			this->__set_back_pointer_to_zero();
-			FE_CHECK(this->m_back_ptr >= this->m_front_ptr, "${%s@0}: Exceeded the queue index boundary", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+			FE_SUSPECT(this->m_back_ptr >= this->m_front_ptr, "${%s@0}: Exceeded the queue index boundary", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 		}
 
 		Traits::construct(*this->m_back_ptr, std::move(value_p));
@@ -198,7 +198,7 @@ public:
 		if ((this->m_absolute_begin_pointer + Capacity) == this->m_front_ptr)
 		{
 			this->m_front_ptr = this->m_absolute_begin_pointer;
-			FE_CHECK(this->is_empty() == true, "${%s@0}: Exceeded the queue index boundary", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+			FE_SUSPECT(this->is_empty() == true, "${%s@0}: Exceeded the queue index boundary", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 		}
 
 		T l_return_value_buffer = std::move(*this->m_front_ptr);

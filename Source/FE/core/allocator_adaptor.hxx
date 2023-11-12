@@ -37,7 +37,7 @@ namespace std_style
 
 		_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
 		{
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			pointer const l_result = allocator::allocate(count_p);
 
@@ -81,8 +81,8 @@ namespace std_style
 
 		_FORCE_INLINE_ void deallocate(pointer const pointer_p, size_type count_p) noexcept
 		{
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-			FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
 
 			if constexpr (is_trivial == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 			{
@@ -122,7 +122,7 @@ namespace std_style
 
 		_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
 		{
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			return allocator::allocate(count_p);
 		}
@@ -134,8 +134,8 @@ namespace std_style
 
 		_FORCE_INLINE_ void deallocate(pointer const pointer_p, size_type count_p) noexcept
 		{
-			FE_CHECK(pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(pointer_p));
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(pointer_p));
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			allocator::deallocate(pointer_p, count_p);
 		}
@@ -168,7 +168,7 @@ namespace std_style
 
 		_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
 		{
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			return allocator::allocate(count_p);
 		}
@@ -180,8 +180,8 @@ namespace std_style
 
 		_FORCE_INLINE_ void deallocate(pointer const pointer_p, size_type count_p) noexcept
 		{
-			FE_CHECK(pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(pointer_p));
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(pointer_p));
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			allocator::deallocate(pointer_p, count_p);
 		}

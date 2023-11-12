@@ -3,7 +3,6 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
 #include <FE/core/memory.hxx>
-#include <FE/core/containers/index_map.hxx>
 #pragma warning(push)
 #pragma warning(disable: 4324) // structure was padded due to alignment specifier
 
@@ -105,14 +104,14 @@ public:
 
 	_FORCE_INLINE_ T& operator*() noexcept
 	{
-		FE_CHECK(this->m_is_constructed == false, "ERROR: Attempted to dereference an uninitialized memory block.");
+		FE_SUSPECT(this->m_is_constructed == false, "ERROR: Attempted to dereference an uninitialized memory block.");
 
 		return *reinterpret_cast<pointer>(this->m_memory);
 	}
 
 	_FORCE_INLINE_ T* operator->() noexcept
 	{
-		FE_CHECK(this->m_is_constructed == false, "ERROR: Attempted to access an uninitialized memory block.");
+		FE_SUSPECT(this->m_is_constructed == false, "ERROR: Attempted to access an uninitialized memory block.");
 
 		return reinterpret_cast<pointer>(this->m_memory);
 	}

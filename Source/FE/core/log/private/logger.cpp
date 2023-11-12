@@ -20,7 +20,7 @@ BEGIN_NAMESPACE(FE::log)
 
 void logger::set_root_directory(const directory_char_type* root_directory_name_p) noexcept
 {
-    FE_CHECK(root_directory_name_p == nullptr, "root_directory_name_p was nullptr.");
+    FE_SUSPECT(root_directory_name_p == nullptr, "root_directory_name_p was nullptr.");
 
     std::filesystem::path l_directory_name = root_directory_name_p;
 
@@ -35,8 +35,8 @@ void logger::set_root_directory(const directory_char_type* root_directory_name_p
 
 void logger::mkdir(const directory_char_type* folder_name_p) noexcept
 {
-    FE_CHECK(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
-    FE_CHECK(folder_name_p == nullptr, "folder_name_p was nullptr.");
+    FE_SUSPECT(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
+    FE_SUSPECT(folder_name_p == nullptr, "folder_name_p was nullptr.");
 
 #ifdef _WINDOWS_64BIT_OS_
     this->m_directory_buffer += L"\\";
@@ -56,8 +56,8 @@ void logger::mkdir(const directory_char_type* folder_name_p) noexcept
 
 void logger::cd(const directory_char_type* folder_name_p) noexcept
 {
-    FE_CHECK(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
-    FE_CHECK(folder_name_p == nullptr, "folder_name_p was nullptr.");
+    FE_SUSPECT(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
+    FE_SUSPECT(folder_name_p == nullptr, "folder_name_p was nullptr.");
 
     SWITCH(folder_name_p)
     {
@@ -86,7 +86,7 @@ void logger::cd(const directory_char_type* folder_name_p) noexcept
 #endif
 
         this->m_directory_buffer += folder_name_p;
-        FE_CHECK(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
+        FE_SUSPECT(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
     }
         break;
     }
@@ -94,9 +94,9 @@ void logger::cd(const directory_char_type* folder_name_p) noexcept
 
 void logger::do_log(const char* content_p, const directory_char_type* filename_p) noexcept
 {
-    FE_CHECK(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
-    FE_CHECK(content_p == nullptr, "content_p was nullptr.");
-    FE_CHECK(filename_p == nullptr, "filename_p was nullptr.");
+    FE_SUSPECT(std::filesystem::exists(this->m_directory_buffer.c_str()) == false, "Current directory is invalid.");
+    FE_SUSPECT(content_p == nullptr, "content_p was nullptr.");
+    FE_SUSPECT(filename_p == nullptr, "filename_p was nullptr.");
 
     std::filesystem::path l_directory_name = this->m_directory_buffer.c_str();
 

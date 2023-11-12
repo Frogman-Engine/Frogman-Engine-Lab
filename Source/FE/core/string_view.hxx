@@ -115,54 +115,54 @@ public:
 	_NODISCARD_ _FORCE_INLINE_ iterator begin() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return iterator{ l_pointer_to_string + this->m_begin };
 	}
 	_NODISCARD_ _FORCE_INLINE_ iterator end() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return iterator{ l_pointer_to_string + this->m_end };
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ const_iterator cbegin() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return const_iterator{ l_pointer_to_string + this->m_begin };
 	}
 	_NODISCARD_ _FORCE_INLINE_ const_iterator cend() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return const_iterator{ l_pointer_to_string + this->m_end };
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ reverse_iterator rbegin() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return reverse_iterator{ (l_pointer_to_string + this->m_end) - 1 };
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ reverse_iterator rend() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return reverse_iterator{ (l_pointer_to_string + this->m_begin) - 1 };
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ const_reverse_iterator crbegin() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return const_reverse_iterator{ (l_pointer_to_string + this->m_end) - 1 };
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ const_reverse_iterator crend() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return const_reverse_iterator{ (l_pointer_to_string + this->m_begin) - 1 };
 	}
 	
@@ -170,34 +170,34 @@ public:
 	_NODISCARD_ _FORCE_INLINE_ CharT& operator[](index_t index_p) const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
-		FE_CHECK(index_p >= this->m_end, "${%s@0}: ${%s@1} was ${%lu@2}, and the string capacity was ${%lu@3}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p, &m_end);
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(index_p >= this->m_end, "${%s@0}: ${%s@1} was ${%lu@2}, and the string capacity was ${%lu@3}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p, &m_end);
 		return l_pointer_to_string[index_p];
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ CharT front() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return *(l_pointer_to_string + this->m_begin);
 	}
 	_NODISCARD_ _FORCE_INLINE_ CharT back() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return *((l_pointer_to_string + this->m_end) - 1);
 	}
 	_NODISCARD_ _FORCE_INLINE_ CharT* data() const noexcept
 	{
 		pointer l_pointer_to_string = this->m_watcher.operator->();
-		FE_CHECK(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
+		FE_SUSPECT(l_pointer_to_string == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(l_pointer_to_string));
 		return l_pointer_to_string + this->m_begin;
 	}
 
 
 	_NODISCARD_ _FORCE_INLINE_ length_type length() const noexcept
 	{
-		FE_CHECK(this->m_end < this->m_begin, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(this->m_begin), TO_STRING(this->m_end), &m_begin, &m_end);
+		FE_SUSPECT(this->m_end < this->m_begin, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(this->m_begin), TO_STRING(this->m_end), &m_begin, &m_end);
 		return this->m_end - this->m_begin; 
 	}
 
@@ -208,20 +208,20 @@ public:
 
 	_CONSTEXPR17_ void remove_prefix(const size_type count_p) noexcept
 	{
-		FE_CHECK(this->m_begin >= this->m_end, "${%s@0}: Unable to shrink the front of an empty string view", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+		FE_SUSPECT(this->m_begin >= this->m_end, "${%s@0}: Unable to shrink the front of an empty string view", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 		this->m_begin += count_p;
 	}
 
 	_CONSTEXPR17_ void remove_suffix(const size_type count_p) noexcept
 	{
-		FE_CHECK(this->m_begin >= this->m_end, "${%s@0}: Unable to shrink the back of an empty string view", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+		FE_SUSPECT(this->m_begin >= this->m_end, "${%s@0}: Unable to shrink the back of an empty string view", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 		this->m_end -= count_p;
 	}
 
 
 	_CONSTEXPR20_ void reset_range() noexcept
 	{
-		FE_CHECK(this->m_watcher.is_expired() == true, "Assertion Failed: Cannot reset an empty string view.");
+		FE_SUSPECT(this->m_watcher.is_expired() == true, "Assertion Failed: Cannot reset an empty string view.");
 
 		this->m_begin = 0;
 		this->m_end = algorithm::string::length(this->m_watcher.get_unchecked());
@@ -235,8 +235,8 @@ public:
 
 	_CONSTEXPR20_ void copy(CharT* const out_dest_buffer_pointer_p, const size_type buffer_capacity_p, const size_type count_p, const size_type position_p = 0) const noexcept
 	{
-		FE_CHECK(out_dest_buffer_pointer_p == nullptr, "${%s@0}: out_dest_string_buffer_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-		FE_CHECK(count_p > this->length(), "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(count_p), TO_STRING(this->length()));
+		FE_SUSPECT(out_dest_buffer_pointer_p == nullptr, "${%s@0}: out_dest_string_buffer_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_SUSPECT(count_p > this->length(), "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(count_p), TO_STRING(this->length()));
 
 		algorithm::string::copy(out_dest_buffer_pointer_p, buffer_capacity_p, this->begin().operator->() + position_p, count_p);
 	}
@@ -245,16 +245,16 @@ public:
 	_CONSTEXPR20_ void copy(basic_string<CharT, Allocator, Traits>& out_dest_string_buffer_p, _MAYBE_UNUSED_ const size_type buffer_capacity_p, const size_type count_p, const size_type position_p = 0) const noexcept
 	{
 		pointer l_out_dest_string_buffer = out_dest_string_buffer_p.data();
-		FE_CHECK(l_out_dest_string_buffer == nullptr, "${%s@0}: out_dest_string_buffer_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-		FE_CHECK(count_p > this->length(), "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(count_p), TO_STRING(this->length()));
-		FE_CHECK(count_p > buffer_capacity_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(count_p), TO_STRING(buffer_capacity_p));
+		FE_SUSPECT(l_out_dest_string_buffer == nullptr, "${%s@0}: out_dest_string_buffer_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_SUSPECT(count_p > this->length(), "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(count_p), TO_STRING(this->length()));
+		FE_SUSPECT(count_p > buffer_capacity_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(count_p), TO_STRING(buffer_capacity_p));
 
 		algorithm::string::copy(l_out_dest_string_buffer, this->begin().operator->() + position_p, count_p);
 	}
 	
 	_NODISCARD_ _CONSTEXPR20_ basic_string_view substr(const size_type position_p, const size_type count_p) noexcept
 	{
-		FE_CHECK(this->m_watcher.is_expired() == true, "Assertion Failed: Cannot return a substring of an empty string view.");
+		FE_SUSPECT(this->m_watcher.is_expired() == true, "Assertion Failed: Cannot return a substring of an empty string view.");
 		
 		basic_string_view l_tmp_view;
 		l_tmp_view = *this;
@@ -287,7 +287,7 @@ public:
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean starts_with(const CharT* const string_p) const noexcept
 	{
-		FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@0} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+		FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@0} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
 		length_t l_input_string_length = algorithm::string::length(string_p);
 
@@ -319,7 +319,7 @@ public:
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean ends_with(const CharT* const string_p) const noexcept
 	{
-		FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+		FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 		
 		length_t l_input_string_length = algorithm::string::length(string_p);
 		return algorithm::string::compare_ranged(this->begin().operator->(), algorithm::string::range{ this->m_end - l_input_string_length, this->m_end },
@@ -344,7 +344,7 @@ public:
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean contains(const CharT* const string_p) const noexcept
 	{
-		FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+		FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 		return (algorithm::string::find_the_first(this->begin().operator->(), string_p)).has_value();
 	}
 
@@ -355,15 +355,15 @@ public:
 			return std::nullopt;
 		}
 
-		FE_CHECK(position_p > this->length(), "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->length()));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->length()));
 
 		return std::move(this->find(other_p.begin().operator->(), position_p));
 	}
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::range> find(const CharT* const string_p, const size_type position_p = 0) const noexcept
 	{
-		FE_CHECK(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-		FE_CHECK(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
+		FE_SUSPECT(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
 
 		std::optional<algorithm::string::range> l_result = algorithm::string::find_the_first(this->begin().operator->() + position_p, string_p);
 
@@ -379,7 +379,7 @@ public:
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::range> find(const CharT value_p, const size_type position_p = 0) const noexcept
 	{
-		FE_CHECK(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
 
 		std::optional<algorithm::string::range> l_result = algorithm::string::find_the_first(this->begin().operator->() + position_p, value_p);
 		
@@ -400,29 +400,29 @@ public:
 			return std::nullopt;
 		}
 
-		FE_CHECK(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
 
 		return std::move(this->rfind(other_p.begin().operator->(), position_p));
 	}
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::range> rfind(const CharT* const string_p, const size_type position_p = 0) const noexcept
 	{
-		FE_CHECK(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-		FE_CHECK(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
+		FE_SUSPECT(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
 
 		return std::move(algorithm::string::find_the_last_within_range(this->begin().operator->(), algorithm::string::range{this->m_begin, position_p}, string_p));
 	}
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::range> rfind(const CharT value_p, size_type position_p = 0) const noexcept
 	{
-		FE_CHECK(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
 
 		return std::move(algorithm::string::find_the_last_within_range(this->begin().operator->(), algorithm::string::range{this->m_begin, position_p}, value_p));
 	}
 
 	_NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ algorithm::string::count<CharT> count_chars(const CharT value_p, const size_type position_p = 0) const noexcept
 	{
-		FE_CHECK(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
+		FE_SUSPECT(position_p > this->length(), "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->length()));
 
 		return std::move(algorithm::string::count_chars(this->begin().operator->() + position_p, value_p));
 	}

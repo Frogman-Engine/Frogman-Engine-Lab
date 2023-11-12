@@ -16,32 +16,34 @@
 
 TEST(pool, block_allocation)
 {
-	FE::scoped_pool_resource<FE::block_pool<FE::var::int64, 32>> l_pool_lifecycle(1);
+	FE::scoped_pool_resource<FE::block_pool<FE::var::int64, 32>> l_pool(1);
 
-	/*FE::block_pool<std::string>::create_pages(1, FE::memory_region_t{ "Restaurant" });
-
+	FE::memory_region_t l_memory_region = "Restaurant";
 	{
-		FE::block_pool_ptr<std::string> l_smart_ptr1 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
+
+		FE::scoped_namespace_pool_resource<FE::block_pool<std::string>>l_pool_namespace(l_memory_region.data(), 1);
+
+		FE::block_pool_ptr<std::string> l_smart_ptr1 = FE::block_pool<std::string>::allocate(l_memory_region.data());
 		l_smart_ptr1->reserve(20);
 		l_smart_ptr1->assign("Aglio e olio!");
 
-		FE::block_pool_ptr<std::string> l_smart_ptr2 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
+		FE::block_pool_ptr<std::string> l_smart_ptr2 = FE::block_pool<std::string>::allocate(l_memory_region.data());
 		l_smart_ptr2->reserve(20);
 		l_smart_ptr2->assign("Pizza!");
 
-		FE::block_pool_ptr<std::string> l_smart_ptr3 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
+		FE::block_pool_ptr<std::string> l_smart_ptr3 = FE::block_pool<std::string>::allocate(l_memory_region.data());
 		l_smart_ptr3->reserve(20);
 		l_smart_ptr3->assign("Vongole!");
 
-		FE::block_pool_ptr<std::string> l_smart_ptr4 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
+		FE::block_pool_ptr<std::string> l_smart_ptr4 = FE::block_pool<std::string>::allocate(l_memory_region.data());
 		l_smart_ptr4->reserve(20);
 		l_smart_ptr4->assign("Carbonara!");
 
-		FE::block_pool_ptr<std::string> l_smart_ptr5 = FE::block_pool<std::string>::allocate(FE::memory_region_t{ "Restaurant" });
+		FE::block_pool_ptr<std::string> l_smart_ptr5 = FE::block_pool<std::string>::allocate(l_memory_region.data());
 		l_smart_ptr5->reserve(20);
 		l_smart_ptr5->assign("Arrabbiata!");
-	}*/
 
+	}
 
 	{
 		FE::block_pool_ptr<FE::var::int64, 32> l_smart_ptr[10];
@@ -89,6 +91,32 @@ TEST(pool, generic_block_allocation)
 		FE::generic_pool_ptr<FE::var::int64, 1 KB> l_another_smart_ptr = std::move(l_smart_ptr[0]);
 	}
 
+
+	FE::memory_region_t l_memory_region = "Restaurant";
+	{
+	
+		FE::scoped_namespace_pool_resource<FE::generic_pool<1 KB>>l_pool_namespace(l_memory_region.data(), 1);
+
+		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr1 = FE::generic_pool<1 KB>::allocate<std::string>(l_memory_region.data(), 1);
+		l_smart_ptr1->reserve(20);
+		l_smart_ptr1->assign("Aglio e olio!");
+
+		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr2 = FE::generic_pool<1 KB>::allocate<std::string>(l_memory_region.data(), 1);
+		l_smart_ptr2->reserve(20);
+		l_smart_ptr2->assign("Pizza!");
+
+		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr3 = FE::generic_pool<1 KB>::allocate<std::string>(l_memory_region.data(), 1);
+		l_smart_ptr3->reserve(20);
+		l_smart_ptr3->assign("Vongole!");
+
+		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr4 = FE::generic_pool<1 KB>::allocate<std::string>(l_memory_region.data(), 1);
+		l_smart_ptr4->reserve(20);
+		l_smart_ptr4->assign("Carbonara!");
+
+		FE::generic_pool_ptr<std::string, 1 KB> l_smart_ptr5 = FE::generic_pool<1 KB>::allocate<std::string>(l_memory_region.data(), 1);
+		l_smart_ptr5->reserve(20);
+		l_smart_ptr5->assign("Arrabbiata!");
+	}
 }
 
 
@@ -132,6 +160,64 @@ TEST(pool_allocator, all)
 		l_vector.get_allocator().shrink_to_fit();
 	}
 }
+
+
+TEST(namespace_pool_allocator, all)
+{
+	FE::namespace_pool_allocator<int, FE::capacity<4 KB>> l_allocator("list node pool");
+	l_allocator.create_pages(2);
+	{
+		std::list<int, FE::namespace_pool_allocator<int, FE::capacity<4 KB>>> l_list{ l_allocator };
+
+		for (int i = 0; i < 10; ++i)
+		{
+			l_list.push_back(1);
+		}
+	}
+	l_allocator.shrink_to_fit();
+}
+
+
+void memory_pooled_std_list_iteration(benchmark::State& state_p) noexcept
+{
+	FE::namespace_pool_allocator<int, FE::capacity<4 KB>> l_allocator("list node pool"); // std::list nodes are allocated under the memory pool namespace named "list node pool". This provides higher cache hit ratio. 
+	l_allocator.create_pages(2);
+	std::list<int, FE::namespace_pool_allocator<int, FE::capacity<4 KB>>> l_list{ l_allocator };
+
+	for (int i = 0; i < 10; ++i)
+	{
+		l_list.push_back(1);
+	}
+
+	for (auto _ : state_p)
+	{
+		for (_MAYBE_UNUSED_ auto& element : l_list)
+		{
+		}
+	}
+
+	l_allocator.shrink_to_fit();
+}
+BENCHMARK(memory_pooled_std_list_iteration);
+
+
+void std_list_iteration(benchmark::State& state_p) noexcept
+{
+	std::list<int> l_list;
+
+	for (int i = 0; i < 10; ++i)
+	{
+		l_list.push_back(1);
+	}
+
+	for (auto _ : state_p)
+	{
+		for (_MAYBE_UNUSED_ auto& element : l_list)
+		{
+		}
+	}
+}
+BENCHMARK(std_list_iteration);
 
 
 

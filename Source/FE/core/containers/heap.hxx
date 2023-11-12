@@ -62,7 +62,7 @@ namespace internal::heap
 
 		_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
 		{
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			return tl_s_memory_pool_allocator.allocate(count_p);
 		}
@@ -76,7 +76,7 @@ namespace internal::heap
 			}
 
 			pointer const l_result = static_cast<pointer>(tl_s_memory_pool_allocator.allocate(new_count_p));
-			FE_CHECK(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
+			FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
 
 			if (l_result != pointer_p) _LIKELY_
 			{
@@ -88,8 +88,8 @@ namespace internal::heap
 
 		_FORCE_INLINE_ static void deallocate(pointer pointer_p, size_type count_p) noexcept
 		{
-			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-			FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
+			FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_SUSPECT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
 
 			tl_s_memory_pool_allocator.deallocate(pointer_p, count_p);
 		}

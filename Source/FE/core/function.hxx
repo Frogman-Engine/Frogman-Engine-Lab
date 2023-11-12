@@ -88,7 +88,7 @@ public:
 
     _FORCE_INLINE_ R operator()(Arguments& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_SUSPECT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         return this->m_function_pointer(arguments_p...);
     }
 
@@ -150,7 +150,7 @@ public:
 
     _FORCE_INLINE_ void operator()(Arguments& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_SUSPECT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         this->m_function_pointer(arguments_p...);
     }
 
@@ -215,7 +215,7 @@ public:
 
     _FORCE_INLINE_ R operator()(Arguments&& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_SUSPECT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         return this->m_function_pointer(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -277,7 +277,7 @@ public:
 
     _FORCE_INLINE_ void operator()(Arguments&& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_SUSPECT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         this->m_function_pointer(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -346,7 +346,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -409,7 +409,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -472,7 +472,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -535,7 +535,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -599,7 +599,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -662,7 +662,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -725,7 +725,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -788,7 +788,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_SUSPECT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -1266,7 +1266,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBu
 
     virtual void operator()(void) noexcept override
     {
-        FE_CHECK(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
+        FE_SUSPECT(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
 
         if constexpr (task_type::has_void_return_type == true)
         {
@@ -1463,7 +1463,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBu
 
     virtual void operator()(void) noexcept override
     {
-        FE_CHECK(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
+        FE_SUSPECT(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
 
         if constexpr (task_type::has_void_return_type == true)
         {

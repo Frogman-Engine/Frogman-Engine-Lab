@@ -1,6 +1,6 @@
 ﻿#include <gtest/gtest.h>
+#include <benchmark/benchmark.h>
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
-#include <FE/miscellaneous/google_test_extension.h>
 #include <FE/core/iterator.hxx>
 #include <FE/core/smart_pointers/exclusive_ptr.hxx>
 #include <FE/core/smart_pointers/proxy_ptr.hxx>
@@ -97,3 +97,39 @@ TEST(pedantic_iterator, iteration)
 		EXPECT_TRUE(*l_pedantic == "Pizza");
 	}
 }
+
+
+
+
+void FE_iterator_vector_iteration_test(benchmark::State& state_p) noexcept
+{
+	std::vector<int> l_vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	for (auto _ : state_p)
+	{
+		FE::iterator<FE::contiguous_iterator<int>> l_iterator = l_vec.begin().operator->();
+		FE::const_iterator<FE::contiguous_iterator<int>> l_end = l_vec.data() + l_vec.size();
+		while (l_iterator.operator!=(l_end))
+		{
+			++l_iterator;
+		}
+	}
+}
+
+BENCHMARK(FE_iterator_vector_iteration_test);
+
+
+void std_iterator_vector_iteration_test(benchmark::State& state_p) noexcept
+{
+	std::vector<int> l_vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	for (auto _ : state_p)
+	{
+		auto l_iterator = l_vec.begin();
+		auto l_end = l_vec.cend();
+		while (l_iterator != l_end)
+		{
+			++l_iterator;	
+		}
+	}
+}
+
+BENCHMARK(std_iterator_vector_iteration_test);

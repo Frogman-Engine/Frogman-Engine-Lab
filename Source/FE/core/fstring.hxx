@@ -52,8 +52,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string(const value_type* const string_p) noexcept : m_fstring{ _NULL_ }, m_length(algorithm::string::length<CharT>(string_p))
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-        FE_CHECK(this->m_length >= Capacity, "${%s@0}: the input string length exceeds the max string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(this->m_length >= Capacity, "${%s@0}: the input string length exceeds the max string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
         Traits::copy( this->m_fstring, string_p, this->m_length);
     }
@@ -74,8 +74,8 @@ public:
         FE_STATIC_CHECK(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
         FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fixed_sized_string's value_type.");
 
-        FE_CHECK(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
-        FE_CHECK((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fixed_sized_string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
+        FE_SUSPECT((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fixed_sized_string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
         Traits::assign(string_info<CharT>{ this->m_fstring, length_t{static_cast<length_t>(last_p - first_p)}, capacity_t{Capacity} }, first_p, last_p);
     }
@@ -90,10 +90,10 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& operator=(const value_type* const string_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
         this->m_length = algorithm::string::length<CharT>(string_p);
-        FE_CHECK(this->m_length >= Capacity, "${%s@0}: the input string length exceeds the max string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(this->m_length >= Capacity, "${%s@0}: the input string length exceeds the max string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
         Traits::copy(this->m_fstring, string_p, this->m_length);
         return *this;
@@ -127,14 +127,14 @@ public:
 
     _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ CharT& operator[](index_t index_p) noexcept
     {
-        FE_CHECK(index_p >= this->m_length, "${%s@0}: index out of boundary.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(index_p >= this->m_length, "${%s@0}: index out of boundary.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
         return this->m_fstring[index_p];
     }
 
 
     _CONSTEXPR20_ fixed_sized_string& assign(const size_type count_p, const value_type value_p) noexcept
     {
-        FE_CHECK(count_p >= Capacity, "${%s@0}: ${%s@1} exceeds fixed sized string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(count_p));
+        FE_SUSPECT(count_p >= Capacity, "${%s@0}: ${%s@1} exceeds fixed sized string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(count_p));
         Traits::assign(this->m_fstring, count_p, value_p);
         this->m_length = count_p;
         return *this;
@@ -142,7 +142,7 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& assign(const fixed_sized_string& other_p, const size_type input_begin_p, const size_type input_end_p) noexcept
     {
-        FE_CHECK(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} cannot be greater than or equal to ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(input_begin_p), TO_STRING(input_end_p));
+        FE_SUSPECT(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} cannot be greater than or equal to ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(input_begin_p), TO_STRING(input_end_p));
 
         if (other_p.m_length == 0)
         {
@@ -161,9 +161,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& assign(const value_type* const string_p, const size_type size_to_assign_p) noexcept
     {
-        FE_CHECK(size_to_assign_p == 0, "${%s@0}: {%s@1} is zero.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_to_assign_p));
-        FE_CHECK(string_p == nullptr, "${%s@0}: {%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-        FE_CHECK(size_to_assign_p >= Capacity, "ERROR: size_to_assign_p exceeds fixed sized string capacity.");
+        FE_SUSPECT(size_to_assign_p == 0, "${%s@0}: {%s@1} is zero.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_to_assign_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: {%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(size_to_assign_p >= Capacity, "ERROR: size_to_assign_p exceeds fixed sized string capacity.");
        
         Traits::assign(string_info<CharT>{this->m_fstring, _NULL_, Capacity}, string_p, size_to_assign_p);
         this->m_length = size_to_assign_p;
@@ -172,11 +172,11 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& assign(const_iterator input_begin_p, const_iterator input_end_p) noexcept
     {
-        FE_CHECK(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
-        FE_CHECK(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));
+        FE_SUSPECT(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
+        FE_SUSPECT(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));
 
-        FE_CHECK(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} must be smaller than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(input_begin_p), TO_STRING(input_end_p));
-        FE_CHECK((input_end_p - input_begin_p) >= Capacity, "${%s@0}: input string range length exceeds fixed sized string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} must be smaller than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(input_begin_p), TO_STRING(input_end_p));
+        FE_SUSPECT((input_end_p - input_begin_p) >= Capacity, "${%s@0}: input string range length exceeds fixed sized string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
         
         Traits::assign(string_info<CharT>{this->m_fstring, _NULL_, Capacity}, input_begin_p, input_end_p);
         this->m_length = input_end_p - input_begin_p;
@@ -185,8 +185,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string&  assign(std::initializer_list<const CharT>&& initializer_list_p) noexcept
     {
-        FE_CHECK(initializer_list_p.size() >= Capacity, "ERROR: initializer_list_p.size() exceeds the string capacity.");
-        FE_CHECK(initializer_list_p.size() == 0, "${%s@0}: {%s@1} is an empty initializer_list_p.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(initializer_list_p));
+        FE_SUSPECT(initializer_list_p.size() >= Capacity, "ERROR: initializer_list_p.size() exceeds the string capacity.");
+        FE_SUSPECT(initializer_list_p.size() == 0, "${%s@0}: {%s@1} is an empty initializer_list_p.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(initializer_list_p));
        
         algorithm::string::concatenate(this->m_fstring, Capacity, std::move(initializer_list_p));
         this->m_length = initializer_list_p.size();
@@ -207,7 +207,7 @@ public:
 
     _FORCE_INLINE_ fixed_sized_string& assign_range(const value_type* const string_p, const algorithm::string::range input_string_range_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: {%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: {%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         return this->assign(string_p, input_string_range_p._begin, input_string_range_p._end);
     }
 
@@ -242,9 +242,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& insert(const size_type position_p, const size_type count_p, value_type value_p) noexcept
     {
-        FE_CHECK(position_p >= Capacity, "ERROR: position_p cannot be greater than the string capacity.");
-        FE_CHECK(count_p == 0, "ERROR: insert() operation was not successful. size_type count_p was zero.");
-        FE_CHECK((this->m_length + count_p) >= Capacity, "ERROR: fixed sized string capacity overflowed.");
+        FE_SUSPECT(position_p >= Capacity, "ERROR: position_p cannot be greater than the string capacity.");
+        FE_SUSPECT(count_p == 0, "ERROR: insert() operation was not successful. size_type count_p was zero.");
+        FE_SUSPECT((this->m_length + count_p) >= Capacity, "ERROR: fixed sized string capacity overflowed.");
 
         Traits::insert(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_p, value_p);
         this->m_length += count_p;
@@ -253,8 +253,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& insert(const size_type position_p, const value_type* const string_p) noexcept
     {
-        FE_CHECK(position_p >= Capacity, "${%s@0}: position_p cannot be greater than the string capacity.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
-        FE_CHECK(string_p == nullptr, "${%s@0}: the input string is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+        FE_SUSPECT(position_p >= Capacity, "${%s@0}: position_p cannot be greater than the string capacity.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: the input string is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
         
         size_type l_inout_string_length = algorithm::string::length(string_p);
         Traits::insert(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, string_p, l_inout_string_length);
@@ -264,8 +264,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& insert(const size_type position_p, const fixed_sized_string& other_p) noexcept
     {
-        FE_CHECK(position_p >= Capacity, "${%s@0}: ${%s@1} cannot be greater than the ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(position_p), TO_STRING(Capacity));
-        FE_CHECK((this->m_length + other_p.m_length) >= Capacity, "${%s@0}: fixed sized string capacity overflowed.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(position_p >= Capacity, "${%s@0}: ${%s@1} cannot be greater than the ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(position_p), TO_STRING(Capacity));
+        FE_SUSPECT((this->m_length + other_p.m_length) >= Capacity, "${%s@0}: fixed sized string capacity overflowed.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
         if (other_p.m_length == 0)
         {
@@ -279,8 +279,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& insert(const size_type position_p, const fixed_sized_string& other_p, const size_type input_begin_p, size_type input_end_p) noexcept
     {
-        FE_CHECK(position_p >= Capacity, "${%s@0}: ${%s@1} cannot be greater than the ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(position_p), TO_STRING(Capacity));
-        FE_CHECK(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(input_begin_p), TO_STRING(input_end_p));
+        FE_SUSPECT(position_p >= Capacity, "${%s@0}: ${%s@1} cannot be greater than the ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(position_p), TO_STRING(Capacity));
+        FE_SUSPECT(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(input_begin_p), TO_STRING(input_end_p));
 
         if (other_p.m_length == 0)
         {
@@ -294,9 +294,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& insert(const size_type position_p, const value_type* const string_p, const size_type input_begin_p, const size_type input_end_p) noexcept
     {
-        FE_CHECK(position_p >= Capacity, "${%s@0}: ${%s@1} cannot be greater than the ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(position_p), TO_STRING(Capacity));
-        FE_CHECK(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(input_begin_p), TO_STRING(input_end_p));
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(position_p >= Capacity, "${%s@0}: ${%s@1} cannot be greater than the ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(position_p), TO_STRING(Capacity));
+        FE_SUSPECT(input_begin_p >= input_end_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(input_begin_p), TO_STRING(input_end_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
         Traits::insert(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, string_p, input_begin_p, input_end_p);
         this->m_length += input_end_p - input_begin_p;
@@ -305,8 +305,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& insert(const size_type position_p, std::initializer_list<const CharT>&& initializer_list_p) noexcept
     {
-        FE_CHECK(initializer_list_p.size() == 0, "${%s@0}: initializer_list_p is empty.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
-        FE_CHECK((this->m_length + initializer_list_p.size()) >= Capacity, "${%s@0}: fixed sized string capacity overflowed.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(initializer_list_p.size() == 0, "${%s@0}: initializer_list_p is empty.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+        FE_SUSPECT((this->m_length + initializer_list_p.size()) >= Capacity, "${%s@0}: fixed sized string capacity overflowed.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
         Traits::insert(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, std::move(initializer_list_p));
         this->m_length += initializer_list_p.size();
@@ -332,8 +332,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& erase(const size_type index_p = 0, const size_type count_p = 1) noexcept
     {
-        FE_CHECK(Capacity < (index_p + count_p), "${%s@0}: fixed sized string capacity overflowed.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
-        FE_CHECK(count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_p));
+        FE_SUSPECT(Capacity < (index_p + count_p), "${%s@0}: fixed sized string capacity overflowed.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_p));
 
         Traits::erase(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, index_p, count_p);
         this->m_length -= count_p;
@@ -343,7 +343,7 @@ public:
 
     _CONSTEXPR20_ void push_back(const value_type value_p) noexcept
     {
-        FE_CHECK(this->m_length >= Capacity, "${%s0}: out of capacity", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(this->m_length >= Capacity, "${%s0}: out of capacity", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
         this->m_fstring[this->m_length] = value_p;
         ++this->m_length;
         this->m_fstring[this->m_length] = _NULL_;
@@ -351,7 +351,7 @@ public:
 
     _CONSTEXPR20_ CharT pop_back() noexcept
     {
-        FE_CHECK(this->m_length == 0, "${%s0}: Unable to pop an empty fstring", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(this->m_length == 0, "${%s0}: Unable to pop an empty fstring", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
         const CharT l_return_value = this->back();
         --this->m_length;
         this->m_fstring[this->m_length] = _NULL_;
@@ -361,8 +361,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& append(const size_type input_count_p, const value_type value_p) noexcept
     {
-        FE_CHECK(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
-        FE_CHECK(this->max_length() < (this->m_length + input_count_p), "${%s0}: cannot append ${%ld@1} character(s) to the fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), &input_count_p);
+        FE_SUSPECT(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
+        FE_SUSPECT(this->max_length() < (this->m_length + input_count_p), "${%s0}: cannot append ${%ld@1} character(s) to the fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), &input_count_p);
 
         Traits::append(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, input_count_p, value_p);
         this->m_length += input_count_p;
@@ -372,9 +372,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& append(const fixed_sized_string& other_p, const size_type input_position_p, const size_type input_count_p = 1) noexcept
     {
-        FE_CHECK(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
-        FE_CHECK(this->capacity() < (this->m_length + input_count_p), "${%s0}: cannot append another fstring that exceeds the capacity of a caller fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
-        FE_CHECK(other_p.m_length < (input_count_p + input_position_p), "${%s0}: out of input fstring index boundary.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
+        FE_SUSPECT(this->capacity() < (this->m_length + input_count_p), "${%s0}: cannot append another fstring that exceeds the capacity of a caller fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(other_p.m_length < (input_count_p + input_position_p), "${%s0}: out of input fstring index boundary.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 
         Traits::append(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, other_p.m_fstring, input_position_p, input_count_p);
         this->m_length += input_count_p;
@@ -384,9 +384,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& append(const value_type* string_p, const size_type input_position_p, const size_type input_count_p = 1) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(cstr_ptrc_p));
-        FE_CHECK(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
-        FE_CHECK(this->capacity() < (this->m_length + input_count_p), "${%s0}: cannot append another fstring that exceeds the capacity of a caller fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(cstr_ptrc_p));
+        FE_SUSPECT(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
+        FE_SUSPECT(this->capacity() < (this->m_length + input_count_p), "${%s0}: cannot append another fstring that exceeds the capacity of a caller fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 
         Traits::append(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, string_p, input_position_p, input_count_p);
         this->m_length += input_count_p;
@@ -396,9 +396,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& append(const value_type* string_p, const size_type input_count_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-        FE_CHECK(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
-        FE_CHECK(this->capacity() < (this->m_length + input_count_p), "${%s0}: cannot append another fstring that exceeds the capacity of a caller fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(input_count_p == 0, "${%s0}: ${%s1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
+        FE_SUSPECT(this->capacity() < (this->m_length + input_count_p), "${%s0}: cannot append another fstring that exceeds the capacity of a caller fstring.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 
         Traits::append(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, string_p, input_count_p);
         this->m_length += input_count_p;
@@ -407,10 +407,10 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& append(const_iterator input_begin_p, const_iterator input_end_p) noexcept
     {
-        FE_CHECK(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
-        FE_CHECK(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));
-        FE_CHECK(input_begin_p >= input_end_p, "${%s@0}: input_position_p must not be greater than input_count_p.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
-        FE_CHECK((input_end_p - input_begin_p) + this->m_length >= Capacity, "${%s@0}: input string range length exceeds fixed sized string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
+        FE_SUSPECT(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));
+        FE_SUSPECT(input_begin_p >= input_end_p, "${%s@0}: input_position_p must not be greater than input_count_p.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+        FE_SUSPECT((input_end_p - input_begin_p) + this->m_length >= Capacity, "${%s@0}: input string range length exceeds fixed sized string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
         
         Traits::append(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, input_begin_p, input_end_p);
         this->m_length += input_end_p - input_begin_p;
@@ -419,8 +419,8 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& append(std::initializer_list<const CharT>&& initializer_list_p) noexcept
     {
-        FE_CHECK(initializer_list_p.size() == 0, "${%s@0}: The initializer_list_p is empty.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
-        FE_CHECK(this->max_length() < initializer_list_p.size() + this->m_length, "${%s@0}: initializer_list_p is too large to take the contents.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(initializer_list_p.size() == 0, "${%s@0}: The initializer_list_p is empty.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+        FE_SUSPECT(this->max_length() < initializer_list_p.size() + this->m_length, "${%s@0}: initializer_list_p is too large to take the contents.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
         
         algorithm::string::concatenate(this->data() + this->m_length, this->max_length(), std::move(initializer_list_p));
         this->m_length += initializer_list_p.size();
@@ -460,7 +460,7 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& operator+=(const value_type* const string_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
         length_type l_input_string_length = algorithm::string::length<CharT>(string_p);
         algorithm::string::concatenate<CharT>(this->m_fstring, Capacity, string_p, l_input_string_length);
@@ -499,7 +499,7 @@ public:
 
     _NODISCARD_ _CONSTEXPR20_ boolean starts_with(const value_type* const string_p) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@0} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@0} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
         length_t l_substring_length = algorithm::string::length(string_p);
         return algorithm::string::compare_ranged(this->m_fstring, algorithm::string::range{0, l_substring_length},
@@ -529,7 +529,7 @@ public:
 
     _NODISCARD_ _CONSTEXPR20_ boolean ends_with(const value_type* const string_p) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         length_t l_substring_length = algorithm::string::length(string_p);
         return algorithm::string::compare_ranged(this->m_fstring, algorithm::string::range{this->m_length - l_substring_length, this->m_length},
             string_p, algorithm::string::range{ 0, l_substring_length }
@@ -554,22 +554,22 @@ public:
 
     _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean contains(const CharT* const string_p) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         return (algorithm::string::find_the_first(this->m_fstring, string_p)).has_value();
     }
 
 
     _CONSTEXPR20_ fixed_sized_string& replace(const size_type position_p, const size_type count_to_replace_p, const fixed_sized_string& other_p) noexcept
     {
-        FE_CHECK(((this->m_length + other_p.m_length) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
-        FE_CHECK(position_p > this->m_length, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->m_length));
+        FE_SUSPECT(((this->m_length + other_p.m_length) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->m_length));
 
         if (other_p.m_length == 0)
         {
             return *this;
         }
 
-        FE_CHECK(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
+        FE_SUSPECT(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
         
         Traits::replace(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_to_replace_p, other_p.m_fstring, other_p.m_length);
         this->m_length = (this->m_length + other_p.m_length) - count_to_replace_p;
@@ -578,17 +578,17 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& replace(const size_type position_p, const size_type count_to_replace_p, const fixed_sized_string& other_p, const size_type other_position_p, const size_type other_count_p) noexcept
     {
-        FE_CHECK(((this->m_length + other_count_p) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
-        FE_CHECK(position_p > this->m_length, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->m_length));
-        FE_CHECK(other_position_p > other_p.m_length, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(other_position_p), TO_STRING(other_p.m_length));
+        FE_SUSPECT(((this->m_length + other_count_p) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->m_length));
+        FE_SUSPECT(other_position_p > other_p.m_length, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(other_position_p), TO_STRING(other_p.m_length));
 
         if (other_p.m_length == 0)
         {
             return *this;
         }
 
-        FE_CHECK(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
-        FE_CHECK(other_count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(other_count_p));
+        FE_SUSPECT(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
+        FE_SUSPECT(other_count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(other_count_p));
 
         Traits::replace(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_to_replace_p, other_p.m_fstring + other_position_p, other_count_p);
         this->m_length = (this->m_length + other_p.m_length) - count_to_replace_p;
@@ -597,10 +597,10 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& replace(const size_type position_p, const size_type count_to_replace_p, const value_type* const string_p, const size_type input_count_p) noexcept
     {
-        FE_CHECK(input_count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
-        FE_CHECK(((this->m_length + input_count_p) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
-        FE_CHECK(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(input_count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
+        FE_SUSPECT(((this->m_length + input_count_p) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         
         Traits::replace(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_to_replace_p, string_p, input_count_p);
         this->m_length = (this->m_length + input_count_p) - count_to_replace_p;
@@ -609,11 +609,11 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& replace(const size_type position_p, const size_type count_to_replace_p, const value_type* const string_p) noexcept
     {
-        FE_CHECK(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         
         size_type l_input_length = algorithm::string::length(string_p);
-        FE_CHECK(((this->m_length + l_input_length) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(((this->m_length + l_input_length) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
         Traits::replace(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_to_replace_p, string_p, l_input_length);
         this->m_length = (this->m_length + l_input_length) - count_to_replace_p;
@@ -622,9 +622,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& replace(const size_type position_p, const size_type count_to_replace_p, const value_type value_p, const size_type input_count_p) noexcept
     {
-        FE_CHECK(input_count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
-        FE_CHECK(((this->m_length + input_count_p) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
-        FE_CHECK(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
+        FE_SUSPECT(input_count_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_count_p));
+        FE_SUSPECT(((this->m_length + input_count_p) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
         
         Traits::replace(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_to_replace_p, value_p, input_count_p);
         this->m_length = (this->m_length + input_count_p) - count_to_replace_p;
@@ -635,9 +635,9 @@ public:
     {
         size_type l_input_size = initializer_list_p.size();
 
-        FE_CHECK(((this->m_length + l_input_size) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
-        FE_CHECK(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
-        FE_CHECK(l_input_size == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(initializer_list_p.size()));
+        FE_SUSPECT(((this->m_length + l_input_size) - count_to_replace_p) > this->max_length(), "${%s@0}: failed to replace.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+        FE_SUSPECT(count_to_replace_p == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(count_to_replace_p));
+        FE_SUSPECT(l_input_size == 0, "${%s@0}: ${%s@1} is zero.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(initializer_list_p.size()));
 
         Traits::replace(string_info<CharT>{this->m_fstring, this->m_length, Capacity}, position_p, count_to_replace_p, std::move(initializer_list_p));
         this->m_length = (this->m_length + l_input_size) - count_to_replace_p;
@@ -646,9 +646,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& replace(const size_type first_index_p, const size_type last_index_p, const_iterator input_first_p, const_iterator input_last_p) noexcept
     {
-        FE_CHECK(input_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_first_p));
-        FE_CHECK(input_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_last_p));
-        FE_CHECK(input_first_p > input_last_p, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_first_p), TO_STRING(input_last_p));
+        FE_SUSPECT(input_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_first_p));
+        FE_SUSPECT(input_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_last_p));
+        FE_SUSPECT(input_first_p > input_last_p, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_first_p), TO_STRING(input_last_p));
        
         size_type l_input_size = input_last_p - input_first_p;
         size_type l_this_count_to_replace = last_index_p - first_index_p;
@@ -661,9 +661,9 @@ public:
 
     _CONSTEXPR20_ fixed_sized_string& replace_with_range(const size_type position_p, const size_type count_to_replace_p, const_iterator input_iterator_begin_p, algorithm::string::range input_string_range_p) noexcept
     {
-        FE_CHECK(input_iterator_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(cstr_ptrc_p));
-        FE_CHECK(input_string_range_p._begin >= input_string_range_p._end, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_string_range_p._begin), TO_STRING(input_string_range_p._end));
-        FE_CHECK(position_p > this->max_length(), "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(position_p), TO_STRING(this->max_length()));
+        FE_SUSPECT(input_iterator_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(cstr_ptrc_p));
+        FE_SUSPECT(input_string_range_p._begin >= input_string_range_p._end, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_string_range_p._begin), TO_STRING(input_string_range_p._end));
+        FE_SUSPECT(position_p > this->max_length(), "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(position_p), TO_STRING(this->max_length()));
 
         return this->replace(position_p, count_to_replace_p, input_iterator_begin_p + input_string_range_p._begin, input_iterator_begin_p + input_string_range_p._end);
     }
@@ -675,17 +675,17 @@ public:
             return *this;
         }
 
-        FE_CHECK(input_string_range_p._begin >= input_string_range_p._end, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_string_range_p._begin), TO_STRING(input_string_range_p._end));
-        FE_CHECK(position_p > this->max_length(), "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(position_p), TO_STRING(this->max_length()));
+        FE_SUSPECT(input_string_range_p._begin >= input_string_range_p._end, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_string_range_p._begin), TO_STRING(input_string_range_p._end));
+        FE_SUSPECT(position_p > this->max_length(), "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(position_p), TO_STRING(this->max_length()));
 
         return this->replace(position_p, count_to_replace_p, other_p, input_string_range_p._begin, input_string_range_p._end - input_string_range_p._begin);
     }
 
     _CONSTEXPR20_ _FORCE_INLINE_ fixed_sized_string& replace_with_range(const size_type position_p, const size_type count_to_replace_p, const value_type* const string_p, const algorithm::string::range input_string_range_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-        FE_CHECK(input_string_range_p._begin >= input_string_range_p._end, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_string_range_p._begin), TO_STRING(input_string_range_p._end));
-        FE_CHECK(position_p > this->max_length(), "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(position_p), TO_STRING(this->max_length()));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(input_string_range_p._begin >= input_string_range_p._end, "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(input_string_range_p._begin), TO_STRING(input_string_range_p._end));
+        FE_SUSPECT(position_p > this->max_length(), "${%s@0}: ${%s@1} must not be greater than ${%s@2}.", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(position_p), TO_STRING(this->max_length()));
 
         return this->replace(position_p, count_to_replace_p, string_p + input_string_range_p._begin, input_string_range_p._end - input_string_range_p._begin);
     }
@@ -700,9 +700,9 @@ public:
 
     _CONSTEXPR20_ _FORCE_INLINE_ void copy(value_type* const dest_out_buffer_p, _MAYBE_UNUSED_ const size_type buffer_capacity_p, const size_type count_p, const size_type position_p = 0) const noexcept
     {
-        FE_CHECK(dest_out_buffer_p == nullptr, "${%s@0}: dest_out_buffer_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-        FE_CHECK(count_p > this->m_length, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(count_p), TO_STRING(this->m_length));
-        FE_CHECK(count_p > buffer_capacity_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(count_p), TO_STRING(buffer_capacity_p));
+        FE_SUSPECT(dest_out_buffer_p == nullptr, "${%s@0}: dest_out_buffer_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+        FE_SUSPECT(count_p > this->m_length, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(count_p), TO_STRING(this->m_length));
+        FE_SUSPECT(count_p > buffer_capacity_p, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(count_p), TO_STRING(buffer_capacity_p));
 
         algorithm::string::copy(dest_out_buffer_p, this->m_fstring + position_p, count_p);
     }
@@ -715,15 +715,15 @@ public:
             return std::nullopt;
         }
 
-        FE_CHECK(position_p > this->m_length, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->m_length));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(position_p), TO_STRING(this->m_length));
 
         return std::move(this->find(other_p.m_fstring, position_p));
     }
 
     _NODISCARD_ _CONSTEXPR20_ std::optional<algorithm::string::range> find(const value_type* const string_p, const size_type position_p = 0) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-        FE_CHECK(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
         
         std::optional<algorithm::string::range> l_result = algorithm::string::find_the_first(this->m_fstring + position_p, string_p);
         l_result->_begin += position_p;
@@ -733,7 +733,7 @@ public:
 
     _NODISCARD_ _CONSTEXPR20_ std::optional<algorithm::string::range> find(const value_type value_p, const size_type position_p = 0) const noexcept
     {
-        FE_CHECK(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
         
         std::optional<algorithm::string::range> l_result = algorithm::string::find_the_first(this->m_fstring + position_p, value_p);
         
@@ -754,29 +754,29 @@ public:
             return std::nullopt;
         }
 
-        FE_CHECK(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
 
         return std::move(this->rfind(other_p.m_fstring, position_p));
     }
 
     _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::range> rfind(const value_type* const string_p, const size_type position_p = 0) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
-        FE_CHECK(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: string_p is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
 
         return std::move(algorithm::string::find_the_last_within_range(this->m_fstring, algorithm::string::range{position_p, this->m_length}, string_p));
     }
 
     _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::range> rfind(const value_type value_p, const size_type position_p = 0) const noexcept
     {
-        FE_CHECK(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
 
         return std::move(algorithm::string::find_the_last_within_range(this->m_fstring, algorithm::string::range{position_p, this->m_length}, value_p));
     }
 
     _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<algorithm::string::count<CharT>> count_chars(const value_type value_p, const size_type position_p = 0) const noexcept
     {
-        FE_CHECK(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
+        FE_SUSPECT(position_p > this->m_length, "${%s@0}: position_p cannot be greater than ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(this->m_length));
 
         return std::move(algorithm::string::count_chars(this->m_fstring + position_p, value_p));
     }
@@ -793,7 +793,7 @@ public:
 
     _CONSTEXPR20_ _FORCE_INLINE_ boolean operator==(const value_type* const string_p) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         return algorithm::string::compare(this->m_fstring, string_p);
     }
 
@@ -804,19 +804,19 @@ public:
 
     _CONSTEXPR20_ _FORCE_INLINE_ boolean operator!=(const value_type* const string_p) const noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         return !algorithm::string::compare(this->m_fstring, string_p);
     }
 
     _CONSTEXPR20_ _FORCE_INLINE_ friend boolean operator==(const value_type* const string_p, const fixed_sized_string& fstring_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         return algorithm::string::compare(string_p, fstring_p.m_fstring);
     }
 
     _CONSTEXPR20_ _FORCE_INLINE_ friend boolean operator!=(const value_type* const string_p, const fixed_sized_string& fstring_p) noexcept
     {
-        FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+        FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
         return !algorithm::string::compare(string_p, fstring_p.m_fstring);
     }
 };

@@ -18,8 +18,8 @@ template<typename CharT, ADDRESS DestAddressAlignment = ADDRESS::_NOT_ALIGNED, A
 _FORCE_INLINE_ void copy(CharT* const destination_out_p, const CharT* const source_p, capacity_t count_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(destination_out_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(destination_out_p), nullptr);
-    FE_CHECK(source_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_p), nullptr);
+    FE_SUSPECT(destination_out_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(destination_out_p), nullptr);
+    FE_SUSPECT(source_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_p), nullptr);
 
     if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED && SourceAddressAlignment == ADDRESS::_ALIGNED)
     {
@@ -55,7 +55,7 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ count<CharT> count_chars(const CharT* string_p, const CharT target_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p), nullptr);
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p), nullptr);
 
     var::count_t l_match_count = 0;
 
@@ -91,7 +91,7 @@ template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void capitalize(CharT* in_out_string_buffer_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(in_out_string_buffer_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_buffer_p), nullptr);
+    FE_SUSPECT(in_out_string_buffer_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_buffer_p), nullptr);
 
     while (*in_out_string_buffer_p != _NULL_)
     {
@@ -121,7 +121,7 @@ template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void to_lowercase(CharT* in_out_string_buffer_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(in_out_string_buffer_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_buffer_p), nullptr);
+    FE_SUSPECT(in_out_string_buffer_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_buffer_p), nullptr);
 
     while (*in_out_string_buffer_p != _NULL_)
     {
@@ -151,7 +151,7 @@ template<typename CharT>
 _CONSTEXPR20_ void capitalize_every_first_letter_of_words(CharT* in_out_string_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(in_out_string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_p), nullptr);
+    FE_SUSPECT(in_out_string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_p), nullptr);
 
     boolean l_is_front_not_spaced = (*in_out_string_p) != ' ';
     boolean l_is_front_not_underscored = (*in_out_string_p) != '_';
@@ -180,7 +180,7 @@ template <typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ uint64 length(const CharT* const string_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p), nullptr);
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p), nullptr);
 
     const CharT* l_iterator_pointer = string_p;
 
@@ -201,9 +201,9 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ count<CharT> count_chars_within_range(const CharT* string_p, const range string_range_p, const CharT target_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p), nullptr);
-    FE_CHECK(string_range_p._begin > string_range_p._end, "${%s@0}: the ${%s@1} cannot be greater than ${%s@2}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end), &string_range_p._begin, &string_range_p._end);
-    FE_CHECK(length(string_p) > string_range_p._end, "${%s@0}: the ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p), nullptr);
+    FE_SUSPECT(string_range_p._begin > string_range_p._end, "${%s@0}: the ${%s@1} cannot be greater than ${%s@2}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end), &string_range_p._begin, &string_range_p._end);
+    FE_SUSPECT(length(string_p) > string_range_p._end, "${%s@0}: the ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
 
     var::count_t l_match_count = 0;
     string_p += string_range_p._begin;
@@ -232,8 +232,8 @@ template <typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean compare(const CharT* lstr_p, const CharT* rstr_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_p), nullptr);
-    FE_CHECK(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_p), nullptr);
+    FE_SUSPECT(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_p), nullptr);
+    FE_SUSPECT(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_p), nullptr);
 
     while ((*lstr_p != _NULL_) && (*lstr_p == *rstr_p))
     {
@@ -257,8 +257,8 @@ struct equal_to
 
     _NODISCARD constexpr boolean operator()(const CharT* const left_p, const CharT* const right_p) const noexcept
     {
-        FE_CHECK(left_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(left_p), nullptr);
-        FE_CHECK(right_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(right_p), nullptr);
+        FE_SUSPECT(left_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(left_p), nullptr);
+        FE_SUSPECT(right_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(right_p), nullptr);
 
         return compare(left_p, right_p);
     }
@@ -269,8 +269,8 @@ template <typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean compare_ranged(const CharT* const lstr_p, const range lstr_range_p, const CharT* const rstr_p, const range rstr_range_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_ptr_p), nullptr);
-    FE_CHECK(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_ptr_p), nullptr);
+    FE_SUSPECT(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_ptr_p), nullptr);
+    FE_SUSPECT(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_ptr_p), nullptr);
 
     length_t l_lstr_length = lstr_range_p._end - lstr_range_p._begin;
     length_t l_rstr_length = rstr_range_p._end - rstr_range_p._begin;
@@ -305,8 +305,8 @@ template <typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean insensitive_comparison(const CharT* const lstr_p, const CharT* const rstr_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_ptr_p), nullptr);
-    FE_CHECK(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_ptr_p), nullptr);
+    FE_SUSPECT(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_ptr_p), nullptr);
+    FE_SUSPECT(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_ptr_p), nullptr);
 
     const CharT* l_left_string_pointer = lstr_p;
     const CharT* l_right_string_pointer = rstr_p;
@@ -330,8 +330,8 @@ template <typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ boolean insensitive_ranged_comparison(const CharT* const lstr_p, const range lstr_range_p, const CharT* const rstr_p, const range rstr_range_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_ptr_p), nullptr);
-    FE_CHECK(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_ptr_p), nullptr);
+    FE_SUSPECT(lstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(lstr_ptr_p), nullptr);
+    FE_SUSPECT(rstr_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(rstr_ptr_p), nullptr);
 
     length_t l_left_string_length = lstr_range_p._end - lstr_range_p._begin;
     length_t l_right_string_length = rstr_range_p._end - rstr_range_p._begin;
@@ -366,10 +366,10 @@ template <typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void concatenate(CharT* const destination_out_p, _MAYBE_UNUSED_ count_t string_buffer_size_p, const CharT* const source_p, count_t source_total_count_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(destination_out_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(destination_out_p), nullptr);
-    FE_CHECK(source_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_p), nullptr);
+    FE_SUSPECT(destination_out_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(destination_out_p), nullptr);
+    FE_SUSPECT(source_p == nullptr, "${%s@0}: ${%s@1} is ${%p@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_p), nullptr);
 
-    FE_CHECK(string_buffer_size_p < source_total_count_p, "${%s@0}: the ${%s@2} cannot be greater than ${%s@1}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_buffer_size_p), TO_STRING(source_total_count_p), &string_buffer_size_p, &source_total_count_p);
+    FE_SUSPECT(string_buffer_size_p < source_total_count_p, "${%s@0}: the ${%s@2} cannot be greater than ${%s@1}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_buffer_size_p), TO_STRING(source_total_count_p), &string_buffer_size_p, &source_total_count_p);
 
     length_t l_destination_string_length = algorithm::string::length<CharT>(destination_out_p);
  
@@ -401,11 +401,11 @@ template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void concatenate(CharT* const out_string_buffer_p, _MAYBE_UNUSED_ size_t string_buffer_size_p, ::std::initializer_list<const CharT>&& chars_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(out_string_buffer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_string_buffer_p));
+    FE_SUSPECT(out_string_buffer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_string_buffer_p));
 
     var::length_t l_string_buffer_length = algorithm::string::length(out_string_buffer_p);
 
-    FE_CHECK(string_buffer_size_p <= chars_p.size() + l_string_buffer_length, "${%s@0}: The total input string length exceeds the destination string buffer capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+    FE_SUSPECT(string_buffer_size_p <= chars_p.size() + l_string_buffer_length, "${%s@0}: The total input string length exceeds the destination string buffer capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 
     ::memcpy(out_string_buffer_p + l_string_buffer_length, chars_p.begin(), sizeof(CharT) * chars_p.size());
 }
@@ -415,7 +415,7 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ std::optional<range> find_the_first(const CharT* const string_p, const CharT target_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
     const CharT* l_string_pointer = string_p;
     while (*l_string_pointer != _NULL_)
@@ -436,7 +436,7 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_last(const CharT* const string_p, const CharT target_char_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
     FE::const_reverse_iterator<FE::contiguous_iterator<const CharT>> l_string_rbegin = string_p + (length(string_p)-1);
     FE::const_reverse_iterator<FE::contiguous_iterator<const CharT>> l_string_rend = string_p - 1;
@@ -461,9 +461,9 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_first_within_range(const CharT* const string_p, const range string_range_p, const CharT target_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-    FE_CHECK(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
-    FE_CHECK(length(string_p) < string_range_p._end, "${%s@0}: ${%s@2} cannot be greater than the length of ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
+    FE_SUSPECT(length(string_p) < string_range_p._end, "${%s@0}: ${%s@2} cannot be greater than the length of ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
 
     const CharT* l_string_pointer = string_p + string_range_p._begin;
     while (*l_string_pointer != _NULL_)
@@ -484,9 +484,9 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_last_within_range(const CharT* const string_p, const range string_range_p, const CharT target_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-    FE_CHECK(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
-    FE_CHECK(length(string_p) < string_range_p._end, "${%s@0}: ${%s@2} cannot be greater than the length of ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
+    FE_SUSPECT(length(string_p) < string_range_p._end, "${%s@0}: ${%s@2} cannot be greater than the length of ${%s@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
 
     FE::const_reverse_iterator<FE::contiguous_iterator<const CharT>> l_string_rbegin = string_p + (string_range_p._end - 1);
     FE::const_reverse_iterator<FE::contiguous_iterator<const CharT>> l_string_rend = string_p + (string_range_p._begin - 1);
@@ -511,15 +511,15 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_first(const CharT* const string_p, const CharT* const target_substring_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-    FE_CHECK(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
 
     const CharT* l_string_pointer = string_p;
     const CharT* l_target_substring_pointer = target_substring_p;
     length_t l_string_length = length(string_p);
     length_t l_target_substring_length = length(target_substring_p);
  
-    FE_CHECK(l_target_substring_length > l_string_length, "${%s@0}: the ${%s@1} is greater than to the string length of ${%s@2}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(l_target_substring_length), TO_STRING(l_string_length), &l_target_substring_length, &l_string_length);
+    FE_SUSPECT(l_target_substring_length > l_string_length, "${%s@0}: the ${%s@1} is greater than to the string length of ${%s@2}. ${%s@1} was ${%lu@3}, and ${%s@2} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(l_target_substring_length), TO_STRING(l_string_length), &l_target_substring_length, &l_string_length);
 
     var::index_t l_string_idx = 0;
     while (*l_target_substring_pointer != _NULL_ && l_string_idx < l_string_length)
@@ -553,8 +553,8 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_last(const CharT* const string_p, const CharT* const target_substring_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-    FE_CHECK(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
 
     length_t l_string_length = length(string_p);
     length_t l_target_substring_length = length(target_substring_p);
@@ -598,18 +598,18 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_first_within_range(const CharT* const string_p, const range string_range_p, const CharT* const target_substring_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
-    FE_CHECK(length(string_p) < string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than the length of ${%s@2}.", TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
+    FE_SUSPECT(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
+    FE_SUSPECT(length(string_p) < string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than the length of ${%s@2}.", TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
 
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-    FE_CHECK(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
 
     const CharT* l_string_pointer = string_p + string_range_p._begin;
     const CharT* l_target_substring_pointer = target_substring_p;
     length_t l_string_length = string_range_p._end - string_range_p._begin;
     length_t l_target_substring_length = length(target_substring_p);
 
-    FE_CHECK(l_target_substring_length > l_string_length, "${%s@0}: the ${%s@1} is greater than or equal to the string length of ${%s@2}", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(l_target_substring_length), TO_STRING(l_string_length));
+    FE_SUSPECT(l_target_substring_length > l_string_length, "${%s@0}: the ${%s@1} is greater than or equal to the string length of ${%s@2}", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(l_target_substring_length), TO_STRING(l_string_length));
 
     var::index_t l_string_idx = 0;
     while (*l_target_substring_pointer != _NULL_ && l_string_idx < l_string_length)
@@ -643,11 +643,11 @@ template<typename CharT>
 _NODISCARD_ _CONSTEXPR20_ std::optional<range> find_the_last_within_range(const CharT* const string_p, const range string_range_p, const CharT* const target_substring_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
-    FE_CHECK(length(string_p) < string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than the length of ${%s@2}.", TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
+    FE_SUSPECT(string_range_p._begin > string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than ${%s@2}.", TO_STRING(string_range_p._begin), TO_STRING(string_range_p._end));
+    FE_SUSPECT(length(string_p) < string_range_p._end, "${%s@0}: ${%s@1} cannot be greater than the length of ${%s@2}.", TO_STRING(length(string_p)), TO_STRING(string_range_p._end));
 
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
-    FE_CHECK(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(target_substring_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(target_substring_p));
 
 
     length_t l_string_length = string_range_p._end - string_range_p._begin;
@@ -704,7 +704,7 @@ template <typename CharT, typename IntT>
 _NODISCARD_ _CONSTEXPR20_ IntT string_to_integer(const CharT* string_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
     var::int16 l_sign = 1;
     if (*string_p == static_cast<const CharT>('-')) { l_sign = -1; }
@@ -732,7 +732,7 @@ template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void invert(CharT* const in_out_string_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(in_out_string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_p));
+    FE_SUSPECT(in_out_string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_string_p));
 
     var::index_t l_start = 0;
     var::index_t l_end = length(in_out_string_p);
@@ -759,7 +759,7 @@ template<typename CharT>
 _CONSTEXPR17_ uint64 hash_string(const CharT* string_p) noexcept
 {
     FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
-    FE_CHECK(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
+    FE_SUSPECT(string_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(string_p));
 
     constexpr uint64 l_magical_prime_number = 257;
 

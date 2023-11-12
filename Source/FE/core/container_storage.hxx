@@ -78,7 +78,7 @@ public:
 
 	_FORCE_INLINE_ reference operator[](size_type index_p) const noexcept
 	{
-		FE_CHECK(index_p >= this->m_smart_array.capacity(), "${%s@0}: ${%s@1} exceeds the array capacity. ${%s@1} was ${%lu@2}, and ${%s@3} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(index_p), &index_p, TO_STRING(this->m_smart_array.capacity()), &FE::buffer<size_type>::set_and_get(this->m_smart_array.capacity()));
+		FE_SUSPECT(index_p >= this->m_smart_array.capacity(), "${%s@0}: ${%s@1} exceeds the array capacity. ${%s@1} was ${%lu@2}, and ${%s@3} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(index_p), &index_p, TO_STRING(this->m_smart_array.capacity()), &FE::buffer<size_type>::set_and_get(this->m_smart_array.capacity()));
 
 		return this->m_smart_array[index_p];
 	}
@@ -151,8 +151,8 @@ class container_storage<T, Allocator, TYPE_TRIVIALITY::_NOT_TRIVIAL> final
 public:
 	_FORCE_INLINE_ reference operator[](size_type index_p) const noexcept
 	{
-		FE_CHECK(index_p >= this->m_smart_array.capacity(), "${%s@0}: ${%s@1} exceeds the array capacity. ${%s@1} was ${%lu@2}, and ${%s@3} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(index_p), &index_p, TO_STRING(this->m_smart_array.capacity()), &FE::buffer<size_type>::set_and_get(this->m_smart_array.capacity()));
-		FE_CHECK(this->m_status_table[index_p] == OBJECT_STATUS::_DESTRUCTED, "${%s@0}: FE::array[${%s@1}] was not initialized.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ACCESS_VIOLATION), TO_STRING(index_p));
+		FE_SUSPECT(index_p >= this->m_smart_array.capacity(), "${%s@0}: ${%s@1} exceeds the array capacity. ${%s@1} was ${%lu@2}, and ${%s@3} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(index_p), &index_p, TO_STRING(this->m_smart_array.capacity()), &FE::buffer<size_type>::set_and_get(this->m_smart_array.capacity()));
+		FE_SUSPECT(this->m_status_table[index_p] == OBJECT_STATUS::_DESTRUCTED, "${%s@0}: FE::array[${%s@1}] was not initialized.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ACCESS_VIOLATION), TO_STRING(index_p));
 
 		return this->m_smart_array[index_p];
 	}
@@ -181,7 +181,7 @@ public:
 
 	_FORCE_INLINE_ void construct_at(size_type index_p) noexcept
 	{
-		FE_CHECK(index_p >= this->m_smart_array.capacity(), "${%s@0}: ${%s@1} exceeds the array capacity. ${%s@1} was ${%lu@2}, and ${%s@3} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(index_p), &index_p, TO_STRING(this->m_smart_array.capacity()), &FE::buffer<size_type>::set_and_get(this->m_smart_array.capacity()));
+		FE_SUSPECT(index_p >= this->m_smart_array.capacity(), "${%s@0}: ${%s@1} exceeds the array capacity. ${%s@1} was ${%lu@2}, and ${%s@3} was ${%lu@4}", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY), TO_STRING(index_p), &index_p, TO_STRING(this->m_smart_array.capacity()), &FE::buffer<size_type>::set_and_get(this->m_smart_array.capacity()));
 
 		this->m_array_size++;
 	}

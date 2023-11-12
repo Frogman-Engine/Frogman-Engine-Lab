@@ -43,7 +43,7 @@
 #endif
 
 
-#ifdef _ENABLE_CHECK_
+#ifdef _ENABLE_SUSPECT_
 // ${%d at n} - int32
 // ${%u at n} - uint32
 // ${%ld at n} - int64
@@ -53,8 +53,8 @@
 // ${%b at n} - bool
 // ${%c at n} - char
 // ${%s at n} - string
-// ${%p at n} - hexadecimal 64bit pointer  |  FE_CHECK() invokes abort() if the expression is true.
-#define FE_CHECK(expression, ...) \
+// ${%p at n} - hexadecimal 64bit pointer  |  FE_SUSPECT() invokes abort() if the expression is true.
+#define FE_SUSPECT(expression, ...) \
 if(expression) _UNLIKELY_ \
 { \
 	const char* __FE_ASSERT_SOURCE_DIR__ = __FILE__; \
@@ -64,7 +64,7 @@ if(expression) _UNLIKELY_ \
 	assert(!(expression)); \
 }
 #else
-#define FE_CHECK(expression, ...)
+#define FE_SUSPECT(expression, ...)
 #endif
 
 
@@ -95,7 +95,7 @@ if(expression) _UNLIKELY_ \
 
 #define TO_STRING(p) #p
 
-#define _NODEFAULT_ default: _UNLIKELY_ FE_CHECK(true, "Reached Default Case: This switch has no default."); break;
+#define _NODEFAULT_ default: _UNLIKELY_ FE_SUSPECT(true, "Reached Default Case: This switch has no default."); break;
 
 
 
