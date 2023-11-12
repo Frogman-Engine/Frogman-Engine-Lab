@@ -1,7 +1,7 @@
 ﻿#include <gtest/gtest.h>
 #include <FE/core/algorithm/math.h>
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
-#include <FE/core/algorithm/private/math.cpp> /* I have no idea why Visual Studio 2022 cannot recognize function symbols of math.cpp even the .cpp file is within the same project. */
+#include <FE/core/algorithm/private/math.cpp> /* I have no idea why Visual Studio 2022 cannot recognize function symbols of math.cpp even the .cpp file is a part of the same project. */
 /*
 Build started...
 1>------ Build started: Project: FE_TEST, Configuration: Debug x64 ------
@@ -19,7 +19,7 @@ using namespace FE;
 using namespace algorithm;
 
 
-TEST(math, prime)
+TEST(math, to_lower_prime)
 {
 	var::uint64 l_num = 4;
 
@@ -28,7 +28,7 @@ TEST(math, prime)
 
 	if (l_result == false)
 	{
-		l_num = math::to_prime(l_num);
+		l_num = math::to_lower_prime(l_num);
 	}
 
 	l_result = math::is_prime(l_num);

@@ -2,6 +2,7 @@
 #define _FE_CORE_STACK_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <FE/core/algorithm/utility.hxx>
 #include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/iterator.hxx>
 #include <FE/core/memory.hxx>
@@ -41,8 +42,8 @@ public:
 template<class T, size_t Capacity, class Traits = FE::memory_traits<T>>
 class fstack final
 {
-	FE_STATIC_ASSERT((std::is_same<T, Traits::value_type>::value == false), "Static Assertion Failed: The template argument T and Traits' value_type have be the same type.");
-	FE_STATIC_ASSERT(std::is_class<Traits>::value == false, "Static Assertion Failed: The template argument Traits is not a class or a struct type.");
+	FE_STATIC_CHECK((std::is_same<T, Traits::value_type>::value == false), "Static Assertion Failed: The template argument T and Traits' value_type have be the same type.");
+	FE_STATIC_CHECK(std::is_class<Traits>::value == false, "Static Assertion Failed: The template argument Traits is not a class or a struct type.");
 
 public:
 	using value_type = T;
@@ -67,8 +68,8 @@ public:
 
 	_CONSTEXPR20_ fstack(std::initializer_list<value_type>&& initializer_list_p) noexcept : m_memory(), m_top_ptr(reinterpret_cast<pointer>(m_memory) + initializer_list_p.size()), m_absolute_begin_pointer(reinterpret_cast<pointer>(m_memory))
 	{
-		FE_ASSERT(initializer_list_p.size() > Capacity, "ERROR!: The length of std::initializer_list exceeds the Capacity");
-		FE_ASSERT(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+		FE_CHECK(initializer_list_p.size() > Capacity, "ERROR!: The length of std::initializer_list exceeds the Capacity");
+		FE_CHECK(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
 
 		Traits::move_construct(this->m_absolute_begin_pointer, const_cast<value_type*>(initializer_list_p.begin()), initializer_list_p.size());
 	}
@@ -76,11 +77,11 @@ public:
 	template<class InputIterator>
 	_CONSTEXPR20_ fstack(InputIterator first_p, InputIterator last_p) noexcept : m_memory(), m_top_ptr(reinterpret_cast<pointer>(m_memory) + (last_p - first_p)), m_absolute_begin_pointer(reinterpret_cast<pointer>(m_memory))
 	{
-		FE_STATIC_ASSERT(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
-		FE_STATIC_ASSERT((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fstack's value_type.");
+		FE_STATIC_CHECK(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
+		FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fstack's value_type.");
 
-		FE_ASSERT(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than the iterator ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
-		FE_ASSERT((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fstack capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
+		FE_CHECK(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than the iterator ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
+		FE_CHECK((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fstack capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));
 
 		Traits::copy_construct(InputIterator{ this->m_absolute_begin_pointer }, first_p, last_p - first_p);
 	}
@@ -112,8 +113,8 @@ public:
 
 	_CONSTEXPR20_ fstack& operator=(std::initializer_list<value_type> initializer_list_p) noexcept
 	{
-		FE_ASSERT(initializer_list_p.size() > Capacity, "ERROR!: The length of std::initializer_list exceeds the Capacity");
-		FE_ASSERT(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
+		FE_CHECK(initializer_list_p.size() > Capacity, "ERROR!: The length of std::initializer_list exceeds the Capacity");
+		FE_CHECK(initializer_list_p.size() == 0, "${%s@0}!: Cannot assign an empty initializer_list", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE));
 
 		if (this->is_empty())
 		{
@@ -176,7 +177,7 @@ public:
 
 	_FORCE_INLINE_ void push(value_type value_p) noexcept
 	{
-		FE_ASSERT(this->m_top_ptr >= this->m_absolute_begin_pointer + Capacity, "${%s@0}: The fstack top exceeded the index boundary", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+		FE_CHECK(this->m_top_ptr >= this->m_absolute_begin_pointer + Capacity, "${%s@0}: The fstack top exceeded the index boundary", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 
 		Traits::construct(*this->m_top_ptr, std::move(value_p));
 		++this->m_top_ptr;
@@ -184,7 +185,7 @@ public:
 
 	_CONSTEXPR20_ value_type pop() noexcept
 	{
-		FE_ASSERT(this->is_empty() == true, "${%s@0}: The fstack top index reached zero. The index value_p must be greater than zero", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
+		FE_CHECK(this->is_empty() == true, "${%s@0}: The fstack top index reached zero. The index value_p must be greater than zero", TO_STRING(FE::MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));
 
 		--this->m_top_ptr;
 		T l_return_value_buffer = std::move(*this->m_top_ptr);
@@ -267,9 +268,7 @@ public:
 
 	_FORCE_INLINE_ void swap(fstack& in_out_other_p) noexcept
 	{
-		fstack l_temporary = std::move(*this);
-		*this = std::move(in_out_other_p);
-		in_out_other_p = std::move(l_temporary);
+		algorithm::utility::swap(*this, in_out_other_p);
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ boolean operator==(const fstack& other_p) const noexcept

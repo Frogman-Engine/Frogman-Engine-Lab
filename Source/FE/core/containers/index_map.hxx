@@ -18,8 +18,8 @@ BEGIN_NAMESPACE(FE)
 template<typename T, class StatefulAllocator = FE::std_style::scalable_aligned_allocator<T>>
 class index_map final
 {
-	FE_STATIC_ASSERT((std::is_same<T, StatefulAllocator::value_type>::value == false), "Static Assertion Failed: The template argument T and StatefulAllocator's value_type have be the same type.");
-	FE_STATIC_ASSERT(std::is_class<StatefulAllocator>::value == false, "Static Assertion Failed: The template argument StatefulAllocator is not a class or a struct type.");
+	FE_STATIC_CHECK((std::is_same<T, StatefulAllocator::value_type>::value == false), "Static Assertion Failed: The template argument T and StatefulAllocator's value_type have be the same type.");
+	FE_STATIC_CHECK(std::is_class<StatefulAllocator>::value == false, "Static Assertion Failed: The template argument StatefulAllocator is not a class or a struct type.");
 
 public:
 	using key_type = typename std::vector<T, StatefulAllocator>::size_type;
@@ -104,11 +104,11 @@ public:
 
 	_FORCE_INLINE_ mapped_type& find(const key_type key_p) noexcept
 	{
-		FE_ASSERT(key_p >= this->m_map.size(), "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
+		FE_CHECK(key_p >= this->m_map.size(), "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
 #ifdef _DEBUG_
 		for (auto invalid_key : this->m_fragmented_index_stack)
 		{
-			FE_ASSERT(key_p == invalid_key, "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
+			FE_CHECK(key_p == invalid_key, "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
 		}
 #endif
 
@@ -117,11 +117,11 @@ public:
 
 	_FORCE_INLINE_ boolean contains(const key_type key_p, const mapped_type& value_p) const noexcept
 	{
-		FE_ASSERT(key_p >= this->m_map.size(), "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
+		FE_CHECK(key_p >= this->m_map.size(), "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
 #ifdef _DEBUG_
 		for (auto invalid_key : this->m_fragmented_index_stack)
 		{
-			FE_ASSERT(key_p == invalid_key, "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
+			FE_CHECK(key_p == invalid_key, "Assertion Failed. ${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(key_p));
 		}
 #endif
 

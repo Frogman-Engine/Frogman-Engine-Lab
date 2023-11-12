@@ -324,9 +324,9 @@ public:
 		return this->m_ref_ptr != nullptr;
 	}
 
-	_FORCE_INLINE_ T* get() const noexcept
+	_FORCE_INLINE_ T& get() const noexcept
 	{
-		return this->m_ref_ptr;
+		return *(this->m_ref_ptr);
 	}
 };
 
@@ -345,7 +345,7 @@ struct pair
 	_FORCE_INLINE_ ~pair() noexcept = default;
 
 	_FORCE_INLINE_ pair(const pair&) noexcept = default;
-	_FORCE_INLINE_ pair(pair&&) noexcept = default;
+	_FORCE_INLINE_ pair(pair&& rvalue_p) noexcept : _first(std::move(rvalue_p._first)), _second(std::move(rvalue_p._second)) {};
 
 	_FORCE_INLINE_ pair& operator=(const pair& other_p) noexcept
 	{

@@ -141,7 +141,7 @@ public:
 
 	_FORCE_INLINE_ pointer get_unchecked() const noexcept
 	{
-		FE_ASSERT(this->m_exclusive_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->m_exclusive_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->m_exclusive_ptr->get();
 	}
 
@@ -158,14 +158,14 @@ public:
 	_FORCE_INLINE_ element_type& operator*() const noexcept
 	{
 		this->__validate_my_ref();
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is pointing to an invalid object", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr->get()));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is pointing to an invalid object", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr->get()));
 		return *(this->m_exclusive_ptr->get());
 	}
 
 	_FORCE_INLINE_ pointer operator->() const noexcept
 	{
 		this->__validate_my_ref();
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is pointing to an invalid object", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr->get()));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is pointing to an invalid object", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr->get()));
 		return this->m_exclusive_ptr->get();
 	}
 
@@ -438,7 +438,7 @@ public:
 
 	_FORCE_INLINE_ pointer get_unchecked() const noexcept
 	{
-		FE_ASSERT(this->m_exclusive_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->m_exclusive_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->m_exclusive_ptr->get();
 	}
 
@@ -455,22 +455,22 @@ public:
 	_FORCE_INLINE_ element_type& operator*() const noexcept
 	{
 		this->__validate_my_ref();
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return *(this->m_exclusive_ptr->get());
 	}
 
 	_FORCE_INLINE_ pointer operator->() const noexcept
 	{
 		this->__validate_my_ref();
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->m_exclusive_ptr->get();
 	}
 
 	_FORCE_INLINE_ element_type& operator[](index_t index_p) const noexcept
 	{
 		this->__validate_my_ref();
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
-		FE_ASSERT(static_cast<index_t>(this->m_smart_ptr_end - this->m_exclusive_ptr->get()) <= index_p, "${%s@0}: ${%s@1} exceeds the index boundary. ${%s@1} was ${%lu@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p);
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(static_cast<index_t>(this->m_smart_ptr_end - this->m_exclusive_ptr->get()) <= index_p, "${%s@0}: ${%s@1} exceeds the index boundary. ${%s@1} was ${%lu@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p);
 		return this->m_exclusive_ptr->get()[index_p];
 	}
 
@@ -593,17 +593,17 @@ public:
 
 	_FORCE_INLINE_ FE::iterator<FE::contiguous_iterator<element_type>> begin() const noexcept
 	{
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->operator->();
 	}
 	_FORCE_INLINE_ FE::iterator<FE::contiguous_iterator<element_type>> end() const noexcept
 	{
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->m_smart_ptr_end;
 	}
 	_FORCE_INLINE_ FE::const_iterator<FE::contiguous_iterator<element_type>> cbegin() const noexcept
 	{ 
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->operator->(); 
 	}
 	_FORCE_INLINE_ FE::const_iterator<FE::contiguous_iterator<element_type>> cend() const noexcept
@@ -612,22 +612,22 @@ public:
 	}
 	_FORCE_INLINE_ FE::reverse_iterator<FE::contiguous_iterator<element_type>> rbegin() const noexcept
 	{
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->operator->();
 	}
 	_FORCE_INLINE_ FE::reverse_iterator<FE::contiguous_iterator<element_type>> rend() const noexcept
 	{
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->m_smart_ptr_end;
 	}
 	_FORCE_INLINE_ FE::const_reverse_iterator<FE::contiguous_iterator<element_type>> crbegin() const noexcept
 	{
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->operator->();
 	}
 	_FORCE_INLINE_ FE::const_reverse_iterator<FE::contiguous_iterator<element_type>> crend() const noexcept
 	{ 
-		FE_ASSERT(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
+		FE_CHECK(this->is_expired() == true, "${%s@0}: ${%s@1} is invalid", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_exclusive_ptr));
 		return this->m_smart_ptr_end; 
 	}
 

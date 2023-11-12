@@ -34,7 +34,7 @@ FE::thread& FE::thread::operator=(thread&& rvalue_p) noexcept
 
 void FE::thread::fork(FE::task_base* const function_p) noexcept
 {
-	FE_ASSERT(function_p == nullptr, "ERROR: function_p is nullptr.");
+	FE_CHECK(function_p == nullptr, "ERROR: function_p is nullptr.");
 
 	this->m_thread = ::std::thread
 	(

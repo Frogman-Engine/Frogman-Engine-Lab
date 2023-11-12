@@ -105,14 +105,14 @@ public:
 
 	_FORCE_INLINE_ T& operator*() noexcept
 	{
-		FE_ASSERT(this->m_is_constructed == false, "ERROR: Attempted to dereference an uninitialized memory block.");
+		FE_CHECK(this->m_is_constructed == false, "ERROR: Attempted to dereference an uninitialized memory block.");
 
 		return *reinterpret_cast<pointer>(this->m_memory);
 	}
 
 	_FORCE_INLINE_ T* operator->() noexcept
 	{
-		FE_ASSERT(this->m_is_constructed == false, "ERROR: Attempted to access an uninitialized memory block.");
+		FE_CHECK(this->m_is_constructed == false, "ERROR: Attempted to access an uninitialized memory block.");
 
 		return reinterpret_cast<pointer>(this->m_memory);
 	}

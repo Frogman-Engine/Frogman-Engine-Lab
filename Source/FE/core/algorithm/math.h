@@ -37,15 +37,42 @@
 BEGIN_NAMESPACE(FE::algorithm::math)
 
 
-_CONSTEXPR17_ boolean is_prime(uint64 number_p) noexcept;
-_CONSTEXPR17_ uint64 to_prime(uint64 number_p) noexcept;
+_CONSTEXPR17_ _FORCE_INLINE_ boolean is_prime(uint64 number_p) noexcept
+{
+	var::uint64 l_count = 2;
+	while ((l_count < number_p) && (number_p % l_count) != 0)
+	{
+		++l_count;
+	}
 
-_CONSTEXPR17_ uint64 abs(int64 value_p) noexcept;
-_CONSTEXPR17_ float64 abs(float64 value_p) noexcept;
+	return l_count == number_p;
+}
 
-_CONSTEXPR17_ index_t calculate_index(index_t row_p, index_t coordinate_x_p, index_t coordinate_y_p) noexcept;
+_CONSTEXPR17_ uint64 to_higher_prime(uint64 number_p) noexcept;
+_CONSTEXPR17_ uint64 to_lower_prime(uint64 number_p) noexcept;
 
-_CONSTEXPR17_ boolean is_nearly_equal(float64 left_p, float64 right_p, float64 offset_p) noexcept;
+
+_CONSTEXPR17_ uint64 abs(int64 value_p) noexcept
+{
+	return ABS(value_p);
+}
+
+_CONSTEXPR17_ float64 abs(float64 value_p) noexcept
+{
+	return ABS(value_p);
+}
+
+
+_CONSTEXPR17_ index_t calculate_index(index_t row_p, index_t coordinate_x_p, index_t coordinate_y_p) noexcept
+{
+	return CALCULATE_INDEX(row_p, coordinate_x_p, coordinate_y_p);
+}
+
+
+_CONSTEXPR17_ boolean is_nearly_equal(float64 left_p, float64 right_p, float64 offset_p) noexcept
+{
+	return IS_NEARLY_EQUAL(left_p, right_p, offset_p);
+}
 
 
 template<typename T>

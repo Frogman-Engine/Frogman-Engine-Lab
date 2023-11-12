@@ -39,7 +39,7 @@ public:
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(const size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 		return FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::allocate<value_type>(count_p).release();
 	}
@@ -67,8 +67,8 @@ public:
 
 	_FORCE_INLINE_ static void deallocate(pointer const pointer_p, _MAYBE_UNUSED_ const size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
 		FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<value_type>(pointer_p, count_p);
 	}
@@ -106,7 +106,7 @@ public:
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(const size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 		return (T*)FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
 	}
@@ -132,8 +132,8 @@ public:
 
 	_FORCE_INLINE_ static void deallocate(pointer const pointer_p, _MAYBE_UNUSED_ const size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
 		FE::generic_pool<ChunkCapacity, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
 	}
@@ -180,7 +180,7 @@ namespace std_style
 
 		_NODISCARD_ _FORCE_INLINE_ static pointer allocate(const size_type count_p) noexcept
 		{
-			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			return FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<value_type>(count_p).release();
 		}
@@ -208,8 +208,8 @@ namespace std_style
 
 		_FORCE_INLINE_ static void deallocate(pointer const pointer_p, _MAYBE_UNUSED_ const size_type count_p) noexcept
 		{
-			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-			FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
 			FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<value_type>(pointer_p, count_p);
 		}
@@ -254,7 +254,7 @@ namespace std_style
 
 		_NODISCARD_ _FORCE_INLINE_ pointer allocate(const size_type count_p) noexcept
 		{
-			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 			return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
 		}
@@ -280,8 +280,8 @@ namespace std_style
 
 		_FORCE_INLINE_ void deallocate(pointer const pointer_p, _MAYBE_UNUSED_ const size_type count_p) noexcept
 		{
-			FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-			FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+			FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+			FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
 			FE::generic_pool<ChunkCapacity::size, Alignment, StatefulAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
 		}

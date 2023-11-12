@@ -26,7 +26,7 @@ class test final : public FE::framework::application
 			argv_p = &l_args_default;
 		}
 		benchmark::Initialize(&argc_p, argv_p);
-		FE_ASSERT(benchmark::ReportUnrecognizedArguments(argc_p, argv_p) == true, "Assertion Failed: Unrecognized Benchmark Arguments Detected.");
+		FE_CHECK(benchmark::ReportUnrecognizedArguments(argc_p, argv_p) == true, "Assertion Failed: Unrecognized Benchmark Arguments Detected.");
 	}
 	
 	virtual int run(_MAYBE_UNUSED_ int argc_p, _MAYBE_UNUSED_ char** argv_p) override final

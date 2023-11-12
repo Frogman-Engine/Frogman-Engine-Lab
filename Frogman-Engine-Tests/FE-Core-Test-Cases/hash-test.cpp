@@ -1,6 +1,7 @@
 ﻿#include <gtest/gtest.h>
 #include <benchmark/benchmark.h>
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
+#include <FE/core/fstring.hxx>
 #include <FE/core/hash.hpp>
 
 
@@ -18,6 +19,11 @@ TEST(hash, all)
 	std::vector<int> l_vec = { 1, 2, 3 };
 	EXPECT_EQ(FE::hash<std::vector<int>>{}(l_vec), FE::hash<std::vector<int>>{}(l_vec));
 
+
+	FE::fstring<16> l_string = "string";
+	FE::fstring<16> l_another_string = "string";
+
+	EXPECT_EQ(FE::hash<FE::fstring<16>>{}(l_string), FE::hash<FE::fstring<16>>{}(l_another_string));
 }
 
 

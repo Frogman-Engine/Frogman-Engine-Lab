@@ -238,8 +238,7 @@ namespace performance_benchmark
 
 	void FE_polymorphic_generic_task(benchmark::State& state_p) noexcept
 	{
-		FE::function<void(void)> l_fn = fn;
-		FE::c_style_task<void(void)> l_task = l_fn;
+		FE::c_style_task<void(void)> l_task = fn;
 	
 		for (auto _ : state_p)
 		{

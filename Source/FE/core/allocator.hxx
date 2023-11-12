@@ -30,7 +30,7 @@ public:
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 		pointer const l_result = allocator::allocate(count_p);
 
@@ -76,8 +76,8 @@ public:
 
 	_FORCE_INLINE_ static void deallocate(pointer pointer_p, size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
 		
 		if constexpr (is_trivial == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 		{
@@ -112,7 +112,7 @@ public:
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 		return ::FE::trackable_calloc<value_type, Alignment>(count_p, sizeof(value_type));
 	}
@@ -132,8 +132,8 @@ public:
 
 	_FORCE_INLINE_ static void deallocate(pointer pointer_p, size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
 		
 		::FE::trackable_free<value_type, Alignment>(pointer_p, count_p, sizeof(value_type));
 	}
@@ -157,16 +157,16 @@ public:
 	_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
 	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_ALIGNED;
 
-	FE_STATIC_ASSERT((FE::align_CPU_L1_cache_line::size % FE::SIMD_auto_alignment::alignment_type::size) != 0, "Static Assertion Failed: SIMD address aligned operations are incompatible with this machine.");
+	FE_STATIC_CHECK((FE::align_CPU_L1_cache_line::size % FE::SIMD_auto_alignment::alignment_type::size) != 0, "Static Assertion Failed: SIMD address aligned operations are incompatible with this machine.");
 
 	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
 		pointer const l_result = static_cast<pointer>(::tbb::detail::r1::cache_aligned_allocate(count_p * sizeof(value_type)));
-		FE_ASSERT(l_result == nullptr, "${%s@0}: failed to allocate memory from cache_aligned_allocator.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		FE_CHECK(l_result == nullptr, "${%s@0}: failed to allocate memory from cache_aligned_allocator.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
-		FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
+		FE_CHECK(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
 
 #if defined(_ENABLE_MEMORY_TRACKER_)
 		::FE::heap_memory_tracker<T, align_64bytes>::__log_heap_memory_allocation(count_p * sizeof(value_type), TO_STRING(cache_aligned_allocate), l_result, typeid(T).name());
@@ -184,7 +184,7 @@ public:
 		}
 
 		pointer const l_result = static_cast<pointer>(cache_aligned_allocator<T>::allocate(new_count_p));
-		FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
+		FE_CHECK(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
 		 
 		if (l_result != pointer_p) _LIKELY_
 		{
@@ -197,8 +197,8 @@ public:
 
 	_FORCE_INLINE_ static void deallocate(pointer pointer_p, _MAYBE_UNUSED_ size_type count_p) noexcept
 	{
-		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
-		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
+		FE_CHECK(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
+		FE_CHECK(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
 
 #if defined(_ENABLE_MEMORY_TRACKER_)
 		::FE::heap_memory_tracker<T, align_64bytes>::__log_heap_memory_deallocation(count_p * sizeof(value_type), TO_STRING(cache_aligned_deallocate), pointer_p, typeid(T).name());

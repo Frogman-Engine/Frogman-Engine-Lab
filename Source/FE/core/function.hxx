@@ -2,6 +2,7 @@
 #define _FE_CORE_FUNCTION_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <any>
 #define PASS_RETURN_BUFFER(return_buffer) (&return_buffer)
 
 
@@ -87,7 +88,7 @@ public:
 
     _FORCE_INLINE_ R operator()(Arguments& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         return this->m_function_pointer(arguments_p...);
     }
 
@@ -149,7 +150,7 @@ public:
 
     _FORCE_INLINE_ void operator()(Arguments& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         this->m_function_pointer(arguments_p...);
     }
 
@@ -214,7 +215,7 @@ public:
 
     _FORCE_INLINE_ R operator()(Arguments&& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         return this->m_function_pointer(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -276,7 +277,7 @@ public:
 
     _FORCE_INLINE_ void operator()(Arguments&& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
+        FE_CHECK(this->m_function_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_function_pointer));
         this->m_function_pointer(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -345,7 +346,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -408,7 +409,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -471,7 +472,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -534,7 +535,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(arguments_p...);
     }
 
@@ -598,7 +599,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -661,7 +662,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -724,7 +725,7 @@ public:
 
     _FORCE_INLINE_ R operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         return (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -787,7 +788,7 @@ public:
 
     _FORCE_INLINE_ void operator()(class_type& instance_p, Arguments&& ...arguments_p) noexcept
     {
-        FE_ASSERT(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
+        FE_CHECK(this->m_method_pointer == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_method_pointer));
         (instance_p.*this->m_method_pointer)(std::forward<Arguments>(arguments_p)...);
     }
 
@@ -1203,6 +1204,7 @@ struct task_base
 {
     virtual void operator()(void) noexcept = 0;
     virtual boolean is_null(void) const noexcept = 0;
+    virtual std::any get_result() const noexcept = 0;
 };
 
 
@@ -1228,7 +1230,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBu
     _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task() noexcept : _task_result(), _arguments_buffer(), _method(), _instance_ptr() {}
     _FORCE_INLINE_ ~cpp_style_task() noexcept = default;
 
-    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(task_type task_p) noexcept : _arguments_buffer(), _method(task_p.m_method_pointer), _instance_ptr(), _task_result() {}
+    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(typename task_type::method_type task_p) noexcept : _arguments_buffer(), _method(task_p), _instance_ptr(), _task_result() {}
     _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(cpp_style_task& other_p) noexcept : _arguments_buffer(other_p._arguments_buffer), _method(other_p._method), _instance_ptr(other_p._instance_ptr), _task_result(other_p._task_result) {}
     _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(cpp_style_task&& rvalue_p) noexcept : _arguments_buffer(std::move(rvalue_p._arguments_buffer)), _method(rvalue_p._method), _instance_ptr(rvalue_p._instance_ptr), _task_result(rvalue_p._task_result)
     {
@@ -1236,7 +1238,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBu
         rvalue_p._instance_ptr = nullptr;
     }
 
-    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task& operator=(task_type task_p) noexcept
+    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task& operator=(typename task_type::method_type task_p) noexcept
     {
         this->_method = task_p;
         return *this;
@@ -1264,7 +1266,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBu
 
     virtual void operator()(void) noexcept override
     {
-        FE_ASSERT(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
+        FE_CHECK(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
 
         if constexpr (task_type::has_void_return_type == true)
         {
@@ -1398,6 +1400,11 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBu
 
         return false;
     }
+
+    virtual std::any get_result() const noexcept override
+    {
+		return this->_task_result;
+    }
 };
 
 template<class C, typename TaskImpl, typename ...ArgumentsBufferTypes>
@@ -1420,7 +1427,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBu
     _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task() noexcept : _task_result(), _arguments_buffer(), _method(), _instance_ptr() {}
     _FORCE_INLINE_ ~cpp_style_task() noexcept = default;
 
-    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(task_type task_p) noexcept : _arguments_buffer(), _method(task_p.m_method_pointer), _instance_ptr(), _task_result(){}
+    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(typename task_type::method_type task_p) noexcept : _arguments_buffer(), _method(task_p), _instance_ptr(), _task_result(){}
     _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(cpp_style_task& other_p) noexcept : _arguments_buffer(other_p._arguments_buffer), _method(other_p._method), _instance_ptr(other_p._instance_ptr), _task_result(other_p._task_result) {}
     _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task(cpp_style_task&& rvalue_p) noexcept : _arguments_buffer(std::move(rvalue_p._arguments_buffer)), _method(rvalue_p._method), _instance_ptr(rvalue_p._instance_ptr), _task_result(rvalue_p._task_result)
     {
@@ -1428,7 +1435,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBu
         rvalue_p._instance_ptr = nullptr;
     }
 
-    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task& operator=(task_type task_p) noexcept
+    _CONSTEXPR20_ _FORCE_INLINE_ cpp_style_task& operator=(typename task_type::method_type task_p) noexcept
     {
         this->_method = task_p;
         return *this;
@@ -1456,7 +1463,7 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBu
 
     virtual void operator()(void) noexcept override
     {
-        FE_ASSERT(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
+        FE_CHECK(this->_instance_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->_instance_ptr));
 
         if constexpr (task_type::has_void_return_type == true)
         {
@@ -1590,6 +1597,11 @@ struct cpp_style_task<C, TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBu
 
         return false;
     }
+
+    virtual std::any get_result() const noexcept override
+    {
+        return this->_task_result;
+    }
 };
 
 
@@ -1615,11 +1627,11 @@ struct c_style_task<TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBufferT
     _CONSTEXPR20_ _FORCE_INLINE_ c_style_task() noexcept : _task_result(), _arguments_buffer(), _function() {}
     _FORCE_INLINE_ ~c_style_task() noexcept = default;
 
-    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(task_type task_p) noexcept : _function(task_p.m_function_pointer), _task_result() {}
+    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(typename task_type::function_type task_p) noexcept : _function(task_p), _task_result() {}
     _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(c_style_task& other_p) noexcept : _arguments_buffer(other_p._arguments_buffer), _function(other_p._function), _task_result(other_p._task_result) {}
     _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(c_style_task&& rvalue_p) noexcept : _arguments_buffer(std::move(rvalue_p._arguments_buffer)), _function(rvalue_p._function), _task_result(rvalue_p._task_result) { rvalue_p._function = nullptr; }
 
-    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task& operator=(task_type task_p) noexcept
+    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task& operator=(typename task_type::function_type task_p) noexcept
     {
         this->_function = task_p;
         return *this;
@@ -1770,6 +1782,11 @@ struct c_style_task<TaskImpl, FE::FORWARD_DATA::_AS_RVALUE_REF, ArgumentsBufferT
 
         return false;
     }
+
+    virtual std::any get_result() const noexcept override
+    {
+        return this->_task_result;
+    }
 };
 
 template<typename TaskImpl, typename ...ArgumentsBufferTypes>
@@ -1788,11 +1805,11 @@ struct c_style_task<TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBufferT
     _CONSTEXPR20_ _FORCE_INLINE_ c_style_task() noexcept : _task_result(), _arguments_buffer(), _function() {}
     _FORCE_INLINE_ ~c_style_task() noexcept = default;
 
-    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(task_type task_p) noexcept : _function(task_p.m_function_pointer), _task_result() {}
+    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(typename task_type::function_type task_p) noexcept : _function(task_p), _task_result() {}
     _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(c_style_task& other_p) noexcept : _arguments_buffer(other_p._arguments_buffer), _function(other_p._function), _task_result(other_p._task_result) {}
     _CONSTEXPR20_ _FORCE_INLINE_ c_style_task(c_style_task&& rvalue_p) noexcept : _arguments_buffer(std::move(rvalue_p._arguments_buffer)), _function(rvalue_p._function), _task_result(rvalue_p._task_result) { rvalue_p._function = nullptr; }
 
-    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task& operator=(task_type task_p) noexcept
+    _CONSTEXPR20_ _FORCE_INLINE_ c_style_task& operator=(typename task_type::function_type task_p) noexcept
     {
         this->_function = task_p;
         return *this;
@@ -1942,6 +1959,11 @@ struct c_style_task<TaskImpl, FE::FORWARD_DATA::_AS_LVALUE_REF, ArgumentsBufferT
         }
 
         return false;
+    }
+
+    virtual std::any get_result() const noexcept override
+    {
+        return this->_task_result;
     }
 };
 
