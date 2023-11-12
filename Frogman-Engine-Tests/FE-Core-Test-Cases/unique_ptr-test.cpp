@@ -248,6 +248,7 @@ void FE_unique_ptr_RAII_construction_and_destruction(benchmark::State& state_p) 
 	for (auto _ : state_p)
 	{
 		FE::unique_ptr<std::byte[]> l_unique_ptr = FE::make_unique<std::byte[]>(1024);
+		benchmark::DoNotOptimize(l_unique_ptr);
 	}
 }
 BENCHMARK(FE_unique_ptr_RAII_construction_and_destruction);
@@ -258,6 +259,7 @@ void std_unique_ptr_RAII_construction_and_destruction(benchmark::State& state_p)
 	for (auto _ : state_p)
 	{
 		std::unique_ptr<std::byte[]> l_unique_ptr = std::make_unique<std::byte[]>(1024);
+		benchmark::DoNotOptimize(l_unique_ptr);
 	}
 }
 BENCHMARK(std_unique_ptr_RAII_construction_and_destruction);
@@ -268,6 +270,7 @@ void FE_exclusive_ptr_RAII_construction_and_destruction(benchmark::State& state_
 	for (auto _ : state_p)
 	{
 		FE::exclusive_ptr<std::byte[]> l_exclusive_ptr = FE::make_exclusive<std::byte[]>(1024);
+		benchmark::DoNotOptimize(l_exclusive_ptr);
 	}
 }
 BENCHMARK(FE_exclusive_ptr_RAII_construction_and_destruction);

@@ -107,7 +107,9 @@ void FE_iterator_vector_iteration_test(benchmark::State& state_p) noexcept
 	for (auto _ : state_p)
 	{
 		FE::iterator<FE::contiguous_iterator<int>> l_iterator = l_vec.begin().operator->();
+		benchmark::DoNotOptimize(l_iterator);
 		FE::const_iterator<FE::contiguous_iterator<int>> l_end = l_vec.data() + l_vec.size();
+		benchmark::DoNotOptimize(l_end);
 		while (l_iterator.operator!=(l_end))
 		{
 			++l_iterator;
@@ -124,7 +126,9 @@ void std_iterator_vector_iteration_test(benchmark::State& state_p) noexcept
 	for (auto _ : state_p)
 	{
 		auto l_iterator = l_vec.begin();
+		benchmark::DoNotOptimize(l_iterator);
 		auto l_end = l_vec.cend();
+		benchmark::DoNotOptimize(l_end);
 		while (l_iterator != l_end)
 		{
 			++l_iterator;	

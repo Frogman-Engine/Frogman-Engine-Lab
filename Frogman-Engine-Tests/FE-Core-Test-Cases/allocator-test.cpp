@@ -49,6 +49,7 @@ void c_malloc_free_performance_benchmark(benchmark::State& state_p) noexcept
 	for (auto _ : state_p)
 	{
 		void* l_pointer = malloc(1024);
+		benchmark::DoNotOptimize(l_pointer);
 		free(l_pointer);
 	}
 }
@@ -60,6 +61,7 @@ void cpp_new_delete_performance_benchmark(benchmark::State& state_p) noexcept
 	for (auto _ : state_p)
 	{
 		std::byte* l_pointer = new std::byte[1024];
+		benchmark::DoNotOptimize(l_pointer);
 		delete[] l_pointer;
 	}
 }
@@ -71,6 +73,7 @@ void tbb_scalable_aligned_malloc_free_benchmark(benchmark::State& state_p) noexc
 	for (auto _ : state_p)
 	{
 		void* l_pointer = scalable_aligned_malloc(1024, 64);
+		benchmark::DoNotOptimize(l_pointer);
 		scalable_aligned_free(l_pointer);
 	}
 }

@@ -470,6 +470,7 @@ void std_string_construction_and_destruction(benchmark::State& state_p) noexcept
 	for (auto _ : state_p)
 	{
 		std::string l_string = "string performance competition";
+		benchmark::DoNotOptimize(l_string);
 	}
 }
 BENCHMARK(std_string_construction_and_destruction);
@@ -480,6 +481,7 @@ void fstring_construction_and_destruction(benchmark::State& state_p) noexcept
 	for (auto _ : state_p)
 	{
 		FE::fstring<64> l_string = "string performance competition";
+		benchmark::DoNotOptimize(l_string);
 	}
 }
 BENCHMARK(fstring_construction_and_destruction);
@@ -490,6 +492,8 @@ BENCHMARK(fstring_construction_and_destruction);
 void std_string_assignment(benchmark::State& state_p) noexcept
 {
 	std::string l_string;
+	benchmark::DoNotOptimize(l_string);
+
 	for (auto _ : state_p)
 	{
 		l_string = "string performance competition";
@@ -501,6 +505,8 @@ BENCHMARK(std_string_assignment);
 void fstring_assignment(benchmark::State& state_p) noexcept
 {
 	FE::fstring<64> l_string;
+	benchmark::DoNotOptimize(l_string);
+
 	for (auto _ : state_p)
 	{
 		l_string = "string performance competition";
@@ -513,9 +519,12 @@ BENCHMARK(fstring_assignment);
 void std_string_find(benchmark::State& state_p) noexcept
 {
 	std::string l_string = "You can run, but you can't hide.";
+	benchmark::DoNotOptimize(l_string);
+
 	for (auto _ : state_p)
 	{
-		_DISCARD_ auto l_result = l_string.find("but");
+		auto l_result = l_string.find("but");
+		benchmark::DoNotOptimize(l_result);
 	}
 }
 BENCHMARK(std_string_find);
@@ -524,9 +533,12 @@ BENCHMARK(std_string_find);
 void fstring_find(benchmark::State& state_p) noexcept
 {
 	FE::fstring<64> l_string = "You can run, but you can't hide.";
+	benchmark::DoNotOptimize(l_string);
+
 	for (auto _ : state_p)
 	{
-		_DISCARD_ auto l_result = l_string.find("but");
+		auto l_result = l_string.find("but");
+		benchmark::DoNotOptimize(l_result);
 	}
 }
 BENCHMARK(fstring_find);

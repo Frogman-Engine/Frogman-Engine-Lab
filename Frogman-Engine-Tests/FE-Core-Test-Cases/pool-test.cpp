@@ -181,8 +181,12 @@ TEST(namespace_pool_allocator, all)
 void memory_pooled_std_list_iteration(benchmark::State& state_p) noexcept
 {
 	FE::namespace_pool_allocator<int, FE::capacity<4 KB>> l_allocator("list node pool"); // std::list nodes are allocated under the memory pool namespace named "list node pool". This provides higher cache hit ratio. 
+	benchmark::DoNotOptimize(l_allocator);
+
 	l_allocator.create_pages(2);
+
 	std::list<int, FE::namespace_pool_allocator<int, FE::capacity<4 KB>>> l_list{ l_allocator };
+	benchmark::DoNotOptimize(l_list);
 
 	for (int i = 0; i < 10; ++i)
 	{
@@ -191,8 +195,9 @@ void memory_pooled_std_list_iteration(benchmark::State& state_p) noexcept
 
 	for (auto _ : state_p)
 	{
-		for (_MAYBE_UNUSED_ auto& element : l_list)
+		for (auto& element : l_list)
 		{
+			benchmark::DoNotOptimize(element);
 		}
 	}
 
@@ -204,6 +209,7 @@ BENCHMARK(memory_pooled_std_list_iteration);
 void std_list_iteration(benchmark::State& state_p) noexcept
 {
 	std::list<int> l_list;
+	benchmark::DoNotOptimize(l_list);
 
 	for (int i = 0; i < 10; ++i)
 	{
@@ -212,8 +218,9 @@ void std_list_iteration(benchmark::State& state_p) noexcept
 
 	for (auto _ : state_p)
 	{
-		for (_MAYBE_UNUSED_ auto& element : l_list)
+		for (auto& element : l_list)
 		{
+			benchmark::DoNotOptimize(element);
 		}
 	}
 }
@@ -226,6 +233,8 @@ BENCHMARK(std_list_iteration);
 void boost_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
 	static std::string* l_s_strings[_MAX_ITERATION_];
+	boost::pool_allocator<std::string> l_allocator;
+
 	for (auto _ : state_p)
 	{
 		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
@@ -245,7 +254,10 @@ BENCHMARK(boost_pool_allocator_extreme_test);
 void boost_object_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
 	static std::string* l_s_strings[_MAX_ITERATION_];
+	benchmark::DoNotOptimize(l_s_strings);
+
 	boost::object_pool<std::string> l_allocator;
+	benchmark::DoNotOptimize(l_allocator);
 
 	for (auto _ : state_p)
 	{
@@ -266,7 +278,10 @@ BENCHMARK(boost_object_pool_allocator_extreme_test);
 void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
 	static std::string* l_s_strings[_MAX_ITERATION_];
+	benchmark::DoNotOptimize(l_s_strings);
+
 	FE::scoped_pool_resource<FE::pool_allocator<std::string>> l_manager(2);
+	benchmark::DoNotOptimize(l_manager);
 
 	for (auto _ : state_p)
 	{
@@ -287,8 +302,13 @@ BENCHMARK(FE_pool_allocator_extreme_test);
 void tbb_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
 	static std::string* l_s_strings[_MAX_ITERATION_];
+	benchmark::DoNotOptimize(l_s_strings);
+
 	tbb::memory_pool<tbb::scalable_allocator<std::string>> l_memory_pool;
+	benchmark::DoNotOptimize(l_memory_pool);
+
 	tbb::memory_pool_allocator<std::string> l_allocator(l_memory_pool);
+	benchmark::DoNotOptimize(l_allocator);
 
 	for (auto _ : state_p)
 	{

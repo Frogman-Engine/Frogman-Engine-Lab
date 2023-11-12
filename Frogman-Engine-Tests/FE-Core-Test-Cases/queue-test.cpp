@@ -223,6 +223,7 @@ TEST(queue, pop_all)
 void FE_queue_push_and_pop(benchmark::State& state_p) noexcept
 {
 	FE::fqueue<const char*, 64> l_queue;
+	benchmark::DoNotOptimize(l_queue);
 
 	for (auto _ : state_p)
 	{
@@ -236,6 +237,7 @@ BENCHMARK(FE_queue_push_and_pop);
 void std_queue_push_and_pop(benchmark::State& state_p) noexcept
 {
 	std::queue<const char*> l_queue;
+	benchmark::DoNotOptimize(l_queue);
 
 	for (auto _ : state_p)
 	{

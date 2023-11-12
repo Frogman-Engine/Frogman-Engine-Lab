@@ -221,13 +221,14 @@ namespace performance_benchmark
 	void fn() noexcept
 	{
 		static let var::uint32 l_uint32 = 0;
+		benchmark::DoNotOptimize(l_uint32);
 		++l_uint32;
 	}
 
 	void FE_function(benchmark::State& state_p) noexcept
 	{
 		FE::function<void(void)> l_fn = fn;
-
+		benchmark::DoNotOptimize(l_fn);
 		for (auto _ : state_p)
 		{
 			l_fn();
@@ -239,7 +240,7 @@ namespace performance_benchmark
 	void FE_polymorphic_generic_task(benchmark::State& state_p) noexcept
 	{
 		FE::c_style_task<void(void)> l_task = fn;
-	
+		benchmark::DoNotOptimize(l_task);
 		for (auto _ : state_p)
 		{
 			l_task();
@@ -251,7 +252,7 @@ namespace performance_benchmark
 	void std_function(benchmark::State& state_p) noexcept
 	{
 		std::function l_fn = fn;
-
+		benchmark::DoNotOptimize(l_fn);
 		for (auto _ : state_p)
 		{
 			l_fn();

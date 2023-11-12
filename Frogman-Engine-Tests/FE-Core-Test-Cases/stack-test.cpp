@@ -206,6 +206,7 @@ TEST(fstack, container_comparison_)
 void FE_stack_push_and_pop(benchmark::State& state_p) noexcept
 {
 	FE::fstack<const char*, 64> l_stack;
+	benchmark::DoNotOptimize(l_stack);
 
 	for (auto _ : state_p)
 	{
@@ -219,6 +220,7 @@ BENCHMARK(FE_stack_push_and_pop);
 void std_stack_push_and_pop(benchmark::State& state_p) noexcept
 {
 	std::stack<const char*, std::vector<const char*>> l_stack;
+	benchmark::DoNotOptimize(l_stack);
 
 	for (auto _ : state_p)
 	{

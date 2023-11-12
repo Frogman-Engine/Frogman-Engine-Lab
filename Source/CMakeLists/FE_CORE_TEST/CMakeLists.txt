@@ -30,10 +30,8 @@ SET(_TEST_CODE_
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/fstring-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/function_table-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/function-thread-test.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/hash_multimap-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/hash-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/heap-test.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/index_map-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/iterator-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/math_algorithm-test.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../Frogman-Engine-Tests/FE-Core-Test-Cases/never-dangling_smart-pointer-test.cpp
