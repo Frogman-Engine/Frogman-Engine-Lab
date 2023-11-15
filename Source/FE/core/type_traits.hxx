@@ -249,6 +249,13 @@ struct is_primitive
 };
 
 
+template<typename T>
+struct is_numeric
+{
+	_MAYBE_UNUSED_ static constexpr inline bool value = (((std::is_integral<T>::value == true) && (FE::is_boolean<T>::value == false)) || (std::is_floating_point<T>::value == true));
+};
+
+
 enum struct TYPE_TRAIT : int8
 {
 	_UNDEFINED = -1,
