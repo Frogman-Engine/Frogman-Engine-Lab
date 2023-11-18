@@ -19,20 +19,20 @@
 BEGIN_NAMESPACE(FE)
 
 
-template<class T, class Comparison, class Allocator>
+template<class T, class Comparator, class Allocator>
 class priority_queue
 {
 	// heap
 };
 
 
-template<class T, size_t Capacity, class Comparison = std::less<T>>
-class fpriority_queue : public std::priority_queue<T, std::pmr::vector<T>, Comparison>
+template<class T, size_t Capacity, class Comparator = std::less<T>>
+class fpriority_queue : public std::priority_queue<T, std::pmr::vector<T>, Comparator>
 {
 public:
-	using base_type = std::priority_queue<T, std::pmr::vector<T>, Comparison>;
+	using base_type = std::priority_queue<T, std::pmr::vector<T>, Comparator>;
 	using container_type = typename base_type::container_type;
-	using comparison = Comparison;
+	using comparison = Comparator;
 	using value_type = typename container_type::value_type;
 	using size_type = typename container_type::size_type;
 	using reference = typename container_type::reference;
