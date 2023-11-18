@@ -319,7 +319,7 @@ public:
 		return *this->m_ref_ptr;
 	}
 
-	_FORCE_INLINE_ boolean is_valid() const noexcept
+	_FORCE_INLINE_ boolean is_null() const noexcept
 	{
 		return this->m_ref_ptr != nullptr;
 	}
