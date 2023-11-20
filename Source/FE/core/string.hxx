@@ -24,13 +24,13 @@ class basic_string_view;
 template<typename CharT = char, class Allocator = FE::scalable_aligned_allocator<CharT>, class Traits = FE::char_traits<CharT>>
 class basic_string final
 {
-    FE_STATIC_CHECK(std::is_const<CharT>::value == true, "static assertion failed: the template argument CharT cannot be const.");
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a valid character type.");
-    FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "static assertion failed: the template argument Allocator is not a valid class nor struct type.");
-    FE_STATIC_CHECK(std::is_class<Traits>::value == false, "static assertion failed: the template argument traits is not a class or a struct type.");
-    FE_STATIC_CHECK((std::is_same<CharT, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to CharT. The template parameter CharT must be identical to the value_type of the Allocator.");
-    FE_STATIC_CHECK((std::is_same<CharT, Traits::value_type>::value == false), "static assertion failed: enforcing traits' value_type to be equivalent to CharT. The template parameter CharT must be identical to traits::value_type.");
-    FE_STATIC_CHECK(Allocator::is_address_aligned == ADDRESS::_NOT_ALIGNED, "static assertion failed: addresses allocated from the class Allocator must meet the hardware-specific SIMD Alignment requirements.");
+    FE_STATIC_SUSPICION(std::is_const<CharT>::value == true, "static assertion failed: the template argument CharT cannot be const.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a valid character type.");
+    FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "static assertion failed: the template argument Allocator is not a valid class nor struct type.");
+    FE_STATIC_SUSPICION(std::is_class<Traits>::value == false, "static assertion failed: the template argument traits is not a class or a struct type.");
+    FE_STATIC_SUSPICION((std::is_same<CharT, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to CharT. The template parameter CharT must be identical to the value_type of the Allocator.");
+    FE_STATIC_SUSPICION((std::is_same<CharT, Traits::value_type>::value == false), "static assertion failed: enforcing traits' value_type to be equivalent to CharT. The template parameter CharT must be identical to traits::value_type.");
+    FE_STATIC_SUSPICION(Allocator::is_address_aligned == ADDRESS::_NOT_ALIGNED, "static assertion failed: addresses allocated from the class Allocator must meet the hardware-specific SIMD Alignment requirements.");
 
 public:
     using traits_type = Traits;
@@ -146,15 +146,15 @@ public:
     template<class InputIterator>
     _CONSTEXPR20_ basic_string(InputIterator first_p, InputIterator last_p) noexcept : m_smart_string(FE::make_exclusive<CharT[], Allocator>(size_t{ static_cast<size_t>(last_p - first_p)})), m_length(m_smart_string.capacity() - _NULL_ESCAPE_SIZE_)
     {
-        FE_STATIC_CHECK(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
-        FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as basic_string's value_type.");
+        FE_STATIC_SUSPICION(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
+        FE_STATIC_SUSPICION((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as basic_string's value_type.");
 
         FE_SUSPECT(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
 
         Traits::assign(string_info<CharT>{ this->m_smart_string.get(), length_t{static_cast<length_t>(last_p - first_p)}, capacity_t{ this->m_smart_string.capacity() } }, first_p, last_p);
     }
 
-    _CONSTEXPR20_ basic_string(const basic_string& other_p) noexcept : m_smart_string(FE::make_exclusive<value_type[], Allocator>(other_p.m_smart_string.capacity())), m_length(other_p.m_length) 
+    _CONSTEXPR20_ basic_string(const basic_string& other_p) noexcept : m_smart_string(FE::make_exclusive<value_type[], Allocator>(other_p.m_smart_string.capacity())), m_length(other_p.m_length)
     {
         if (other_p.is_empty() == true)
         {
@@ -163,7 +163,8 @@ public:
 
         Traits::copy<allocator_type::is_address_aligned, static_cast<ADDRESS>(allocator_type::is_address_aligned)>(this->m_smart_string.get(), other_p.m_smart_string.get(), other_p.m_smart_string.capacity());
     }
-    _CONSTEXPR20_ basic_string(basic_string&& rvalue_p) noexcept : m_smart_string(std::move(rvalue_p.m_smart_string)), m_length(rvalue_p.m_length) 
+
+    _CONSTEXPR20_ basic_string(basic_string&& rvalue_p) noexcept : m_smart_string(std::move(rvalue_p.m_smart_string)), m_length(rvalue_p.m_length)
     {
         if (rvalue_p.is_empty() == true)
         {
@@ -688,7 +689,7 @@ public:
 
     _CONSTEXPR20_ basic_string& append(const_iterator input_begin_p, const_iterator input_end_p) noexcept
     {
-        FE_STATIC_CHECK((std::is_same<const_iterator::value_type, value_type>::value == false), "static assertion failed: const_iterator::value_type is not equal to value_type.");
+        FE_STATIC_SUSPICION((std::is_same<const_iterator::value_type, value_type>::value == false), "static assertion failed: const_iterator::value_type is not equal to value_type.");
         FE_SUSPECT(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
         FE_SUSPECT(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));
         FE_SUSPECT(input_begin_p >= input_end_p, "${%s@0}: input_position_p must not be greater than input_count_p.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE));

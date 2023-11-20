@@ -42,7 +42,7 @@ _MAYBE_UNUSED_ constexpr int8 ASCII_code_nine = 57;
 template<typename IntT>
 struct integral_info
 {
-    FE_STATIC_CHECK(std::is_integral<IntT>::value == false, "static assertion failed: The template argument IntT is not an integral type.");
+    FE_STATIC_SUSPICION(std::is_integral<IntT>::value == false, "static assertion failed: The template argument IntT is not an integral type.");
     IntT _value = 0;
     var::uint8 _digit_length = 0;
 };
@@ -50,7 +50,7 @@ struct integral_info
 template<typename RealType>
 struct real_info
 {
-    FE_STATIC_CHECK(std::is_floating_point<RealType>::value == false, "static assertion failed: The template argument RealType is not a floating point type.");
+    FE_STATIC_SUSPICION(std::is_floating_point<RealType>::value == false, "static assertion failed: The template argument RealType is not a floating point type.");
     RealType _value = 0;
     var::uint8 _total_length = 0;
     var::uint8 _integral_part_length = 0;
@@ -61,8 +61,8 @@ struct real_info
 template<typename UIntT, typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ integral_info<UIntT> string_to_uint(const CharT* const integral_string_p) noexcept
 {
-    FE_STATIC_CHECK(std::is_unsigned<UIntT>::value == false, "static assertion failed: the template argument UIntT is not an unsigned integral type.");
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a character type.");
+    FE_STATIC_SUSPICION(std::is_unsigned<UIntT>::value == false, "static assertion failed: the template argument UIntT is not an unsigned integral type.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a character type.");
 
     const CharT* l_integral_string_pointer = integral_string_p;
     UIntT l_result = 0;
@@ -81,8 +81,8 @@ _CONSTEXPR20_ _FORCE_INLINE_ integral_info<UIntT> string_to_uint(const CharT* co
 template<typename SIntT, typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ integral_info<SIntT> string_to_int(const CharT* integral_string_p) noexcept
 {
-    FE_STATIC_CHECK(std::is_signed<SIntT>::value == false, "static assertion failed: the template argument SIntT is not a signed integral type.");
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a character type.");
+    FE_STATIC_SUSPICION(std::is_signed<SIntT>::value == false, "static assertion failed: the template argument SIntT is not a signed integral type.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a character type.");
 
     const CharT* l_integral_string_pointer = integral_string_p;
     SIntT l_result = 0;
@@ -121,7 +121,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ integral_info<SIntT> string_to_int(const CharT* int
 template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ boolean string_to_boolean(const CharT* const string_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
 
     const CharT* l_string_pointer = string_p;
 
@@ -224,7 +224,7 @@ _NODISCARD_ _CONSTEXPR20_ _FORCE_INLINE_ var::uint8 count_integral_digit_length(
 template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void int_to_string(CharT* const string_out_p, _MAYBE_UNUSED_ length_t input_string_capacity_p, var::int64 value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
     ABORT_IF(string_out_p == nullptr, "NULLPTR DETECTED: string_out_p is nullptr.");
     ABORT_IF(value_p == FE::min_value<var::int64>, "NaCN ERROR: value_p is not a calculatable number");
 
@@ -266,7 +266,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ void int_to_string(CharT* const string_out_p, _MAYB
 template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void uint_to_string(CharT* const string_out_p, _MAYBE_UNUSED_ length_t input_string_capacity_p, var::uint64 value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type of value_p assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type of value_p assigned to the template argument CharT");
     ABORT_IF(string_out_p == nullptr, "NULLPTR DETECTED: string_out_p is nullptr.");
 
     var::int8 l_integral_digits = count_integral_digit_length<var::uint64>(value_p);
@@ -301,7 +301,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ void uint_to_string(CharT* const string_out_p, _MAY
 template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ void float_to_string(CharT* const string_out_p, length_t input_string_capacity_p, float64 value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
 
     ABORT_IF(string_out_p == nullptr, "NULLPTR DETECTED: string_out_p is nullptr.");
 
@@ -328,7 +328,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ void float_to_string(CharT* const string_out_p, len
 template<typename CharT>
 _CONSTEXPR20_ _FORCE_INLINE_ const CharT* boolean_to_string(boolean value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
 
     return (value_p == true) ? static_cast<const CharT*>("true") : static_cast <const CharT*>("false");
 }
@@ -339,7 +339,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ const CharT* boolean_to_string(boolean value_p) noe
 template <typename CharT, typename T>
 _CONSTEXPR20_ _FORCE_INLINE_ void any_object_binary_representation(CharT* const dest_buffer_p, _MAYBE_UNUSED_ capacity_t dest_buffer_capacity_p, T& object_p)
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
 
     constexpr count_t l_required_bit_count = (sizeof(T) * 8) + sizeof(T);
     ABORT_IF(dest_buffer_capacity_p < l_required_bit_count, "ERROR: The input buffer capacity is insufficient to store the binary representation of the subject");
@@ -381,8 +381,8 @@ _CONSTEXPR20_ _FORCE_INLINE_ void any_object_binary_representation(CharT* const 
 template<typename CharT, typename T>
 _CONSTEXPR20_ _FORCE_INLINE_ const CharT* any_primitive_to_string(T value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
-    FE_STATIC_CHECK(FE::is_primitive<T>::value == false, "static assertion failed: T must be a primitive type.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_primitive<T>::value == false, "static assertion failed: T must be a primitive type.");
 
     if constexpr (FE::is_boolean<T>::value)
     {
@@ -439,8 +439,8 @@ _CONSTEXPR20_ _FORCE_INLINE_ const CharT* any_primitive_to_string(T value_p) noe
 template<typename CharT, typename T>
 _CONSTEXPR20_ _FORCE_INLINE_ void any_primitive_to_string(CharT* const dest_buffer_p, capacity_t dest_buffer_capacity_p, T value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
-    FE_STATIC_CHECK(FE::is_primitive<T>::value == false, "static assertion failed: T must be a primitive type.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_primitive<T>::value == false, "static assertion failed: T must be a primitive type.");
 
     if constexpr (FE::is_boolean<T>::value)
     {
@@ -495,7 +495,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ void any_primitive_to_string(CharT* const dest_buff
 template<typename CharT, typename U>
 _CONSTEXPR20_ _FORCE_INLINE_ const CharT* any_to_string(U& value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
 
     thread_local static CharT tl_s_buffer[_256_BYTES_BIT_COUNT_]{};
     std::memset(tl_s_buffer, _NULL_, sizeof(CharT) * internal::strlen(tl_s_buffer));
@@ -515,7 +515,7 @@ _CONSTEXPR20_ _FORCE_INLINE_ const CharT* any_to_string(U& value_p) noexcept
 template<typename CharT, typename U>
 _CONSTEXPR20_ _FORCE_INLINE_ void any_to_string(CharT* const dest_buffer_p, capacity_t dest_buffer_capacity_p, U& value_p) noexcept
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
 
     if constexpr (std::is_class< typename std::remove_reference< decltype(value_p) >::type >::value == true)
     {

@@ -4,7 +4,7 @@
 #include <FE/core/types.hxx>
 
 
-#if !defined(_VISUAL_STUDIO_CPP_) && !defined(_GNUC_)&& !defined(_CLANG_)
+#if !defined(_MSVC_) && !defined(_GNUC_)&& !defined(_CLANG_)
 #error Frogman Engine requires Microsoft Visual Studio 2022 C++ v143, LLVM Clang, g++ 11 ,or latest g++ to compile. Please use one of these compilers.
 #endif
 #if !defined(_WINDOWS_64BIT_OS_) && !defined(_LINUX_64BIT_OS_)

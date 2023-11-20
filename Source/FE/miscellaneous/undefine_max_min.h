@@ -3,7 +3,7 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/macros/macro_definitions.h>
 
-#ifdef _VISUAL_STUDIO_CPP_
+#ifdef _MSVC_
 #ifdef max
 #undef max
 #endif

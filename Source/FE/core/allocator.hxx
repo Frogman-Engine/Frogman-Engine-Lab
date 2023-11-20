@@ -11,7 +11,7 @@
 
 BEGIN_NAMESPACE(FE)
 
-
+// FE::pool_allocator and FE::namespace_pool_allocator must not be used an Implementation of this class to replace FE::new_delete_pool_allocator and FE::new_delete_namespace_pool_allocator.
 template <class Implementation>
 class new_delete_proxy_allocator final
 {
@@ -28,11 +28,21 @@ public:
 	_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
 	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = Implementation::is_address_aligned;
 
-	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
+private:
+	static allocator s_allocator;
+
+public:
+	constexpr new_delete_proxy_allocator() noexcept {}
+
+	template <typename AnotherImplementation = Implementation>
+	constexpr new_delete_proxy_allocator(_MAYBE_UNUSED_ const new_delete_proxy_allocator<AnotherImplementation>& other_p) noexcept {}
+
+
+	_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
 	{
 		FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
-		pointer const l_result = allocator::allocate(count_p);
+		pointer const l_result = s_allocator.allocate(count_p);
 
 		if constexpr (is_trivial == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 		{
@@ -46,9 +56,9 @@ public:
 	}
 
 
-	_NODISCARD_ _FORCE_INLINE_ static pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
+	_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
 	{
-		pointer const l_result = allocator::reallocate(pointer_p, prev_count_p, new_count_p);
+		pointer const l_result = s_allocator.reallocate(pointer_p, prev_count_p, new_count_p);
 
 		if constexpr (is_trivial == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 		{
@@ -74,7 +84,7 @@ public:
 	}
 
 
-	_FORCE_INLINE_ static void deallocate(pointer pointer_p, size_type count_p) noexcept
+	_FORCE_INLINE_ void deallocate(pointer pointer_p, size_type count_p) noexcept
 	{
 		FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 		FE_SUSPECT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
@@ -87,9 +97,12 @@ public:
 				begin->~value_type();
 			}
 		}
-		allocator::deallocate(pointer_p, count_p);
+		s_allocator.deallocate(pointer_p, count_p);
 	}
 };
+
+template <class Implementation>
+typename new_delete_proxy_allocator<Implementation>::allocator new_delete_proxy_allocator<Implementation>::s_allocator;
 
 
 
@@ -110,7 +123,13 @@ public:
 	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = (std::is_same<FE::SIMD_auto_alignment::alignment_type, Alignment>::value == true) ? ADDRESS::_ALIGNED : ADDRESS::_NOT_ALIGNED;
 
 
-	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
+	constexpr scalable_aligned_allocator() noexcept {}
+
+	template <typename U = T>
+	constexpr scalable_aligned_allocator(_MAYBE_UNUSED_ const scalable_aligned_allocator<U, Alignment>& other_p) noexcept {}
+
+
+	_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
 	{
 		FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
@@ -118,7 +137,7 @@ public:
 	}
 
 
-	_NODISCARD_ _FORCE_INLINE_ static pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
+	_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
 	{
 		if (new_count_p == 0)
 		{
@@ -130,7 +149,7 @@ public:
 	}
 
 
-	_FORCE_INLINE_ static void deallocate(pointer pointer_p, size_type count_p) noexcept
+	_FORCE_INLINE_ void deallocate(pointer pointer_p, size_type count_p) noexcept
 	{
 		FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 		FE_SUSPECT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);
@@ -157,9 +176,16 @@ public:
 	_MAYBE_UNUSED_ static constexpr inline auto is_trivial = FE::is_trivial<value_type>::value;
 	_MAYBE_UNUSED_ static constexpr inline ADDRESS is_address_aligned = ADDRESS::_ALIGNED;
 
-	FE_STATIC_CHECK((FE::align_CPU_L1_cache_line::size % FE::SIMD_auto_alignment::alignment_type::size) != 0, "Static Assertion Failed: SIMD address aligned operations are incompatible with this machine.");
+	FE_STATIC_SUSPICION((FE::align_CPU_L1_cache_line::size % FE::SIMD_auto_alignment::alignment_type::size) != 0, "Static Assertion Failed: SIMD address aligned operations are incompatible with this machine.");
 
-	_NODISCARD_ _FORCE_INLINE_ static pointer allocate(size_type count_p) noexcept
+
+	constexpr cache_aligned_allocator() noexcept {}
+
+	template <typename U = T>
+	constexpr cache_aligned_allocator(_MAYBE_UNUSED_ const cache_aligned_allocator<U>& other_p) noexcept {}
+
+
+	_NODISCARD_ _FORCE_INLINE_ pointer allocate(size_type count_p) noexcept
 	{
 		FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
@@ -175,7 +201,7 @@ public:
 	}
 	
 
-	_NODISCARD_ _FORCE_INLINE_ static pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
+	_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer pointer_p, size_type prev_count_p, size_type new_count_p) noexcept
 	{
 		if (new_count_p == 0)
 		{
@@ -195,7 +221,7 @@ public:
 	}
 
 
-	_FORCE_INLINE_ static void deallocate(pointer pointer_p, _MAYBE_UNUSED_ size_type count_p) noexcept
+	_FORCE_INLINE_ void deallocate(pointer pointer_p, _MAYBE_UNUSED_ size_type count_p) noexcept
 	{
 		FE_SUSPECT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 		FE_SUSPECT(pointer_p == nullptr, "${%s@0}: attempted to delete ${%p@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), pointer_p);

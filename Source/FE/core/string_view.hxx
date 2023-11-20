@@ -21,7 +21,7 @@ class basic_string;
 template<typename CharT>
 class basic_string_view final
 {
-	FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
+	FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
 
 	FE::proxy_ptr<CharT[]> m_watcher;
 	var::index_t m_begin;

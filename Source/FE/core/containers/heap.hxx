@@ -3,6 +3,9 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
 #include <FE/core/allocator_adaptor.hxx>
+#ifndef TBB_PREVIEW_MEMORY_POOL
+#define TBB_PREVIEW_MEMORY_POOL
+#endif
 #include <tbb/memory_pool.h>
 #include <memory>
 
@@ -39,7 +42,7 @@ namespace internal::heap
 		{
 			if (ptr_p == nullptr || this->m_manager.is_null() == true) { return; }
 
-			this->m_manager->deallocate(ptr_p);
+			this->m_manager->deallocate(static_cast<T*>(ptr_p), _NULL_);
 		}
 	};
 
@@ -86,11 +89,12 @@ public:
 	//using const_reverse_iterator = FE::const_reverse_iterator<FE::heap_iterator<>>;
 
 private:
-	tbb::memory_pool<FE::std_style::scalable_aligned_allocator<T>> m_pool;
+	tbb::memory_pool<FE::scalable_aligned_allocator<T>> m_pool;
 	tbb::memory_pool_allocator<T> m_allocator;
 	std::unique_ptr<internal::heap::node<T>, internal::heap::tbb_memory_pool_deleter<T>>  m_root;
 	key_comparator m_comparator;
 
+public:
 	heap() noexcept : m_pool(), m_allocator(m_pool), m_root(), m_comparator() {}
 	heap(const key_comparator& comparator_p) noexcept : m_pool(), m_allocator(m_pool), m_root(), m_comparator(comparator_p) {}
 	

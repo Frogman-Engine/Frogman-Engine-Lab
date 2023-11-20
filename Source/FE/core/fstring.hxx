@@ -21,9 +21,9 @@ BEGIN_NAMESPACE(FE)
 template<typename CharT, uint64 Capacity, class Traits = FE::char_traits<CharT>>
 class fixed_sized_string final
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a valid character type.");
-    FE_STATIC_CHECK(std::is_class<Traits>::value == false, "static assertion failed: the template argument traits is not a class or a struct type.");
-    FE_STATIC_CHECK((std::is_same<CharT, Traits::value_type>::value == false), "static assertion failed: enforcing traits' value_type to be equivalent to CharT. The template parameter CharT must be identical to traits::value_type.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "static assertion failed: the template argument CharT is not a valid character type.");
+    FE_STATIC_SUSPICION(std::is_class<Traits>::value == false, "static assertion failed: the template argument traits is not a class or a struct type.");
+    FE_STATIC_SUSPICION((std::is_same<CharT, Traits::value_type>::value == false), "static assertion failed: enforcing traits' value_type to be equivalent to CharT. The template parameter CharT must be identical to traits::value_type.");
 
 
 public:
@@ -71,8 +71,8 @@ public:
     template<class InputIterator>
     _CONSTEXPR20_ fixed_sized_string(InputIterator first_p, InputIterator last_p) noexcept
     {
-        FE_STATIC_CHECK(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
-        FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fixed_sized_string's value_type.");
+        FE_STATIC_SUSPICION(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
+        FE_STATIC_SUSPICION((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fixed_sized_string's value_type.");
 
         FE_SUSPECT(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
         FE_SUSPECT((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fixed_sized_string capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));

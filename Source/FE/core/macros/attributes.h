@@ -12,12 +12,19 @@
 #define _DEPRECATED_ [[deprecated]]
 #define _IN_DEVELOPMENT_ _DEPRECATED_
 
+
 #ifdef _HAS_CXX20_
-#define _LIKELY_ [[likely]]
-#define _UNLIKELY_ [[unlikely]]
+	#define _LIKELY_ [[likely]]
+	#define _UNLIKELY_ [[unlikely]]
+		#ifdef _MSVC_
+			#define _NO_UNIQUE_ADDRESS_ [[msvc::no_unique_address]]
+		#else
+			#define _NO_UNIQUE_ADDRESS_ [[no_unique_address]]
+		#endif
 #else
 #define _LIKELY_
 #define _UNLIKELY_
+#define _NO_UNIQUE_ADDRESS_
 #endif
 
 

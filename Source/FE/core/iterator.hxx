@@ -13,8 +13,8 @@ BEGIN_NAMESPACE(FE)
 template<class To, class From>
 _FORCE_INLINE_ To iterator_cast(const From& ptr_p) noexcept
 {
-	FE_STATIC_CHECK(((std::is_class<From>::value == false) && (std::is_pointer<From>::value == false)), "Static assertion failure: template arguments must be a pointer type or an iterator type.");
-	FE_STATIC_CHECK(((std::is_class<To>::value == false) && (std::is_pointer<To>::value == false)), "Static assertion failure: template arguments must be a pointer type or an iterator type.");
+	FE_STATIC_SUSPICION(((std::is_class<From>::value == false) && (std::is_pointer<From>::value == false)), "Static assertion failure: template arguments must be a pointer type or an iterator type.");
+	FE_STATIC_SUSPICION(((std::is_class<To>::value == false) && (std::is_pointer<To>::value == false)), "Static assertion failure: template arguments must be a pointer type or an iterator type.");
 
 	if constexpr (std::is_class<To>::value == true)
 	{
@@ -37,7 +37,7 @@ _FORCE_INLINE_ To iterator_cast(const From& ptr_p) noexcept
 template <class Implementation>
 struct iterator final : public Implementation
 {
-	FE_STATIC_CHECK(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
+	FE_STATIC_SUSPICION(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
 
 	using base_type = Implementation;
 	using iterator_category = typename Implementation::category;
@@ -199,7 +199,7 @@ public:
 template <class Implementation>
 struct reverse_iterator final : public Implementation
 {
-	FE_STATIC_CHECK(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
+	FE_STATIC_SUSPICION(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
 
 	using base_type = Implementation;
 	using iterator_category = typename Implementation::category;
@@ -364,7 +364,7 @@ public:
 template <class Implementation>
 struct const_iterator final : public Implementation
 {
-	FE_STATIC_CHECK(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
+	FE_STATIC_SUSPICION(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
 
 	using base_type = Implementation;
 	using iterator_category = typename Implementation::category;
@@ -526,7 +526,7 @@ public:
 template <class Implementation>
 struct const_reverse_iterator final : public Implementation
 {
-	FE_STATIC_CHECK(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
+	FE_STATIC_SUSPICION(std::is_class<Implementation>::value == false, "Static Assertion Failed: Illegal Implementation Detected.");
 
 	using base_type = Implementation;
 	using iterator_category = typename Implementation::category;

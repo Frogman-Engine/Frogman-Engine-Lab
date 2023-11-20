@@ -124,19 +124,9 @@ TEST(pool, generic_block_allocation)
 
 TEST(new_delete_pool_allocator, all)
 {
-	FE::scoped_pool_resource<FE::new_delete_pool_allocator<std::string, 1 KB>> l_pool_lifecycle(1);
+	FE::new_delete_pool_allocator<std::string, FE::capacity<1 KB>> l_allocator;
 
 	{
-		auto l_ptr = FE::new_delete_pool_allocator<std::string, 1 KB>::allocate(1);
-
-		l_ptr = FE::new_delete_pool_allocator<std::string, 1 KB>::reallocate(l_ptr, 1, 2);
-
-		FE::new_delete_pool_allocator<std::string, 1 KB>::deallocate(l_ptr, 2);
-	}
-
-	{
-		FE::std_style::new_delete_pool_allocator<std::string, FE::capacity<1 KB>> l_allocator;
-
 		auto l_ptr = l_allocator.allocate(1);
 
 		l_ptr = l_allocator.reallocate(l_ptr, 1, 2);
@@ -151,7 +141,7 @@ TEST(new_delete_pool_allocator, all)
 TEST(pool_allocator, all)
 {
 	{
-		std::vector<std::string, FE::std_style::pool_allocator<std::string, FE::capacity<4 KB>>> l_vector;
+		std::vector<std::string, FE::pool_allocator<std::string, FE::capacity<4 KB>>> l_vector;
 		l_vector.get_allocator().create_pages(1);
 
 		l_vector.reserve(64);
@@ -277,22 +267,21 @@ BENCHMARK(boost_object_pool_allocator_extreme_test);
 
 void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
+	FE::pool_allocator<std::string> l_allocator;
+	l_allocator.create_pages(1);
 	static std::string* l_s_strings[_MAX_ITERATION_];
 	benchmark::DoNotOptimize(l_s_strings);
-
-	FE::scoped_pool_resource<FE::pool_allocator<std::string>> l_manager(2);
-	benchmark::DoNotOptimize(l_manager);
 
 	for (auto _ : state_p)
 	{
 		for(FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
 		{
-			l_s_strings[i] = FE::pool_allocator<std::string>::allocate(1);
+			l_s_strings[i] = l_allocator.allocate(1);
 		}
 
 		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
 		{
-			FE::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
+			l_allocator.deallocate(l_s_strings[i], 1);
 		}
 	}
 }

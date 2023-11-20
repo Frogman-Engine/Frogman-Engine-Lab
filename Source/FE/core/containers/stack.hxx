@@ -17,11 +17,11 @@ BEGIN_NAMESPACE(FE)
 
 
 //https://en.cppreference.com/w/cpp/container/stack
-template<class T, class StatefulAllocator = std_style::scalable_aligned_allocator<T>>
-class stack : public std::stack<T, std::vector<T, StatefulAllocator>>
+template<class T, class Allocator = FE::scalable_aligned_allocator<T>>
+class stack : public std::stack<T, std::vector<T, Allocator>>
 {
 public:
-	using container_type = std::vector<T, StatefulAllocator>;
+	using container_type = std::vector<T, Allocator>;
 	using value_type = typename container_type::value_type;
 	using size_type = typename container_type::size_type;
 	using reference = typename container_type::reference;
@@ -42,8 +42,8 @@ public:
 template<class T, size_t Capacity, class Traits = FE::memory_traits<T>>
 class fstack final
 {
-	FE_STATIC_CHECK((std::is_same<T, Traits::value_type>::value == false), "Static Assertion Failed: The template argument T and Traits' value_type have be the same type.");
-	FE_STATIC_CHECK(std::is_class<Traits>::value == false, "Static Assertion Failed: The template argument Traits is not a class or a struct type.");
+	FE_STATIC_SUSPICION((std::is_same<T, Traits::value_type>::value == false), "Static Assertion Failed: The template argument T and Traits' value_type have be the same type.");
+	FE_STATIC_SUSPICION(std::is_class<Traits>::value == false, "Static Assertion Failed: The template argument Traits is not a class or a struct type.");
 
 public:
 	using value_type = T;
@@ -77,8 +77,8 @@ public:
 	template<class InputIterator>
 	_CONSTEXPR20_ fstack(InputIterator first_p, InputIterator last_p) noexcept : m_memory(), m_top_ptr(reinterpret_cast<pointer>(m_memory) + (last_p - first_p)), m_absolute_begin_pointer(reinterpret_cast<pointer>(m_memory))
 	{
-		FE_STATIC_CHECK(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
-		FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fstack's value_type.");
+		FE_STATIC_SUSPICION(std::is_class<InputIterator>::value == false, "Static Assertion Failure: The template argument InputIterator must be a class or a struct type.");
+		FE_STATIC_SUSPICION((std::is_same<typename std::remove_const<typename InputIterator::value_type>::type, typename std::remove_const<value_type>::type>::value == false), "Static Assertion Failure: InputIterator's value_type has to be the same as fstack's value_type.");
 
 		FE_SUSPECT(first_p >= last_p, "${%s@0}: The input iterator ${%s@1} must not be greater than the iterator ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
 		FE_SUSPECT((last_p - first_p) > Capacity, "${%s@0}: The input size exceeds the fstack capacity.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY));

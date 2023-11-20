@@ -4,8 +4,6 @@
 #include <FE/core/prerequisites.h>
 #include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/do_once.hxx>
-#include <tbb/concurrent_vector.h>
-#include <tbb/concurrent_queue.h>
 #include <boost/stacktrace.hpp>
 #include <vector>
 
@@ -25,21 +23,6 @@ namespace FE
 }
 
 
-namespace FE::concurrency
-{
-	template<typename T>
-	class proxy_ptr;
-
-	template<typename T, class Allocator>
-	class exclusive_ptr;
-
-	template<typename T>
-	class exclusive_ptr_base;
-}
-
-
-
-
 BEGIN_NAMESPACE(FE::internal)
 
 
@@ -53,13 +36,13 @@ public:
 	using pointer = typename exclusive_ptr_base<T>*;
 	using element_type = typename std::remove_extent<T>::type;
 
-	using ref_table_type = std::vector<const_pointer, FE::std_style::scalable_aligned_allocator<const_pointer>>;
+	using ref_table_type = std::vector<const_pointer, FE::scalable_aligned_allocator<const_pointer>>;
 
 	using ref_table_value_type = typename ref_table_type::value_type;
 	static_assert(std::is_same<ref_table_value_type, const exclusive_ptr_base<T>*>::value == true, "Static Assertion Failure: ref_table_value_type must be the same as exclusive_ptr_base<T>*");
 	
 	using ref_table_key_type = typename ref_table_type::size_type;
-	using ref_table_recycler_type = std::vector<ref_table_key_type, FE::std_style::scalable_aligned_allocator<ref_table_key_type>>;
+	using ref_table_recycler_type = std::vector<ref_table_key_type, FE::scalable_aligned_allocator<ref_table_key_type>>;
 
 	static constexpr ref_table_key_type invalid_key_value = FE::max_value<ref_table_key_type>;
 	static constexpr auto ref_table_initial_size = 1024;

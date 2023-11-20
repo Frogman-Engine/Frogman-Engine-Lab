@@ -7,7 +7,14 @@
 #include <FE/core/fstring.hxx>
 #include <FE/core/hash.hpp>
 #include <FE/core/pool_allocator.hxx>
-#include <unordered_map> 
+#ifndef TBB_PREVIEW_MEMORY_POOL
+#define TBB_PREVIEW_MEMORY_POOL
+#endif
+#include <tbb/memory_pool.h>
+#include <mutex>
+
+
+#define _FUNCTION_TABLE_MEMORY_NAMESPACE_ "Function Table"
 
 
 
@@ -25,9 +32,7 @@ class function_table
 	friend class application;
 	
 public:		
-
 	constexpr static size_t function_pool_size = 1 MB;
-	using function_pool = FE::generic_pool<function_pool_size>;
 
 	template<typename T>
 	using smart_function_ptr = FE::generic_pool_ptr<T, function_pool_size>;
@@ -36,16 +41,12 @@ public:
 													FE::task_base*, 
 													FE::hash<method_signature_t>,
 													std::equal_to<method_signature_t>,
-													FE::std_style::pool_allocator<std::pair<const method_signature_t, FE::task_base*>, FE::capacity<function_pool_size>, FE::align_8bytes>
+													tbb::memory_pool_allocator<std::pair<const method_signature_t, FE::task_base*>>
 													>;
-	
-	/* 
-		::std::unordered_map uses node-based linked list for its underlying Container.
-		Since the inner bucket data structure has poor cache access patterns, ::std::unordered_map needs to be replaced with a hash map with contiguous buckets
-	*/
 private:
-	thread_local static underlying_container tl_s_task_map;
-
+	static tbb::memory_pool<FE::cache_aligned_allocator<std::pair<const method_signature_t, FE::task_base*>>> s_memory_pool;
+	static underlying_container s_task_map;
+	static std::mutex s_mutex;
 
 public:
 	function_table() noexcept = delete;
@@ -56,20 +57,23 @@ public:
 	template<class TaskType, typename FunctionPtr>
 	_FORCE_INLINE_ static void register_method(const underlying_container::key_type& key_p, FunctionPtr function_p) noexcept
 	{	
-		FE_STATIC_CHECK((std::is_pointer<FunctionPtr>::value == false), "An invalid function type detected.");
-		FE_STATIC_CHECK((std::is_base_of<FE::task_base, TaskType>::value == false), "An invalid function type detected.");
+		FE_STATIC_SUSPICION((std::is_pointer<FunctionPtr>::value == false), "An invalid function type detected.");
+		FE_STATIC_SUSPICION((std::is_base_of<FE::task_base, TaskType>::value == false), "An invalid function type detected.");
 
-		smart_function_ptr<TaskType> l_unique_ptr = function_pool::allocate<TaskType>(1);
-		*(l_unique_ptr.get()) = function_p;
-		FE::task_base* const l_task_ptr = l_unique_ptr.release();
-		tl_s_task_map.emplace(key_p, l_task_ptr);
+		{
+			std::lock_guard<std::mutex> l_lock(s_mutex);
+			smart_function_ptr<TaskType> l_unique_ptr = FE::generic_pool<function_pool_size>::allocate<TaskType>(_FUNCTION_TABLE_MEMORY_NAMESPACE_, 1);
+			*(l_unique_ptr.get()) = function_p;
+			FE::task_base* const l_task_ptr = l_unique_ptr.release();
+			s_task_map.emplace(key_p, l_task_ptr);
+		}
 	}
 
-	_FORCE_INLINE_ static boolean check_presence(const underlying_container::key_type& key_p) noexcept { return tl_s_task_map.find(key_p) != tl_s_task_map.end(); }
-	_FORCE_INLINE_ static FE::task_base* retrieve(const underlying_container::key_type& key_p) noexcept { return tl_s_task_map.find(key_p)->second; }
+	_FORCE_INLINE_ static boolean check_presence(const underlying_container::key_type& key_p) noexcept { return s_task_map.find(key_p) != s_task_map.end(); }
+	_FORCE_INLINE_ static FE::task_base* retrieve(const underlying_container::key_type& key_p) noexcept { return s_task_map.find(key_p)->second; }
 
 	template<class... Arguments>
-	_FORCE_INLINE_ static void invoke(const underlying_container::key_type& key_p) noexcept { tl_s_task_map.find(key_p)->second->operator()(); }
+	_FORCE_INLINE_ static void invoke(const underlying_container::key_type& key_p) noexcept { s_task_map.find(key_p)->second->operator()(); }
 };
 
 

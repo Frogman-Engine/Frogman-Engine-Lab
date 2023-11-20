@@ -14,7 +14,7 @@ BEGIN_NAMESPACE(FE)
 template<typename CharT>
 struct string_info
 {
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
 
     CharT* _string_pointer;
     length_t _length;
@@ -25,8 +25,8 @@ struct string_info
 template<typename CharT>
 class char_traits
 {
-    FE_STATIC_CHECK(std::is_const<CharT>::value == true, "static assertion failed: the template argument CharT cannot be const.");
-    FE_STATIC_CHECK(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
+    FE_STATIC_SUSPICION(std::is_const<CharT>::value == true, "static assertion failed: the template argument CharT cannot be const.");
+    FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "CharT is not a valid character type");
 
 public:
     using value_type = CharT;
@@ -76,8 +76,8 @@ public:
     template<class ConstIterator>
     _FORCE_INLINE_ static void assign(string_info<CharT> in_out_string_p, ConstIterator input_begin_p, ConstIterator input_end_p) noexcept
     {
-        FE_STATIC_CHECK((std::is_same<typename std::remove_const<typename ConstIterator::value_type>::type, typename std::remove_const<CharT>::type>::value == false), "static assertion failed: const_iterator::value_type is not equal to CharT.");
-        FE_STATIC_CHECK((std::is_class<ConstIterator>::value == false), "static assertion failed: the template argument const_iterator must be a class or a struct type.");
+        FE_STATIC_SUSPICION((std::is_same<typename std::remove_const<typename ConstIterator::value_type>::type, typename std::remove_const<CharT>::type>::value == false), "static assertion failed: const_iterator::value_type is not equal to CharT.");
+        FE_STATIC_SUSPICION((std::is_class<ConstIterator>::value == false), "static assertion failed: the template argument const_iterator must be a class or a struct type.");
 
         FE_SUSPECT(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
         FE_SUSPECT(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));
@@ -213,8 +213,8 @@ public:
     template<class ConstIterator>
     _FORCE_INLINE_ static void append(string_info<CharT> in_out_string_p, ConstIterator input_begin_p, ConstIterator input_end_p) noexcept
     {
-        FE_STATIC_CHECK((std::is_class<ConstIterator>::value == false), "static assertion failed: the template argument const_iterator must be a class or a struct type.");
-        FE_STATIC_CHECK((std::is_same<ConstIterator::value_type, CharT>::value == false), "static assertion failed: const_iterator::value_type is not equal to CharT.");
+        FE_STATIC_SUSPICION((std::is_class<ConstIterator>::value == false), "static assertion failed: the template argument const_iterator must be a class or a struct type.");
+        FE_STATIC_SUSPICION((std::is_same<ConstIterator::value_type, CharT>::value == false), "static assertion failed: const_iterator::value_type is not equal to CharT.");
         
         FE_SUSPECT(input_begin_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_begin_p));
         FE_SUSPECT(input_end_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(input_end_p));

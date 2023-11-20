@@ -105,7 +105,7 @@ SET(_CORE_
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/memory.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/memory_block.hxx 
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/memory_metrics.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/container_storage.hxx
+	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/pair.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/prerequisites.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/pool.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/pool_allocator.hxx

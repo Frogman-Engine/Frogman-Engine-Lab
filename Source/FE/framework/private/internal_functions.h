@@ -46,5 +46,7 @@ _FORCE_INLINE_ const char* get_current_local_time() noexcept
 #endif
     return tl_s_local_time_string_buffer;
 }
+
+
 END_NAMESPACE;
 #endif

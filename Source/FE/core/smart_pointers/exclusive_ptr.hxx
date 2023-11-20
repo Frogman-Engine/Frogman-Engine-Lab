@@ -2,7 +2,6 @@
 #define _FE_CORE_EXCLUSIVE_PTR_HXX_
 #include <FE/core/prerequisites.h>
 #include <FE/core/smart_pointers/private/ref_table.hxx>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/allocator.hxx>
 #include <FE/core/algorithm/utility.hxx>
 #include <FE/core/iterator.hxx>
@@ -90,8 +89,8 @@ public:
 template<typename T, class Allocator = FE::new_delete_proxy_allocator<FE::scalable_aligned_allocator<typename std::remove_all_extents<T>::type>>>
 class exclusive_ptr final : public FE::exclusive_ptr_base<T>
 {
-	FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
-	FE_STATIC_CHECK((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+	FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
 
 public:
 	using ref_table_type = internal::ref_table_for_exclusive_ptr<T, Allocator>;
@@ -105,14 +104,17 @@ public:
 	using element_type = typename base_type::element_type;
 	using allocator_type = Allocator;
 
+private:
+	_NO_UNIQUE_ADDRESS_ allocator_type m_allocator;
+
 public:
-	_CONSTEXPR20_ exclusive_ptr() noexcept : base_type() {}
+	_CONSTEXPR20_ exclusive_ptr(const Allocator& allocator_p = Allocator()) noexcept : base_type(), m_allocator(allocator_p) {}
 
 	_CONSTEXPR23_ ~exclusive_ptr() noexcept
 	{
 		if (this->m_smart_ptr != nullptr)
 		{
-			Allocator::deallocate(this->m_smart_ptr, 1);
+			this->m_allocator.deallocate(this->m_smart_ptr, 1);
 			this->m_smart_ptr = nullptr;
 		}
 
@@ -125,7 +127,7 @@ public:
 
 	_CONSTEXPR20_ exclusive_ptr(const exclusive_ptr& other_p) noexcept = delete;
 
-	_CONSTEXPR20_ exclusive_ptr(exclusive_ptr&& rvalue_p) noexcept : base_type(rvalue_p.m_smart_ptr)
+	_CONSTEXPR20_ exclusive_ptr(exclusive_ptr&& rvalue_p) noexcept : base_type(rvalue_p.m_smart_ptr), m_allocator(rvalue_p.m_allocator)
 	{
 		if ((rvalue_p.m_smart_ptr == nullptr) || (rvalue_p.m_ref_table_key == ref_table_type::invalid_key_value))
 		{
@@ -138,8 +140,9 @@ public:
 		rvalue_p.m_smart_ptr = nullptr;
 	}
 
-	_CONSTEXPR20_ exclusive_ptr(element_type value_p) noexcept : base_type(Allocator::allocate(1))
+	_CONSTEXPR20_ exclusive_ptr(element_type value_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p)
 	{
+		base_type::m_smart_ptr = this->m_allocator.allocate(1);
 		this->m_ref_table_key = ref_table_type::__register_ref(this);
 		*this->m_smart_ptr = std::move(value_p);
 	}
@@ -155,7 +158,7 @@ public:
 
 		if (this->m_smart_ptr != nullptr)
 		{
-			Allocator::deallocate(this->m_smart_ptr, 1);
+			this->m_allocator.deallocate(this->m_smart_ptr, 1);
 		}
 
 		if (this->m_ref_table_key != ref_table_type::invalid_key_value)
@@ -174,7 +177,7 @@ public:
 	{
 		if (this->m_smart_ptr == nullptr)
 		{
-			this->m_smart_ptr = Allocator::allocate(1);
+			this->m_smart_ptr = this->m_allocator.allocate(1);
 		}
 
 		if (this->m_ref_table_key == ref_table_type::invalid_key_value)
@@ -210,6 +213,11 @@ public:
 		exclusive_ptr l_tmp = std::move(in_out_other_p);
 		in_out_other_p = std::move(*this);
 		*this = std::move(l_tmp);
+	}
+
+	_FORCE_INLINE_ allocator_type& get_allocator() noexcept
+	{
+		return this->m_allocator;
 	}
 
 	_FORCE_INLINE_ explicit operator bool() const noexcept
@@ -328,8 +336,8 @@ _CONSTEXPR23_ _NODISCARD_ exclusive_ptr<T, Allocator> make_exclusive(T value_p) 
 template<typename T, class Allocator>
 class exclusive_ptr<T[], Allocator> final : public FE::exclusive_ptr_base<T[]>
 {
-	FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
-	FE_STATIC_CHECK((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+	FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
 
 public:
 	using ref_table_type = internal::ref_table_for_exclusive_ptr<T[], Allocator>;
@@ -345,15 +353,16 @@ public:
 
 private:
 	pointer m_smart_ptr_end;
+	_NO_UNIQUE_ADDRESS_ allocator_type m_allocator;
 
 public:
-	_CONSTEXPR17_ exclusive_ptr() noexcept : base_type(), m_smart_ptr_end(base_type::m_smart_ptr) {}
+	_CONSTEXPR17_ exclusive_ptr(const Allocator& allocator_p = Allocator()) noexcept : base_type(), m_smart_ptr_end(base_type::m_smart_ptr), m_allocator(allocator_p) {}
 
 	_CONSTEXPR23_ ~exclusive_ptr() noexcept
 	{
 		if (this->m_smart_ptr != nullptr)
 		{
-			Allocator::deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
+			this->m_allocator.deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
 			this->m_smart_ptr = nullptr;
 			this->m_smart_ptr_end = nullptr;
 		}
@@ -367,7 +376,7 @@ public:
 
 	_CONSTEXPR20_ exclusive_ptr(const exclusive_ptr& other_p) noexcept = delete;
 
-	_CONSTEXPR20_ exclusive_ptr(exclusive_ptr&& rvalue_p) noexcept : base_type(rvalue_p.m_smart_ptr), m_smart_ptr_end(rvalue_p.m_smart_ptr_end)
+	_CONSTEXPR20_ exclusive_ptr(exclusive_ptr&& rvalue_p) noexcept : base_type(rvalue_p.m_smart_ptr), m_smart_ptr_end(rvalue_p.m_smart_ptr_end), m_allocator()
 	{
 		if ((rvalue_p.m_smart_ptr == nullptr) || (rvalue_p.m_ref_table_key == ref_table_type::invalid_key_value))
 		{
@@ -382,18 +391,23 @@ public:
 		rvalue_p.m_smart_ptr_end = nullptr;
 	}
 
-	_CONSTEXPR20_ exclusive_ptr(FE::reserve&& array_size_p) noexcept : base_type(Allocator::allocate(array_size_p._value)), m_smart_ptr_end(base_type::m_smart_ptr + array_size_p._value)
+	_CONSTEXPR20_ exclusive_ptr(FE::reserve&& array_size_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p)
 	{
+		base_type::m_smart_ptr = this->m_allocator.allocate(array_size_p._value);
+		this->m_smart_ptr_end = base_type::m_smart_ptr + array_size_p._value;
 		this->m_ref_table_key = ref_table_type::__register_ref(this);
 	}
 
-	_CONSTEXPR20_ exclusive_ptr(std::initializer_list<element_type>&& values_p) noexcept : base_type(Allocator::allocate( values_p.size() )), m_smart_ptr_end(base_type::m_smart_ptr + values_p.size())
+	_CONSTEXPR20_ exclusive_ptr(std::initializer_list<element_type>&& values_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p)
 	{
-		if (values_p.size() == 0)
+		size_t l_initializer_list_size = values_p.size();
+		if (l_initializer_list_size == 0)
 		{
 			return;
 		}
 
+		base_type::m_smart_ptr  = this->m_allocator.allocate(l_initializer_list_size);
+		this->m_smart_ptr_end = base_type::m_smart_ptr + l_initializer_list_size;
 		this->__copy_from_initializer_list(std::move(values_p));
 		this->m_ref_table_key = ref_table_type::__register_ref(this);
 	}
@@ -409,7 +423,7 @@ public:
 
 		if (this->m_smart_ptr != nullptr)
 		{
-			Allocator::deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
+			this->m_allocator.deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
 		}
 
 		if (this->m_ref_table_key != ref_table_type::invalid_key_value)
@@ -490,6 +504,11 @@ public:
 		exclusive_ptr l_tmp = std::move(in_out_other_p);
 		in_out_other_p = std::move(*this);
 		*this = std::move(l_tmp);
+	}
+
+	_FORCE_INLINE_ allocator_type& get_allocator() noexcept
+	{
+		return this->m_allocator;
 	}
 
 	_FORCE_INLINE_ size_t capacity() const noexcept
@@ -689,11 +708,7 @@ private:
 	{
 		if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_TRIVIAL)
 		{
-			pointer l_initializer_list = const_cast<pointer>(values_p.begin());
-			size_t l_initializer_list_elem_count = values_p.size();
-
-			std::memcpy(this->m_smart_ptr, l_initializer_list, l_initializer_list_elem_count * sizeof(element_type));
-			std::memset(l_initializer_list, _NULL_, l_initializer_list_elem_count * sizeof(element_type));
+			FE::memcpy<allocator_type::is_address_aligned>(this->m_smart_ptr, const_cast<pointer>(values_p.begin()), values_p.size() * sizeof(element_type));
 		}
 		else if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 		{
@@ -712,7 +727,7 @@ private:
 
 	_FORCE_INLINE_ void __reallocate(size_t new_count_p) noexcept
 	{
-		this->m_smart_ptr = Allocator::reallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr, new_count_p);
+		this->m_smart_ptr = this->m_allocator.reallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr, new_count_p);
 		this->m_smart_ptr_end = this->m_smart_ptr + new_count_p;
 	}
 };

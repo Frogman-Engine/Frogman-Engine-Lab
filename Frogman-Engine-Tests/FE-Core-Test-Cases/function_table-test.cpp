@@ -11,7 +11,9 @@ FE::boolean Jesus_loves_you() noexcept
 	//std::cout << "Jesus loves you!" << std::endl;
 	return true;
 }
- 
+
+
+
 
 // https://learn.microsoft.com/en-us/cpp/build/reference/gf-eliminate-duplicate-strings?view=msvc-170
 TEST(function_table, general)
@@ -34,6 +36,7 @@ TEST(function_table, general)
 void FE_function_table_invocation_overhead_benchmark(benchmark::State& state_p) noexcept
 {
 	FE_SUSPECT(FE::framework::function_table::check_presence("FE::boolean Jesus_loves_you() noexcept") == false, "Could not find the target function.");
+
 
 	for(auto _ : state_p)
 	{

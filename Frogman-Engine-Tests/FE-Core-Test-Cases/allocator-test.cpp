@@ -14,10 +14,11 @@ TEST(allocator, scalable_aligned_allocator)
 	//EXPECT_EQ(FE::heap_memory_tracker<test>::query_type_data()._thread_local_total_bytes_by_type, 0);
 
 	{
-		test* l_ptc = FE::scalable_aligned_allocator<test>::allocate(100);
+		FE::scalable_aligned_allocator<test> l_allocator;
+		test* l_ptc = l_allocator.allocate(100);
 		//EXPECT_EQ(FE::heap_memory_tracker<test>::query_type_data()._thread_local_total_bytes_by_type, sizeof(test) * 100);
-		l_ptc = FE::scalable_aligned_allocator<test>::reallocate(l_ptc, 100, 10);
-		FE::scalable_aligned_allocator<test>::deallocate(l_ptc, 10);
+		l_ptc = l_allocator.reallocate(l_ptc, 100, 10);
+		l_allocator.deallocate(l_ptc, 10);
 	}
 
 	//EXPECT_EQ(FE::heap_memory_tracker<test>::query_type_data()._thread_local_total_bytes_by_type, 0);
@@ -31,10 +32,11 @@ TEST(allocator, cache_aligned_allocator)
 	//EXPECT_EQ(FE::heap_memory_tracker<test>::query_type_data()._thread_local_total_bytes_by_type, 0);
 
 	{
-		test* l_ptc = FE::cache_aligned_allocator<test>::allocate(100);
+		FE::cache_aligned_allocator<test> l_allocator;
+		test* l_ptc = l_allocator.allocate(100);
 		//EXPECT_EQ(FE::heap_memory_tracker<test>::query_type_data()._thread_local_total_bytes_by_type, sizeof(test) * 100);
-		l_ptc = FE::cache_aligned_allocator<test>::reallocate(l_ptc, 100, 10);
-		FE::cache_aligned_allocator<test>::deallocate(l_ptc, 10);
+		l_ptc = l_allocator.reallocate(l_ptc, 100, 10);
+		l_allocator.deallocate(l_ptc, 10);
 	}
 
 	//EXPECT_EQ(FE::heap_memory_tracker<test>::query_type_data()._thread_local_total_bytes_by_type, 0);

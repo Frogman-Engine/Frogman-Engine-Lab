@@ -5,8 +5,8 @@
 #include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/containers/stack.hxx>
 #include <FE/core/containers/queue.hxx>
-#include <FE/core/hash.hpp>
 #include <FE/core/fstring.hxx>
+#include <FE/core/hash.hpp>
 #include <array>
 #include <cstdlib>
 #include <memory>
@@ -64,8 +64,8 @@ namespace internal::pool
     template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment>
     struct chunk
     {
-        FE_STATIC_CHECK(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-        FE_STATIC_CHECK(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+        FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+        FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
         using block_info_type = block_info<T, POOL_TYPE::_BLOCK>;
         using value_type = typename block_info_type::value_type;
@@ -117,18 +117,18 @@ namespace internal::pool
 }
 
 
-template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
+template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 struct pool_deleter;
 
-template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
+template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 class pool;
 
 
-template<typename T, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-struct pool_deleter<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>
+template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+struct pool_deleter<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>
 {
-    FE_STATIC_CHECK(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-    FE_STATIC_CHECK(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+    FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+    FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
     using chunk_type = internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment>;
     using value_type = typename FE::remove_const_reference<typename chunk_type::value_type>::type;
@@ -161,7 +161,7 @@ public:
 template<size_t ChunkCapacity, class Alignment>
 struct generic_deleter_base
 {
-    template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
+    template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
     friend class pool;
 
     using chunk_type = internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>;
@@ -194,7 +194,7 @@ template<size_t ChunkCapacity, class Alignment>
 thread_local FE::fstack<typename generic_deleter_base<ChunkCapacity, Alignment>::block_info_type, generic_deleter_base<ChunkCapacity, Alignment>::temporary_storage_capacity> generic_deleter_base<ChunkCapacity, Alignment>::tl_s_temporary_storage;
 
 
-template<size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
+template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 struct nondestructive_generic_deleter final : public generic_deleter_base<ChunkCapacity, Alignment>
 {
     using base_type = generic_deleter_base<ChunkCapacity, Alignment>;
@@ -216,17 +216,17 @@ struct nondestructive_generic_deleter final : public generic_deleter_base<ChunkC
 
         if (this->m_host_chunk->_unused_blocks.size() > 1)
         {
-            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::__merge(base_type::tl_s_temporary_storage, this->m_host_chunk->_unused_blocks);
+            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(base_type::tl_s_temporary_storage, this->m_host_chunk->_unused_blocks);
         }
     }
 };
 
 
-template<typename T, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-struct pool_deleter<T, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator> final : public generic_deleter_base<ChunkCapacity, Alignment>
+template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+struct pool_deleter<T, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator> final : public generic_deleter_base<ChunkCapacity, Alignment>
 {
-    FE_STATIC_CHECK(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-    FE_STATIC_CHECK(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+    FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+    FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
     using base_type = generic_deleter_base<ChunkCapacity, Alignment>;
     using chunk_type = typename base_type::chunk_type;
@@ -264,7 +264,7 @@ public:
 
         if (this->m_host_chunk->_unused_blocks.size() > 1)
         {
-            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::__merge(base_type::tl_s_temporary_storage, this->m_host_chunk->_unused_blocks);
+            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(base_type::tl_s_temporary_storage, this->m_host_chunk->_unused_blocks);
         }
     }
 
@@ -277,24 +277,24 @@ public:
 
 
 // + memory pool regions
-template<typename T, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-class pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>
+template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+class pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>
 {
-    FE_STATIC_CHECK(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-    FE_STATIC_CHECK(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+    FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+    FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
 public:
     using chunk_type = internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment>;
-    using deleter_type = pool_deleter<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>;
+    using deleter_type = pool_deleter<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>;
     using block_info_type = typename chunk_type::block_info_type;
 
-    using global_pool_type = std::list<chunk_type, StatefulGlobalAllocator>;
-    using namespace_pool_type = std::unordered_multimap<FE::memory_region_t, chunk_type, FE::hash<FE::memory_region_t>, std::equal_to<FE::memory_region_t>, StatefulNamespaceAllocator>;
+    using global_pool_type = std::list<chunk_type, GlobalAllocator>;
+    using namespace_pool_type = std::unordered_multimap<FE::memory_region_t, chunk_type, FE::hash<FE::memory_region_t>, std::equal_to<FE::memory_region_t>, NamespaceAllocator>;
 
     constexpr static count_t chunk_capacity = ChunkCapacity;
 
-    FE_STATIC_CHECK((std::is_same<T, typename chunk_type::value_type>::value == false), "Static Assertion Failed: The value_type does not match.");
-    FE_STATIC_CHECK((std::is_same<T*, typename chunk_type::pointer>::value == false), "Static Assertion Failed: The value_type* does not match.");
+    FE_STATIC_SUSPICION((std::is_same<T, typename chunk_type::value_type>::value == false), "Static Assertion Failed: The value_type does not match.");
+    FE_STATIC_SUSPICION((std::is_same<T*, typename chunk_type::pointer>::value == false), "Static Assertion Failed: The value_type* does not match.");
 
 private:
     thread_local static typename global_pool_type tl_s_global_memory;
@@ -502,32 +502,32 @@ public:
 };
 
 
-template<typename T, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::global_pool_type pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::tl_s_global_memory;
+template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::global_pool_type pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::tl_s_global_memory;
 
-template<typename T, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::namespace_pool_type pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::tl_s_memory_regions;
-
-
+template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+thread_local typename pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::namespace_pool_type pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::tl_s_memory_regions;
 
 
-template<size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-class pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>
+
+
+template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+class pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>
 {
-    template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
+    template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
     friend struct pool_deleter;
 
-    template<size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
+    template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
     friend struct nondestructive_generic_deleter;
 
 public:
     using chunk_type = internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>;
 
     template<typename U>
-    using deleter_type = pool_deleter<U, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>;
+    using deleter_type = pool_deleter<U, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>;
 
-    using global_pool_type = std::list<chunk_type, StatefulGlobalAllocator>;
-    using namespace_pool_type = std::unordered_multimap<FE::memory_region_t, chunk_type, FE::hash<FE::memory_region_t>, std::equal_to<FE::memory_region_t>, StatefulNamespaceAllocator>;
+    using global_pool_type = std::list<chunk_type, GlobalAllocator>;
+    using namespace_pool_type = std::unordered_multimap<FE::memory_region_t, chunk_type, FE::hash<FE::memory_region_t>, std::equal_to<FE::memory_region_t>, NamespaceAllocator>;
 
     using block_info_type = typename chunk_type::block_info_type;
 
@@ -543,9 +543,9 @@ public:
     template<typename U>
     static std::unique_ptr<U, deleter_type<U>> allocate(count_t size_p = 1) noexcept
     {
-        FE_STATIC_CHECK((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
-        FE_STATIC_CHECK(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-        FE_STATIC_CHECK(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
+        FE_STATIC_SUSPICION((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
+        FE_STATIC_SUSPICION(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+        FE_STATIC_SUSPICION(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
         FE_SUSPECT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
         FE_EXIT(size_p > ChunkCapacity, MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY, "Fatal Error: Unable to allocate the size of memmory that exceeds the pool chunk's capacity.");
 
@@ -725,9 +725,9 @@ public:
     template<typename U>
     static std::unique_ptr<U, deleter_type<U>> allocate(const char* region_name_p, count_t size_p = 1) noexcept
     {
-        FE_STATIC_CHECK((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
-        FE_STATIC_CHECK(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-        FE_STATIC_CHECK(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
+        FE_STATIC_SUSPICION((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
+        FE_STATIC_SUSPICION(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+        FE_STATIC_SUSPICION(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
         FE_SUSPECT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
         FE_EXIT(size_p > ChunkCapacity, MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY, "Fatal Error: Unable to allocate the size of memmory that exceeds the pool chunk's capacity.");
 
@@ -984,27 +984,27 @@ private:
 };
 
 
-template<size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::global_pool_type pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::tl_s_global_memory;
+template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::global_pool_type pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::tl_s_global_memory;
 
-template<size_t ChunkCapacity, class Alignment, class StatefulGlobalAllocator, class StatefulNamespaceAllocator>
-thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::namespace_pool_type pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>::tl_s_memory_regions;
-
-
+template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
+thread_local typename pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::namespace_pool_type pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::tl_s_memory_regions;
 
 
-template<typename T, size_t ChunkCapacity = 128, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>, class StatefulNamespaceAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>>
-using block_pool = pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>, StatefulGlobalAllocator, StatefulNamespaceAllocator>;
-
-template<typename T, size_t ChunkCapacity = 128, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>, class StatefulNamespaceAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>>
-using block_pool_ptr = std::unique_ptr<T, pool_deleter<T, FE::POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>, StatefulGlobalAllocator, StatefulNamespaceAllocator>>;
 
 
-template<size_t ChunkCapacity = 512 MB, class Alignment = FE::align_8bytes, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>, class StatefulNamespaceAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>>
-using generic_pool = pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>;
+template<typename T, size_t ChunkCapacity = 128, class GlobalAllocator = FE::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>, class NamespaceAllocator = FE::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>>
+using block_pool = pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>, GlobalAllocator, NamespaceAllocator>;
 
-template<typename T, size_t ChunkCapacity = 512 MB, class Alignment = FE::align_8bytes, class StatefulGlobalAllocator = FE::std_style::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>, class StatefulNamespaceAllocator = FE::std_style::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>>
-using generic_pool_ptr = std::unique_ptr<T, pool_deleter<T, FE::POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, StatefulGlobalAllocator, StatefulNamespaceAllocator>>;
+template<typename T, size_t ChunkCapacity = 128, class GlobalAllocator = FE::scalable_aligned_allocator<internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>, class NamespaceAllocator = FE::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>>>>>
+using block_pool_ptr = std::unique_ptr<T, pool_deleter<T, FE::POOL_TYPE::_BLOCK, ChunkCapacity, FE::align_custom_bytes<sizeof(T)>, GlobalAllocator, NamespaceAllocator>>;
+
+
+template<size_t ChunkCapacity = 512 MB, class Alignment = FE::align_8bytes, class GlobalAllocator = FE::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>, class NamespaceAllocator = FE::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>>
+using generic_pool = pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>;
+
+template<typename T, size_t ChunkCapacity = 512 MB, class Alignment = FE::align_8bytes, class GlobalAllocator = FE::scalable_aligned_allocator<internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>, class NamespaceAllocator = FE::scalable_aligned_allocator<std::pair<const FE::memory_region_t, internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>>>>
+using generic_pool_ptr = std::unique_ptr<T, pool_deleter<T, FE::POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>>;
 
 
 template<uint64 Capacity>
@@ -1017,15 +1017,12 @@ struct capacity final
 template<class PoolType>
 class scoped_pool_resource final
 {
-    FE::memory_region_t m_region_name;
-
 public:
     using pool_type = PoolType;
 
     _FORCE_INLINE_ scoped_pool_resource(count_t pages_p) noexcept
     {
         pool_type::create_pages(pages_p);
-
     }
 
     scoped_pool_resource(const scoped_pool_resource& other_p) noexcept = delete;
@@ -1050,7 +1047,6 @@ public:
     _FORCE_INLINE_ scoped_namespace_pool_resource(const char* region_name_p, count_t pages_p) noexcept : m_region_name(region_name_p)
     {
         pool_type::create_pages(region_name_p, pages_p);
-
     }
 
     scoped_namespace_pool_resource(const scoped_namespace_pool_resource& other_p) noexcept = delete;

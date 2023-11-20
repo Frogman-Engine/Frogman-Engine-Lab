@@ -9,7 +9,7 @@
 
 
 #ifdef _MSC_VER
-#define _VISUAL_STUDIO_CPP_
+#define _MSVC_
 #include <vcruntime.h>
 #endif
 
@@ -40,7 +40,7 @@
 #define _STDCALL_ 
 #define _FASTCALL_
 
-#elif defined(_VISUAL_STUDIO_CPP_)
+#elif defined(_MSVC_)
 #define _FORCE_INLINE_ __forceinline
 #define _STDCALL_ __stdcall
 #define _FASTCALL_ __fastcall

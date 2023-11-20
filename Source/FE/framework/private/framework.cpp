@@ -7,7 +7,6 @@
 #include <boost/stacktrace.hpp>
 #include <csignal>
 
-
 #define _DUMP_FILE_NAME_LENGTH_ 128
 
 
@@ -42,7 +41,7 @@ void application::__launch_main(initialization_arguments& initialization_argumen
 	std::set_terminate([]() { __abnormal_shutdown_with_exit_code(SIGTERM); });
 
 
-	function_table::tl_s_task_map.reserve(initialization_arguments_p._initial_function_table_size);
+	function_table::s_task_map.reserve(initialization_arguments_p._initial_function_table_size);
 }
 
 void application::__shutdown_main()
@@ -83,6 +82,8 @@ END_NAMESPACE
 
 
 FE::framework::RESTART_OR_NOT FE::framework::application::s_restart_or_not = FE::framework::RESTART_OR_NOT::_NO_OPERATION;
+
+
 
 
 int main(int argc_p, char** argv_p)

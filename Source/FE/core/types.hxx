@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <utility>
 #pragma warning(disable: 4530) // disable no-exception warnings
-#ifdef _VISUAL_STUDIO_CPP_
+#ifdef _MSVC_
 #ifdef max
 #undef max
 #endif
@@ -308,10 +308,10 @@ public:
 		return this->m_ref_ptr == nullptr;
 	}
 
-	_FORCE_INLINE_ T& operator->() const noexcept
+	_FORCE_INLINE_ T* operator->() const noexcept
 	{
 		assert(this->m_ref_ptr != nullptr);
-		return *this->m_ref_ptr;
+		return this->m_ref_ptr;
 	}
 
 	_FORCE_INLINE_ operator T& () const noexcept
@@ -331,38 +331,6 @@ public:
 };
 
 
-template<typename First, typename Second>
-struct pair
-{
-	using first_type = First;
-	using second_type = Second;
-	
-	First _first;
-	Second _second;
-
-	_FORCE_INLINE_ pair() noexcept = default;
-	_FORCE_INLINE_ pair(First first_p, Second second_p) noexcept : _first(std::move(first_p)), _second(std::move(second_p)) {};
-	_FORCE_INLINE_ ~pair() noexcept = default;
-
-	_FORCE_INLINE_ pair(const pair&) noexcept = default;
-	_FORCE_INLINE_ pair(pair&& rvalue_p) noexcept : _first(std::move(rvalue_p._first)), _second(std::move(rvalue_p._second)) {};
-
-	_FORCE_INLINE_ pair& operator=(const pair& other_p) noexcept
-	{
-		this->_first = other_p._first;
-		this->_second = other_p._second;
-
-		return *this;
-	}
-
-	_FORCE_INLINE_ pair& operator=(pair&& rvalue_p) noexcept
-	{
-		this->_first = std::move(rvalue_p._first);
-		this->_second = std::move(rvalue_p._second);
-
-		return *this;
-	}
-};
 
 
 namespace container
@@ -419,7 +387,7 @@ END_NAMESPACE
 #endif
 
 
-//#ifdef _VISUAL_STUDIO_CPP_
+//#ifdef _MSVC_
 //#ifndef max
 //#define max(a,b)            (((a) > (b)) ? (a) : (b))
 //#endif

@@ -4,7 +4,6 @@
 #include <FE/core/prerequisites.h>
 #include <FE/core/allocator.hxx>
 #include <FE/core/algorithm/utility.hxx>
-#include <FE/core/container_storage.hxx>
 #include <FE/core/iterator.hxx>
 #include <FE/core/memory.hxx>
 #include <FE/core/smart_pointers/smart_ptrs.h>

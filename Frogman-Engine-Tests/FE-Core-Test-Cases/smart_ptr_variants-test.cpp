@@ -42,7 +42,7 @@ TEST(exclusive_ptr, release)
 		FE::exclusive_ptr<std::vector<int>> l_exclusive_ptr = std::vector{ 1, 2, 3, 4, 5 };
 		FE::exclusive_ptr<std::vector<int>>::pointer l_pointer = l_exclusive_ptr.release();
 		EXPECT_EQ(l_exclusive_ptr.get(), nullptr);
-		FE::exclusive_ptr<std::vector<int>>::allocator_type::deallocate(l_pointer, 1);
+		l_exclusive_ptr.get_allocator().deallocate(l_pointer, 1);
 	}
 }
 
@@ -184,7 +184,7 @@ TEST(smart_ptr_variants, release_array)
 
 		FE::exclusive_ptr<std::string[]>::pointer l_pointer = l_exclusive_ptr.release();
 		EXPECT_EQ(l_exclusive_ptr.get(), nullptr);
-		FE::exclusive_ptr<std::string[]>::allocator_type::deallocate(l_pointer, l_prev_size);
+		l_exclusive_ptr.get_allocator().deallocate(l_pointer, l_prev_size);
 	}
 }
 

@@ -36,6 +36,21 @@ TEST(unique_ptr, construct_by_value_assignment)
 
 
 
+#ifdef _HAS_CXX20_
+#include <FE/core/pair.hxx>
+TEST(unique_ptr, size)
+{
+	using namespace FE;
+
+	{
+		EXPECT_EQ(sizeof(FE::unique_ptr<int>), 8);
+	}
+}
+#endif
+
+
+
+
 TEST(unique_ptr, release)
 {
 	using namespace FE;
@@ -44,7 +59,7 @@ TEST(unique_ptr, release)
 		FE::unique_ptr<std::string> l_unique_ptr = std::string("std::string");
 		FE::unique_ptr<std::string>::pointer l_pointer = l_unique_ptr.release();
 		EXPECT_EQ(l_unique_ptr.get(), nullptr);
-		FE::unique_ptr<std::string>::allocator_type::deallocate(l_pointer, 1);
+		l_unique_ptr.get_allocator().deallocate(l_pointer, 1);
 	}
 }
 
@@ -148,7 +163,7 @@ TEST(unique_ptr, release_array)
 
 		FE::unique_ptr<std::string[]>::pointer l_pointer = l_unique_ptr.release();
 		EXPECT_EQ(l_unique_ptr.get(), nullptr);
-		FE::unique_ptr<std::string[]>::allocator_type::deallocate(l_pointer, l_prev_size);
+		l_unique_ptr.get_allocator().deallocate(l_pointer, l_prev_size);
 	}
 }
 

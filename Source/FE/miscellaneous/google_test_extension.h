@@ -17,7 +17,7 @@
 #define TEST_FROGMAN_ENGINE(test_subject_class_name_p, test_case_p) TEST_F(sample_##test_subject_class_name_p, test_case_p)
 
 
-#ifdef _VISUAL_STUDIO_CPP_
+#ifdef _MSVC_
 
 
 #define DECLARE_TEST_CLASS(namespace_p, test_subject_class_name_p) \

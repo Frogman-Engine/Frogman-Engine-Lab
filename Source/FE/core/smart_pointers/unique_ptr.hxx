@@ -17,8 +17,8 @@ BEGIN_NAMESPACE(FE)
 template<typename T, class Allocator = FE::new_delete_proxy_allocator<FE::scalable_aligned_allocator<typename std::remove_all_extents<T>::type>>>
 class unique_ptr final
 {
-	FE_STATIC_CHECK((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-	FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+	FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 public:
 	using pointer = typename Allocator::pointer;
@@ -26,10 +26,11 @@ public:
 	using allocator_type = Allocator;
 
 private:
+	_NO_UNIQUE_ADDRESS_ allocator_type m_allocator;
 	pointer m_smart_ptr;
 
 public:
-	_FORCE_INLINE_ unique_ptr() noexcept : m_smart_ptr() {}
+	_FORCE_INLINE_ unique_ptr(const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr() {}
 	
 	_CONSTEXPR23_ ~unique_ptr() noexcept
 	{
@@ -38,18 +39,18 @@ public:
 			return;
 		}
 
-		Allocator::deallocate(this->m_smart_ptr, 1);
+		this->m_allocator.deallocate(this->m_smart_ptr, 1);
 		this->m_smart_ptr = nullptr;
 	}
 
 	_CONSTEXPR20_ unique_ptr(const unique_ptr& other_p) noexcept = delete;
 
-	_FORCE_INLINE_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_smart_ptr(rvalue_p.m_smart_ptr)
+	_FORCE_INLINE_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_allocator(rvalue_p.m_allocator), m_smart_ptr(rvalue_p.m_smart_ptr)
 	{
 		rvalue_p.m_smart_ptr = nullptr;
 	}
 
-	_FORCE_INLINE_ unique_ptr(element_type value_p) noexcept : m_smart_ptr(Allocator::allocate(1))
+	_FORCE_INLINE_ unique_ptr(element_type value_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(1))
 	{
 		*this->m_smart_ptr = std::move(value_p);
 	}
@@ -65,7 +66,7 @@ public:
 
 		if (this->m_smart_ptr != nullptr)
 		{
-			Allocator::deallocate(this->m_smart_ptr, 1);
+			this->m_smart_ptr.deallocate(this->m_smart_ptr, 1);
 		}
 
 		this->m_smart_ptr = rvalue_p.m_smart_ptr;
@@ -77,7 +78,7 @@ public:
 	{
 		if (this->m_smart_ptr == nullptr)
 		{
-			this->m_smart_ptr = Allocator::allocate(1);
+			this->m_smart_ptr = this->m_allocator.allocate(1);
 		}
 
 		*this->m_smart_ptr = std::move(value_p);
@@ -106,6 +107,11 @@ public:
 		pointer l_temporary_smart_ptr = in_out_other_p.m_smart_ptr;
 		in_out_other_p.m_smart_ptr = this->m_smart_ptr;
 		this->m_smart_ptr = l_temporary_smart_ptr;
+	}
+
+	_FORCE_INLINE_ allocator_type& get_allocator() noexcept
+	{
+		return this->m_allocator;
 	}
 
 	_FORCE_INLINE_ pointer get() const noexcept
@@ -197,8 +203,8 @@ _CONSTEXPR23_ _NODISCARD_ unique_ptr<T, Allocator> make_unique(T value_p) noexce
 template<typename T, class Allocator>
 class unique_ptr<T[], Allocator> final
 {
-	FE_STATIC_CHECK((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-	FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+	FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 public:
 	using pointer = typename Allocator::pointer;
@@ -206,11 +212,12 @@ public:
 	using allocator_type = Allocator;
 
 private:
+	_NO_UNIQUE_ADDRESS_ allocator_type m_allocator;
 	pointer m_smart_ptr;
 	pointer m_smart_ptr_end;
 
 public:
-	_FORCE_INLINE_ unique_ptr() noexcept : m_smart_ptr(), m_smart_ptr_end() {}
+	_FORCE_INLINE_ unique_ptr(const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(), m_smart_ptr_end() {}
 
 	_CONSTEXPR23_ ~unique_ptr() noexcept
 	{
@@ -219,24 +226,24 @@ public:
 			return;
 		}
 	
-		Allocator::deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
+		this->m_allocator.deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
 		this->m_smart_ptr = nullptr;
 		this->m_smart_ptr_end = nullptr;
 	}
 
 	_CONSTEXPR20_ unique_ptr(const unique_ptr& other_p) noexcept = delete;
 
-	_CONSTEXPR20_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_smart_ptr(rvalue_p.m_smart_ptr), m_smart_ptr_end(rvalue_p.m_smart_ptr_end)
+	_CONSTEXPR20_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_allocator(rvalue_p.m_allocator), m_smart_ptr(rvalue_p.m_smart_ptr), m_smart_ptr_end(rvalue_p.m_smart_ptr_end)
 	{
 		rvalue_p.m_smart_ptr = nullptr;
 		rvalue_p.m_smart_ptr_end = nullptr;
 	}
 
-	_FORCE_INLINE_ unique_ptr(FE::reserve&& array_size_p) noexcept : m_smart_ptr(Allocator::allocate(array_size_p._value)), m_smart_ptr_end(m_smart_ptr + array_size_p._value)
+	_FORCE_INLINE_ unique_ptr(FE::reserve&& array_size_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(array_size_p._value)), m_smart_ptr_end(m_smart_ptr + array_size_p._value)
 	{
 	}
 
-	_CONSTEXPR20_ unique_ptr(std::initializer_list<element_type>&& values_p) noexcept : m_smart_ptr(Allocator::allocate( values_p.size() )), m_smart_ptr_end(m_smart_ptr + values_p.size())
+	_CONSTEXPR20_ unique_ptr(std::initializer_list<element_type>&& values_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate( values_p.size() )), m_smart_ptr_end(m_smart_ptr + values_p.size())
 	{
 		if (values_p.size() == 0)
 		{
@@ -257,7 +264,7 @@ public:
 
 		if (this->m_smart_ptr != nullptr)
 		{
-			Allocator::deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
+			this->m_allocator.deallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr);
 		}
 
 		this->m_smart_ptr = rvalue_p.m_smart_ptr;
@@ -309,7 +316,7 @@ public:
 		this->operator=(std::move(new_array_size_p));
 	}
 
-	_FORCE_INLINE_ var::size_t capacity() const noexcept
+	_FORCE_INLINE_ size_t capacity() const noexcept
 	{
 		return this->m_smart_ptr_end - this->m_smart_ptr;
 	}
@@ -327,6 +334,11 @@ public:
 	_FORCE_INLINE_ pointer get() const noexcept
 	{
 		return this->m_smart_ptr;
+	}
+
+	_FORCE_INLINE_ allocator_type& get_allocator() noexcept
+	{
+		return this->m_allocator;
 	}
 
 	_FORCE_INLINE_ explicit operator bool() const noexcept
@@ -440,6 +452,7 @@ public:
 		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr_end;
 	}
+
 private:
 	_CONSTEXPR20_ void __copy_from_initializer_list(std::initializer_list<element_type>&& values_p) noexcept
 	{
@@ -447,7 +460,7 @@ private:
 
 		if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_TRIVIAL)
 		{
-			std::memcpy(this->m_smart_ptr, const_cast<element_type*>(values_p.begin()), values_p.size() * sizeof(element_type));
+			FE::memcpy<allocator_type::is_address_aligned>(this->m_smart_ptr, const_cast<pointer>(values_p.begin()), values_p.size() * sizeof(element_type));
 		}
 		else if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 		{
@@ -466,7 +479,7 @@ private:
 
 	_FORCE_INLINE_ void __reallocate(size_t new_count_p) noexcept
 	{
-		this->m_smart_ptr = Allocator::reallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr, new_count_p);
+		this->m_smart_ptr = this->m_allocator.reallocate(this->m_smart_ptr, this->m_smart_ptr_end - this->m_smart_ptr, new_count_p);
 		this->m_smart_ptr_end = this->m_smart_ptr + new_count_p;
 	}
 };
@@ -497,8 +510,8 @@ namespace concurrency
 	template<typename T, class Allocator = FE::new_delete_proxy_allocator<FE::cache_aligned_allocator<typename std::remove_all_extents<T>::type>>>
 	class unique_ptr final
 	{
-		FE_STATIC_CHECK((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-		FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+		FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+		FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 	public:
 		using pointer = typename Allocator::pointer;
@@ -506,10 +519,11 @@ namespace concurrency
 		using allocator_type = Allocator;
 
 	private:
+		_NO_UNIQUE_ADDRESS_ allocator_type m_allocator;
 		std::atomic<pointer> m_smart_ptr;
 
 	public:
-		_CONSTEXPR20_ unique_ptr() noexcept : m_smart_ptr() {}
+		_CONSTEXPR20_ unique_ptr(const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr() {}
 
 		_CONSTEXPR23_ ~unique_ptr() noexcept
 		{
@@ -526,14 +540,14 @@ namespace concurrency
 				return;
 			}
 
-			Allocator::deallocate(l_pending_kill, 1);
+			this->m_allocator.deallocate(l_pending_kill, 1);
 		}
 
 		_CONSTEXPR20_ unique_ptr(const unique_ptr& other_p) noexcept = delete;
 
-		_CONSTEXPR20_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_smart_ptr(rvalue_p.m_smart_ptr.exchange(nullptr)) {}
+		_CONSTEXPR20_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_allocator(rvalue_p.m_allocator()), m_smart_ptr(rvalue_p.m_smart_ptr.exchange(nullptr)) {}
 
-		_CONSTEXPR20_ unique_ptr(element_type value_p) noexcept : m_smart_ptr(Allocator::allocate(1))
+		_CONSTEXPR20_ unique_ptr(element_type value_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(1))
 		{
 			*this->m_smart_ptr = std::move(value_p);
 		}
@@ -551,7 +565,7 @@ namespace concurrency
 			pointer l_previous_resource = this->m_smart_ptr.exchange(l_ownership_holder);
 			if (l_previous_resource != nullptr)
 			{
-				Allocator::deallocate(l_previous_resource, 1);
+				this->m_allocator.deallocate(l_previous_resource, 1);
 			}
 			return *this;
 		}
@@ -563,7 +577,7 @@ namespace concurrency
 			
 			if (l_allocate_if_smart_ptr_was_null == nullptr) // This if-statement cannot concurrently result in true.
 			{
-				l_allocate_if_smart_ptr_was_null = Allocator::allocate(1);
+				l_allocate_if_smart_ptr_was_null = this->m_allocator.allocate(1);
 			}
 
 			if (l_allocate_if_smart_ptr_was_null != FE::concurrency::in_progress_signalptr_t<T>::value)
@@ -606,6 +620,11 @@ namespace concurrency
 		{
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load(order_p);
+		}
+
+		_FORCE_INLINE_ allocator_type& get_allocator() noexcept
+		{
+			return this->m_allocator;
 		}
 
 		_FORCE_INLINE_ explicit operator bool() const noexcept
@@ -714,8 +733,8 @@ namespace concurrency
 	template<typename T, class Allocator>
 	class unique_ptr<T[], Allocator> final
 	{
-		FE_STATIC_CHECK((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-		FE_STATIC_CHECK(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+		FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+		FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 	public:
 		using pointer = typename Allocator::pointer;
@@ -723,11 +742,12 @@ namespace concurrency
 		using allocator_type = Allocator;
 
 	private:
+		_NO_UNIQUE_ADDRESS_ allocator_type m_allocator;
 		std::atomic<pointer> m_smart_ptr = nullptr;
 		std::atomic<pointer> m_smart_ptr_end = nullptr;
 
 	public:
-		_CONSTEXPR20_ unique_ptr() noexcept : m_smart_ptr(), m_smart_ptr_end() {}
+		_CONSTEXPR20_ unique_ptr(const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(), m_smart_ptr_end() {}
 
 		_CONSTEXPR23_ ~unique_ptr() noexcept
 		{
@@ -746,16 +766,16 @@ namespace concurrency
 				return;
 			}
 
-			Allocator::deallocate(l_pending_kill, l_pending_kill_end - l_pending_kill);
+			this->m_allocator.deallocate(l_pending_kill, l_pending_kill_end - l_pending_kill);
 		}
 
 		_CONSTEXPR20_ unique_ptr(const unique_ptr& other_p) noexcept = delete;
 
-		_CONSTEXPR20_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_smart_ptr(rvalue_p.m_smart_ptr.exchange(nullptr)), m_smart_ptr_end(rvalue_p.m_smart_ptr_end.exchange(nullptr)) {}
+		_CONSTEXPR20_ unique_ptr(unique_ptr&& rvalue_p) noexcept : m_allocator(rvalue_p.m_allocator), m_smart_ptr(rvalue_p.m_smart_ptr.exchange(nullptr)), m_smart_ptr_end(rvalue_p.m_smart_ptr_end.exchange(nullptr)) {}
 
-		_CONSTEXPR20_ unique_ptr(FE::reserve&& array_size_p) noexcept : m_smart_ptr(Allocator::allocate(array_size_p._value)), m_smart_ptr_end(m_smart_ptr.load(std::memory_order_relaxed) + array_size_p._value) {}
+		_CONSTEXPR20_ unique_ptr(FE::reserve&& array_size_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(array_size_p._value)), m_smart_ptr_end(m_smart_ptr.load(std::memory_order_relaxed) + array_size_p._value) {}
 
-		_CONSTEXPR20_ unique_ptr(std::initializer_list<element_type>&& values_p) noexcept : m_smart_ptr(Allocator::allocate(values_p.size())), m_smart_ptr_end(m_smart_ptr.load(std::memory_order_relaxed) + values_p.size())
+		_CONSTEXPR20_ unique_ptr(std::initializer_list<element_type>&& values_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(values_p.size())), m_smart_ptr_end(m_smart_ptr.load(std::memory_order_relaxed) + values_p.size())
 		{
 			if (values_p.size() == 0)
 			{
@@ -779,7 +799,7 @@ namespace concurrency
 			pointer l_previous_resource_end = this->m_smart_ptr_end.exchange( rvalue_p.m_smart_ptr_end.exchange(nullptr) );
 			if (l_previous_resource != nullptr)
 			{
-				Allocator::deallocate(l_previous_resource, l_previous_resource_end - l_previous_resource);
+				this->m_allocator.deallocate(l_previous_resource, l_previous_resource_end - l_previous_resource);
 			}
 			return *this;
 		}
@@ -856,6 +876,11 @@ namespace concurrency
 		{
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load(order_p);
+		}
+
+		_FORCE_INLINE_ allocator_type& get_allocator() noexcept
+		{
+			return this->m_allocator;
 		}
 
 		_FORCE_INLINE_ explicit operator bool() const noexcept
@@ -1001,7 +1026,7 @@ namespace concurrency
 			{
 				if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_TRIVIAL)
 				{
-					std::memcpy(l_temporary_ownership_holder, const_cast<element_type*>(values_p.begin()), values_p.size() * sizeof(element_type));
+					FE::memcpy<allocator_type::is_address_aligned>(l_temporary_ownership_holder, const_cast<element_type*>(values_p.begin()), values_p.size() * sizeof(element_type));
 				}
 				else if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
 				{
@@ -1026,7 +1051,7 @@ namespace concurrency
 			pointer l_temporary_ownership_holder = this->m_smart_ptr.exchange(FE::concurrency::in_progress_signalptr_t<T>::value);
 			if (l_temporary_ownership_holder != FE::concurrency::in_progress_signalptr_t<T>::value)
 			{
-				l_temporary_ownership_holder = Allocator::reallocate(l_temporary_ownership_holder, this->m_smart_ptr_end.load(std::memory_order_acquire) - l_temporary_ownership_holder, new_count_p);
+				l_temporary_ownership_holder = this->m_allocator.reallocate(l_temporary_ownership_holder, this->m_smart_ptr_end.load(std::memory_order_acquire) - l_temporary_ownership_holder, new_count_p);
 				this->m_smart_ptr_end.store(l_temporary_ownership_holder + new_count_p, std::memory_order_release);
 				this->m_smart_ptr.store(l_temporary_ownership_holder);
 			}
