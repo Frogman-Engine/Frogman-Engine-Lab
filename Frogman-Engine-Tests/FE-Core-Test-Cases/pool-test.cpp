@@ -234,7 +234,18 @@ void boost_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 
 		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
 		{
-			boost::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
+			if (i % 2 == 0)
+			{
+				boost::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
+			}
+		}
+
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			if (i % 2 == 1)
+			{
+				boost::pool_allocator<std::string>::deallocate(l_s_strings[i], 1);
+			}
 		}
 	}
 }
@@ -258,13 +269,25 @@ void boost_object_pool_allocator_extreme_test(benchmark::State& state_p) noexcep
 
 		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
 		{
-			l_allocator.free(l_s_strings[i]);
+			if (i % 2 == 0)
+			{
+				l_allocator.free(l_s_strings[i]);
+			}
+		}
+
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			if (i % 2 == 1)
+			{
+				l_allocator.free(l_s_strings[i]);
+			}
 		}
 	}
 }
 BENCHMARK(boost_object_pool_allocator_extreme_test);
 
-
+// TO DO:
+// Reduce unnecessary memory block range boundary checking
 void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 {
 	FE::pool_allocator<std::string> l_allocator;
@@ -281,7 +304,18 @@ void FE_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 
 		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
 		{
-			l_allocator.deallocate(l_s_strings[i], 1);
+			if (i % 2 == 0)
+			{
+				l_allocator.deallocate(l_s_strings[i], 1);
+			}
+		}
+	
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			if (i % 2 == 1)
+			{
+				l_allocator.deallocate(l_s_strings[i], 1);
+			}
 		}
 	}
 }
@@ -308,7 +342,18 @@ void tbb_pool_allocator_extreme_test(benchmark::State& state_p) noexcept
 
 		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
 		{
-			l_allocator.deallocate(l_s_strings[i], 1);
+			if (i % 2 == 0)
+			{
+				l_allocator.deallocate(l_s_strings[i], 1);
+			}
+		}
+
+		for (FE::var::uint32 i = 0; i < _MAX_ITERATION_; ++i)
+		{
+			if (i % 2 == 1)
+			{
+				l_allocator.deallocate(l_s_strings[i], 1);
+			}
 		}
 	}
 }

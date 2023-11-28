@@ -46,7 +46,6 @@ struct pair
 };
 
 
-
 #ifdef _HAS_CXX20_
 template<typename First, typename Second>
 class compressed_pair final

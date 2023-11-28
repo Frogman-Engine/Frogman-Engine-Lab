@@ -897,6 +897,20 @@ public:
     }
 
 private:
+    /*To do:
+    Minimize de-allocation overheads. This function costs O(N/2) at the most worst case if memory blocks are evenly fragmented.
+    1. Replace priority_queue with heap
+    2. Reduce algorithm time-complexity
+
+    Previous method:
+    1. Start merging free blocks if the queue has more than one.
+    2. Compare boundaries of each free block range and merge them if they are contiguous. Push them back if not. O(N/2) at the worst case
+
+    New method:
+    1. Push a de-allocated memory range into the heap (key has to be address value and arranged in the ascending order.)
+    2. Check if next_to or previous_of is connected to the recently free-ed memory block range.
+    3. Merge them if they are sequence. This only requires O(2) of memory block boundary checking. It is much better than the previous merge algorithm that might cost O(N/2).
+    */
     static void __merge(FE::fstack<block_info_type, recycler_capacity>& temporary_storage_p, FE::fpriority_queue<block_info_type, recycler_capacity, internal::pool::from_low_address>& unused_scattered_blocks_p) noexcept
     {
         /*
@@ -920,7 +934,7 @@ private:
                 unused_scattered_blocks_p.push({ l_prev._address, l_prev._size_in_bytes + l_next._size_in_bytes });
             }
             else
-            {
+            { 
                 temporary_storage_p.push(l_prev);
             }
         }
