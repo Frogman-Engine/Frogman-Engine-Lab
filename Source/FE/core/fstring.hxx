@@ -2,7 +2,6 @@
 #define _FE_CORE_FSTRING_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/char_traits.hxx>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/algorithm/utility.hxx>
 #include <FE/core/heap_memory.hpp>
 #include <FE/core/iterator.hxx>

@@ -2,11 +2,7 @@
 #define _FE_CORE_HEAP_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <FE/core/allocator_adaptor.hxx>
-#ifndef TBB_PREVIEW_MEMORY_POOL
-#define TBB_PREVIEW_MEMORY_POOL
-#endif
-#include <tbb/memory_pool.h>
+#include <FE/core/allocator.hxx>
 #include <memory>
 
 

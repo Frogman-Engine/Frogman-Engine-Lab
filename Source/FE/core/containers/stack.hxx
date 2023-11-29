@@ -3,7 +3,6 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
 #include <FE/core/algorithm/utility.hxx>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/iterator.hxx>
 #include <FE/core/memory.hxx>
 #include <initializer_list>

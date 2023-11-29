@@ -383,37 +383,33 @@ _CONSTEXPR20_ _FORCE_INLINE_ const CharT* any_primitive_to_string(T value_p) noe
 {
     FE_STATIC_SUSPICION(FE::is_char<CharT>::value == false, "an illegal type assigned to the template argument CharT");
     FE_STATIC_SUSPICION(FE::is_primitive<T>::value == false, "static assertion failed: T must be a primitive type.");
+    thread_local static CharT tl_s_buffer[_MAX_NUMERIC_STRING_LENGTH_]{};
 
     if constexpr (FE::is_boolean<T>::value)
     {
-        thread_local static CharT tl_s_buffer[8]{};
         std::memset(tl_s_buffer, _NULL_, sizeof(CharT) * internal::strlen(tl_s_buffer));
         return boolean_to_string<CharT>(value_p);
     }
     else if constexpr (FE::is_char<T>::value)
     {
-        thread_local static CharT tl_s_buffer[2]{};
         tl_s_buffer[0] = value_p;
         tl_s_buffer[1] = _NULL_;
         return tl_s_buffer;
     }
     else if constexpr (std::is_unsigned<T>::value && std::is_integral<T>::value)
     {
-        thread_local static CharT tl_s_buffer[_MAX_NUMERIC_STRING_LENGTH_]{};
         std::memset(tl_s_buffer, _NULL_, sizeof(CharT) * internal::strlen(tl_s_buffer));
         uint_to_string<CharT>(tl_s_buffer, _MAX_NUMERIC_STRING_LENGTH_, value_p);
         return tl_s_buffer;
     }
     else if constexpr (std::is_signed<T>::value && std::is_integral<T>::value)
     {
-        thread_local static CharT tl_s_buffer[_MAX_NUMERIC_STRING_LENGTH_]{};
         std::memset(tl_s_buffer, _NULL_, sizeof(CharT) * internal::strlen(tl_s_buffer));
         int_to_string<CharT>(tl_s_buffer, _MAX_NUMERIC_STRING_LENGTH_, value_p);
         return tl_s_buffer;
     }
     else if constexpr (std::is_floating_point<T>::value)
     {
-        thread_local static CharT tl_s_buffer[_MAX_NUMERIC_STRING_LENGTH_]{};
         std::memset(tl_s_buffer, _NULL_, sizeof(CharT) * internal::strlen(tl_s_buffer));
         float_to_string<CharT>(tl_s_buffer, _MAX_NUMERIC_STRING_LENGTH_, value_p);
         return tl_s_buffer;
@@ -424,7 +420,6 @@ _CONSTEXPR20_ _FORCE_INLINE_ const CharT* any_primitive_to_string(T value_p) noe
     }
     else if constexpr (std::is_pointer<T>::value)
     {
-        thread_local static CharT tl_s_buffer[_MAX_NUMERIC_STRING_LENGTH_]{};
         std::memset(tl_s_buffer, _NULL_, sizeof(CharT) * internal::strlen(tl_s_buffer));
         std::snprintf(tl_s_buffer, _MAX_NUMERIC_STRING_LENGTH_, "%p", value_p);
         return tl_s_buffer;

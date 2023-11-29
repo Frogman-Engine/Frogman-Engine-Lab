@@ -5,7 +5,8 @@
 #include <FE/core/prerequisites.h>
 #include <FE/framework/framework.hpp>
 #include <FE/miscellaneous/private/macro_restrictions.h>
-
+#include <FE/core/containers/set.hxx>
+#include <FE/core/pool.hxx>
 
 
 

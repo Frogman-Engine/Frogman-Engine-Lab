@@ -376,6 +376,37 @@ namespace concurrency
 }
 
 
+template<typename T>
+class buffer final
+{
+	thread_local static T tl_s_rvalue_buffer;
+
+public:
+	using value_type = T;
+	using reference = T&;
+	using rvalue_reference = T&&;
+
+	_CONSTEXPR20_ _FORCE_INLINE_ static void set(rvalue_reference rvalue_p) noexcept
+	{
+		tl_s_rvalue_buffer = std::move(rvalue_p);
+	}
+
+	_CONSTEXPR20_ _FORCE_INLINE_ static reference set_and_get(rvalue_reference rvalue_p) noexcept
+	{
+		tl_s_rvalue_buffer = std::move(rvalue_p);
+		return tl_s_rvalue_buffer;
+	}
+
+	_CONSTEXPR20_ _FORCE_INLINE_ static reference get() noexcept
+	{
+		return tl_s_rvalue_buffer;
+	}
+};
+
+template<typename T>
+thread_local T buffer<T>::tl_s_rvalue_buffer;
+
+
 END_NAMESPACE
 
 

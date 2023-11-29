@@ -2,9 +2,7 @@
 #define _FE_CORE_REF_TABLE_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <FE/core/allocator_adaptor.hxx>
-#include <FE/core/do_once.hxx>
-#include <boost/stacktrace.hpp>
+#include <FE/core/allocator.hxx>
 #include <vector>
 
 
@@ -36,28 +34,31 @@ public:
 	using pointer = typename exclusive_ptr_base<T>*;
 	using element_type = typename std::remove_extent<T>::type;
 
-	using ref_table_type = std::vector<const_pointer, FE::scalable_aligned_allocator<const_pointer>>;
-
+	using ref_table_type = std::vector<const_pointer, tbb::memory_pool_allocator<const_pointer>>;
 	using ref_table_value_type = typename ref_table_type::value_type;
 	static_assert(std::is_same<ref_table_value_type, const exclusive_ptr_base<T>*>::value == true, "Static Assertion Failure: ref_table_value_type must be the same as exclusive_ptr_base<T>*");
 	
 	using ref_table_key_type = typename ref_table_type::size_type;
-	using ref_table_recycler_type = std::vector<ref_table_key_type, FE::scalable_aligned_allocator<ref_table_key_type>>;
+	using ref_table_recycler_type = std::vector<ref_table_key_type, tbb::memory_pool_allocator<ref_table_key_type>>;
 
 	static constexpr ref_table_key_type invalid_key_value = FE::max_value<ref_table_key_type>;
 	static constexpr auto ref_table_initial_size = 1024;
 	static constexpr auto ref_table_recycler_initial_size = ref_table_initial_size >> 1;
 	
 protected:
+	thread_local static tbb::memory_pool<FE::cache_aligned_allocator<std::byte>> tl_s_memory_resource;
 	thread_local static ref_table_type tl_s_ref_table;
 	thread_local static ref_table_recycler_type tl_s_ref_table_recycler;
 };
 
 template<typename T>
-thread_local typename ref_table_base<T>::ref_table_type ref_table_base<T>::tl_s_ref_table;
+thread_local tbb::memory_pool<FE::cache_aligned_allocator<std::byte>> ref_table_base<T>::tl_s_memory_resource;
 
 template<typename T>
-thread_local typename ref_table_base<T>::ref_table_recycler_type ref_table_base<T>::tl_s_ref_table_recycler;
+thread_local typename ref_table_base<T>::ref_table_type ref_table_base<T>::tl_s_ref_table{ typename ref_table_base<T>::ref_table_type::allocator_type{ref_table_base<T>::tl_s_memory_resource} };
+
+template<typename T>
+thread_local typename ref_table_base<T>::ref_table_recycler_type ref_table_base<T>::tl_s_ref_table_recycler{ typename ref_table_base<T>::ref_table_recycler_type::allocator_type{ref_table_base<T>::tl_s_memory_resource} };
 
 
 

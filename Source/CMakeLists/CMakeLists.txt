@@ -51,6 +51,7 @@ SET(_LOG_PRIVATE_
 SET(_CONTAINERS_
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/array.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/heap.hxx 
+	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/set.hxx 
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/queue.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/containers/stack.hxx
 	)
@@ -91,7 +92,6 @@ SET(_SMART_POINTERS_PRIVATE_
 
 SET(_CORE_
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/allocator.hxx 	
-	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/allocator_adaptor.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/char_traits.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/clock.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../FE/core/debug.h

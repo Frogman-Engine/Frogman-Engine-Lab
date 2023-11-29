@@ -3,7 +3,6 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
 #include <FE/core/algorithm/utility.hxx>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/iterator.hxx>
 #include <FE/core/memory.hxx>
 #include <initializer_list>
@@ -43,9 +42,18 @@ private:
 	std::pmr::monotonic_buffer_resource m_memory_resource;
 
 public:
-	_FORCE_INLINE_ fpriority_queue() noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
-	_FORCE_INLINE_ fpriority_queue(const fpriority_queue& other_p) noexcept : m_actual_memory(other_p.m_actual_memory), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(comparison(), other_p.c, std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
-	_FORCE_INLINE_ fpriority_queue(fpriority_queue&& rvalue_p) noexcept : m_actual_memory(std::move(rvalue_p.m_actual_memory)), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) { base_type(comparison(), std::move(rvalue_p.c), std::pmr::polymorphic_allocator<T>{&m_memory_resource}); }
+	_FORCE_INLINE_ fpriority_queue() noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
+	{
+		base_type(std::pmr::polymorphic_allocator<T>{&m_memory_resource}); 
+	}
+	_FORCE_INLINE_ fpriority_queue(const fpriority_queue& other_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
+	{
+		base_type(comparison(), other_p.c, std::pmr::polymorphic_allocator<T>{&m_memory_resource}); 
+	}
+	_FORCE_INLINE_ fpriority_queue(fpriority_queue&& rvalue_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
+	{
+		base_type(comparison(), std::move(rvalue_p.c), std::pmr::polymorphic_allocator<T>{&m_memory_resource}); 
+	}
 
 	_FORCE_INLINE_ boolean is_empty() const noexcept
 	{

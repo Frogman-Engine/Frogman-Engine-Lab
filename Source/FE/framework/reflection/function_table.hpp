@@ -2,7 +2,6 @@
 #define _FE_CORE_FUNCTION_TABLE_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/function.hxx>
 #include <FE/core/fstring.hxx>
 #include <FE/core/hash.hpp>

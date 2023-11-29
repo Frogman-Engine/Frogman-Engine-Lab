@@ -2,9 +2,13 @@
 #define _FE_CORE_ALLOCATOR_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <FE/core/heap_memory.hpp>
 #include <tbb/cache_aligned_allocator.h>
 #include <tbb/scalable_allocator.h>
-#include <FE/core/heap_memory.hpp>
+#ifndef TBB_PREVIEW_MEMORY_POOL
+#define TBB_PREVIEW_MEMORY_POOL
+#endif
+#include <tbb/memory_pool.h>
 
 
 
@@ -13,7 +17,7 @@ BEGIN_NAMESPACE(FE)
 
 // FE::pool_allocator and FE::namespace_pool_allocator must not be used an Implementation of this class to replace FE::new_delete_pool_allocator and FE::new_delete_namespace_pool_allocator.
 template <class Implementation>
-class new_delete_proxy_allocator final
+class new_delete_proxy_allocator
 {
 public:
 	using value_type = typename Implementation::value_type;
@@ -108,7 +112,7 @@ typename new_delete_proxy_allocator<Implementation>::allocator new_delete_proxy_
 
 
 template<typename T, class Alignment = typename FE::SIMD_auto_alignment::alignment_type>
-class scalable_aligned_allocator final
+class scalable_aligned_allocator 
 {
 public:
 	using value_type = T;
@@ -162,7 +166,7 @@ public:
 
 
 template <typename T>
-class cache_aligned_allocator final
+class cache_aligned_allocator
 {
 public:
 	using value_type = T;
@@ -211,7 +215,7 @@ public:
 
 		pointer const l_result = static_cast<pointer>(cache_aligned_allocator<T>::allocate(new_count_p));
 		FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(l_result)) != 0, "${%s@0}: The allocated heap memory address not aligned by sixty-four. The address value was ${%p@1}", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), l_result);
-		 
+
 		if (l_result != pointer_p) _LIKELY_
 		{
 			FE::memcpy<ADDRESS::_ALIGNED, ADDRESS::_ALIGNED>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));

@@ -2,7 +2,6 @@
 #define _FE_CORE_POOL_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <FE/core/allocator_adaptor.hxx>
 #include <FE/core/containers/stack.hxx>
 #include <FE/core/containers/queue.hxx>
 #include <FE/core/fstring.hxx>
@@ -910,6 +909,7 @@ private:
     1. Push a de-allocated memory range into the heap (key has to be address value and arranged in the ascending order.)
     2. Check if next_to or previous_of is connected to the recently free-ed memory block range.
     3. Merge them if they are sequence. This only requires O(2) of memory block boundary checking. It is much better than the previous merge algorithm that might cost O(N/2).
+
     */
     static void __merge(FE::fstack<block_info_type, recycler_capacity>& temporary_storage_p, FE::fpriority_queue<block_info_type, recycler_capacity, internal::pool::from_low_address>& unused_scattered_blocks_p) noexcept
     {
