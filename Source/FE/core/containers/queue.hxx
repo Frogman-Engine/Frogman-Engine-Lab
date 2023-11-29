@@ -5,6 +5,7 @@
 #include <FE/core/algorithm/utility.hxx>
 #include <FE/core/iterator.hxx>
 #include <FE/core/memory.hxx>
+#include <array>
 #include <initializer_list>
 #include <memory_resource>
 #include <queue>
@@ -18,14 +19,7 @@
 BEGIN_NAMESPACE(FE)
 
 
-template<class T, class Comparator, class Allocator>
-class priority_queue
-{
-	// heap
-};
-
-
-template<class T, size_t Capacity, class Comparator = std::less<T>>
+template<class T, size_t Capacity, class Comparator = std::greater<T>>
 class fpriority_queue : public std::priority_queue<T, std::pmr::vector<T>, Comparator>
 {
 public:
@@ -74,6 +68,13 @@ public:
 	{
 		return this->c.cend();
 	}
+};
+
+
+template<class T, class Comparator, class Allocator>
+class priority_queue
+{
+	// heap-based
 };
 
 

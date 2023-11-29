@@ -47,7 +47,7 @@ public:
         const base_type* l_other = &other_p;
         base_type* l_this = this;
 
-        *l_this = l_other;
+        *l_this = *l_other;
     }
 	_FORCE_INLINE_ fset(fset&& rvalue_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
     {

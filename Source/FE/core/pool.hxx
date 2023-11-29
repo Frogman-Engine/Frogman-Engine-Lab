@@ -955,11 +955,6 @@ private:
            block_info_type's _size_in_bytes contains the size of the memory block.
            */
 
-        if (memory_p._unused_blocks.size() > 1)
-        {
-            __merge(deleter_type<T>::base_type::tl_s_temporary_storage, memory_p._unused_blocks);
-        }
-
         in_out_memblock_info_p = memory_p._unused_blocks.top();
         while (in_out_memblock_info_p._size_in_bytes < queried_allocation_size_in_bytes_p)
         {

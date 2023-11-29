@@ -34,6 +34,12 @@ _FORCE_INLINE_ T exchange(T& in_out_target_p, T value_p) noexcept
     return std::move(l_temporary);
 }
 
+template<class Comparator, typename T>
+_FORCE_INLINE_ T& select(T& for_true_p, T& for_false_p) noexcept
+{
+    return Comparator()(for_true_p, for_false_p) ? for_true_p : for_false_p;
+}
+
 
 _MAYBE_UNUSED_ constexpr int8 ASCII_code_zero = 48;
 _MAYBE_UNUSED_ constexpr int8 ASCII_code_nine = 57;
