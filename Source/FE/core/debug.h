@@ -8,10 +8,10 @@
 
 
 
-#ifdef FE_STATIC_SUSPICION
+#ifdef FE_STATIC_ASSERT
 #error FE_STATIC_ASSERT is a reserved Frogman Engine macro keyword.
 #endif 
-#define FE_STATIC_SUSPICION(expression, message) static_assert(!(expression), message)
+#define FE_STATIC_ASSERT(expression, message) static_assert(!(expression), message)
 
 
 #ifdef _ENABLE_FE_CHECK_ONCE_

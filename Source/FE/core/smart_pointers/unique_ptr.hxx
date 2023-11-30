@@ -17,8 +17,8 @@ BEGIN_NAMESPACE(FE)
 template<typename T, class Allocator = FE::new_delete_proxy_allocator<FE::scalable_aligned_allocator<typename std::remove_all_extents<T>::type>>>
 class unique_ptr final
 {
-	FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-	FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_ASSERT((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+	FE_STATIC_ASSERT(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 public:
 	using pointer = typename Allocator::pointer;
@@ -131,13 +131,13 @@ public:
 
 	_FORCE_INLINE_ element_type& operator*() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return *this->m_smart_ptr;
 	}
 
 	_FORCE_INLINE_ pointer operator->() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr;
 	}
 
@@ -203,8 +203,8 @@ _CONSTEXPR23_ _NODISCARD_ unique_ptr<T, Allocator> make_unique(T value_p) noexce
 template<typename T, class Allocator>
 class unique_ptr<T[], Allocator> final
 {
-	FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-	FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+	FE_STATIC_ASSERT((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+	FE_STATIC_ASSERT(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 public:
 	using pointer = typename Allocator::pointer;
@@ -353,20 +353,20 @@ public:
 
 	_FORCE_INLINE_ element_type& operator*() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return *this->m_smart_ptr;
 	}
 
 	_FORCE_INLINE_ pointer operator->() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr;
 	}
 
 	_FORCE_INLINE_ element_type& operator[](index_t index_p) const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
-		FE_SUSPECT(static_cast<index_t>(this->m_smart_ptr_end - this->m_smart_ptr) <= index_p, "${%s@0}: ${%s@1} exceeds the index boundary. ${%s@1} was ${%lu@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p);
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(static_cast<index_t>(this->m_smart_ptr_end - this->m_smart_ptr) <= index_p, "${%s@0}: ${%s@1} exceeds the index boundary. ${%s@1} was ${%lu@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p);
 
 		return this->m_smart_ptr[index_p];
 	}
@@ -414,49 +414,49 @@ public:
 
 	_FORCE_INLINE_ FE::iterator<FE::contiguous_iterator<element_type>> begin() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr;
 	}
 	_FORCE_INLINE_ FE::iterator<FE::contiguous_iterator<element_type>> end() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr_end;
 	}
 	_FORCE_INLINE_ FE::const_iterator<FE::contiguous_iterator<element_type>> cbegin() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr;
 	}
 	_FORCE_INLINE_ FE::const_iterator<FE::contiguous_iterator<element_type>> cend() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr_end;
 	}
 	_FORCE_INLINE_ FE::reverse_iterator<FE::contiguous_iterator<element_type>> rbegin() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr;
 	}
 	_FORCE_INLINE_ FE::reverse_iterator<FE::contiguous_iterator<element_type>> rend() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr_end;
 	}
 	_FORCE_INLINE_ FE::const_reverse_iterator<FE::contiguous_iterator<element_type>> crbegin() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr;
 	}
 	_FORCE_INLINE_ FE::const_reverse_iterator<FE::contiguous_iterator<element_type>> crend() const noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 		return this->m_smart_ptr_end;
 	}
 
 private:
 	_CONSTEXPR20_ void __copy_from_initializer_list(std::initializer_list<element_type>&& values_p) noexcept
 	{
-		FE_SUSPECT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+		FE_ASSERT(this->m_smart_ptr == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 
 		if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_TRIVIAL)
 		{
@@ -510,8 +510,8 @@ namespace concurrency
 	template<typename T, class Allocator = FE::new_delete_proxy_allocator<FE::cache_aligned_allocator<typename std::remove_all_extents<T>::type>>>
 	class unique_ptr final
 	{
-		FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-		FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+		FE_STATIC_ASSERT((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+		FE_STATIC_ASSERT(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 	public:
 		using pointer = typename Allocator::pointer;
@@ -641,14 +641,14 @@ namespace concurrency
 
 		_FORCE_INLINE_ element_type& operator*() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return *(this->m_smart_ptr.load());
 		}
 
 		_FORCE_INLINE_ pointer operator->() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load();
 		}
@@ -733,8 +733,8 @@ namespace concurrency
 	template<typename T, class Allocator>
 	class unique_ptr<T[], Allocator> final
 	{
-		FE_STATIC_SUSPICION((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
-		FE_STATIC_SUSPICION(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
+		FE_STATIC_ASSERT((std::is_same<T, Allocator::value_type>::value == false), "static assertion failed: enforcing Allocator's value_type to be equivalent to the typename T. The template parameter T must be identical to the value_type of the Allocator.");
+		FE_STATIC_ASSERT(std::is_class<Allocator>::value == false, "Static Assertion Failed: The template argument Allocator is not a class or a struct type.");
 
 	public:
 		using pointer = typename Allocator::pointer;
@@ -897,23 +897,23 @@ namespace concurrency
 
 		_FORCE_INLINE_ element_type& operator*() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return *(this->m_smart_ptr.load());
 		}
 
 		_FORCE_INLINE_ pointer operator->() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load();
 		}
 
 		_FORCE_INLINE_ element_type& operator[](index_t index_p) const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
-			FE_SUSPECT(static_cast<index_t>(this->m_smart_ptr_end.load() - this->m_smart_ptr.load()) <= index_p, "${%s@0}: ${%s@1} exceeds the index boundary. ${%s@1} was ${%lu@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p);
+			FE_ASSERT(static_cast<index_t>(this->m_smart_ptr_end.load() - this->m_smart_ptr.load()) <= index_p, "${%s@0}: ${%s@1} exceeds the index boundary. ${%s@1} was ${%lu@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_RANGE), TO_STRING(index_p), &index_p);
 			return this->m_smart_ptr.load()[index_p];
 		}
 
@@ -968,49 +968,49 @@ namespace concurrency
 
 		_FORCE_INLINE_ FE::iterator<FE::contiguous_iterator<element_type>> unsafe_begin() const noexcept 
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::iterator<FE::contiguous_iterator<element_type>> unsafe_end() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr_end.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::const_iterator<FE::contiguous_iterator<element_type>> unsafe_cbegin() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::const_iterator<FE::contiguous_iterator<element_type>> unsafe_cend() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr_end.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::reverse_iterator<FE::contiguous_iterator<element_type>> unsafe_rbegin() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::reverse_iterator<FE::contiguous_iterator<element_type>> unsafe_rend() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr_end.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::const_reverse_iterator<FE::contiguous_iterator<element_type>> unsafe_crbegin() const noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr.load(std::memory_order_acquire);
 		}
 		_FORCE_INLINE_ FE::const_reverse_iterator<FE::contiguous_iterator<element_type>> unsafe_crend() const noexcept 
 		{
-			FE_SUSPECT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load(std::memory_order_acquire) == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 			this->__wait_if_in_progress();
 			return this->m_smart_ptr_end.load(std::memory_order_acquire); 
 		}
@@ -1019,7 +1019,7 @@ namespace concurrency
 	private:
 		_CONSTEXPR20_ void __copy_from_initializer_list(std::initializer_list<element_type>&& values_p) noexcept
 		{
-			FE_SUSPECT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
+			FE_ASSERT(this->m_smart_ptr.load() == nullptr, "${%s@0}: ${%s@1} was nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_smart_ptr));
 
 			pointer const l_temporary_ownership_holder = this->m_smart_ptr.exchange(FE::concurrency::in_progress_signalptr_t<T>::value);
 			if (l_temporary_ownership_holder != FE::concurrency::in_progress_signalptr_t<T>::value)

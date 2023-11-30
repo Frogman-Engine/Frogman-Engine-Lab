@@ -2,8 +2,8 @@
 #define _FE_CORE_POOL_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <FE/core/containers/map.hxx>
 #include <FE/core/containers/stack.hxx>
-#include <FE/core/containers/queue.hxx>
 #include <FE/core/fstring.hxx>
 #include <FE/core/hash.hpp>
 #include <array>
@@ -63,8 +63,8 @@ namespace internal::pool
     template<typename T, POOL_TYPE PoolType, size_t ChunkCapacity, class Alignment>
     struct chunk
     {
-        FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-        FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+        FE_STATIC_ASSERT(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+        FE_STATIC_ASSERT(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
         using block_info_type = block_info<T, POOL_TYPE::_BLOCK>;
         using value_type = typename block_info_type::value_type;
@@ -76,41 +76,45 @@ namespace internal::pool
     public:
         constexpr static size_t chunk_capacity = ChunkCapacity;
 
-        FE::fstack<block_info_type, ChunkCapacity> _unused_blocks;
+        FE::fstack<block_info_type, ChunkCapacity> _free_blocks;
         pointer const _begin = reinterpret_cast<pointer const>(m_memory.data());
         pointer _page_iterator = _begin;
         pointer const _end = _begin + ChunkCapacity;
 
         _FORCE_INLINE_ boolean is_full() const noexcept
         {
-            return (_unused_blocks.is_empty() == true) && (_page_iterator >= _end);
+            return (_free_blocks.is_empty() == true) && (_page_iterator >= _end);
         }
     };
 
     template<size_t ChunkCapacity, class Alignment>
     struct chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>
     {
-        using block_info_type = block_info<void, POOL_TYPE::_GENERIC>;
-
-    private:
-        alignas(FE::SIMD_auto_alignment::alignment_type::size) std::array<std::byte, ChunkCapacity> m_memory;
-
     public:
         constexpr static count_t chunk_capacity = ChunkCapacity;
         constexpr static size_t recycler_capacity = ChunkCapacity / Alignment::size;
 
+        //using block_info_type = block_info<void, POOL_TYPE::_GENERIC>;
+        using block_info_type = typename FE::fmap<std::byte*, var::size_t, recycler_capacity, from_low_address>::value_type;
+        using recycler_type = FE::fmap<std::byte*, var::size_t, recycler_capacity>;
+        using recycler_iterator = typename recycler_type::iterator;
+
+    private:
+        alignas(FE::SIMD_auto_alignment::alignment_type::size) std::array<std::byte, ChunkCapacity> m_memory;
         /*
-         std::pair's _address contains the address of the memory block.
-         std::pair's _size_in_bytes contains the size of the memory block.
+         std::pair's first contains the address of the memory block.
+         std::pair's second contains the size of the memory block.
         */
-        FE::fpriority_queue<block_info_type, recycler_capacity, from_low_address> _unused_blocks;
+
+    public:
+        recycler_type _free_blocks;
         std::byte* const _begin = m_memory.data();
         std::byte* _page_iterator = _begin;
         std::byte* const _end = _begin + m_memory.size();
 
         _FORCE_INLINE_ boolean is_full() const noexcept
         {
-            return (_unused_blocks.is_empty() == true) && (_page_iterator >= _end);
+            return (_free_blocks.is_empty() == true) && (_page_iterator >= _end);
         }
     };
 }
@@ -126,8 +130,8 @@ class pool;
 template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 struct pool_deleter<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>
 {
-    FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-    FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+    FE_STATIC_ASSERT(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+    FE_STATIC_ASSERT(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
     using chunk_type = internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment>;
     using value_type = typename FE::remove_const_reference<typename chunk_type::value_type>::type;
@@ -144,7 +148,7 @@ public:
 
     _FORCE_INLINE_ void operator()(value_type* ptr_p) const noexcept
     {
-        FE_SUSPECT(this->m_host_chunk == nullptr, "${%s@0}: ${%s@1} was nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_host_chunk));
+        FE_ASSERT(this->m_host_chunk == nullptr, "${%s@0}: ${%s@1} was nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_host_chunk));
         if (ptr_p == nullptr || this->m_host_chunk == nullptr) { return; }
 
         if constexpr (FE::is_trivial<value_type>::value == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
@@ -152,7 +156,7 @@ public:
             ptr_p->~value_type();
         }
    
-        this->m_host_chunk->_unused_blocks.push(block_info_type{ ptr_p });
+        this->m_host_chunk->_free_blocks.push(block_info_type{ ptr_p });
     }
 };
 
@@ -164,7 +168,7 @@ struct generic_deleter_base
     friend class pool;
 
     using chunk_type = internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>;
-    using block_info_type = internal::pool::block_info<void, POOL_TYPE::_GENERIC>;
+    using block_info_type = typename chunk_type::block_info_type;
 
     constexpr static size_t chunk_capacity = ChunkCapacity;
     constexpr static size_t temporary_storage_capacity = ChunkCapacity / Alignment::size;
@@ -172,7 +176,7 @@ struct generic_deleter_base
 protected:
     chunk_type* m_host_chunk = nullptr;
     var::size_t m_size_in_bytes = 0;
-    thread_local static FE::fstack<block_info_type, temporary_storage_capacity> tl_s_temporary_storage;
+    //thread_local static FE::fstack<block_info_type, temporary_storage_capacity> tl_s_temporary_storage;
 
 public:
     _FORCE_INLINE_ generic_deleter_base() noexcept : m_host_chunk(), m_size_in_bytes() {}
@@ -189,8 +193,8 @@ public:
     }
 };
 
-template<size_t ChunkCapacity, class Alignment>
-thread_local FE::fstack<typename generic_deleter_base<ChunkCapacity, Alignment>::block_info_type, generic_deleter_base<ChunkCapacity, Alignment>::temporary_storage_capacity> generic_deleter_base<ChunkCapacity, Alignment>::tl_s_temporary_storage;
+//template<size_t ChunkCapacity, class Alignment>
+//thread_local FE::fstack<typename generic_deleter_base<ChunkCapacity, Alignment>::block_info_type, generic_deleter_base<ChunkCapacity, Alignment>::temporary_storage_capacity> generic_deleter_base<ChunkCapacity, Alignment>::tl_s_temporary_storage;
 
 
 template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
@@ -205,17 +209,16 @@ struct nondestructive_generic_deleter final : public generic_deleter_base<ChunkC
 
     _FORCE_INLINE_ void operator()(void* ptr_p) const noexcept
     {
-        FE_SUSPECT(this->m_host_chunk == nullptr, "${%s@0}: ${%s@1} was nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_host_chunk));
-
         if (ptr_p == nullptr || this->m_host_chunk == nullptr) { return; }
 
+        FE_ASSERT(this->m_size_in_bytes == 0, "Assertion Failed: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
+        
+        auto l_insertion_result = this->m_host_chunk->_free_blocks.insert(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
+        FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
 
-        FE_SUSPECT(this->m_size_in_bytes == 0, "Assertion Failed: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
-        this->m_host_chunk->_unused_blocks.push(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
-
-        if (this->m_host_chunk->_unused_blocks.size() > 1)
+        if (this->m_host_chunk->_free_blocks.size() > 1)
         {
-            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(base_type::tl_s_temporary_storage, this->m_host_chunk->_unused_blocks);
+            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(l_insertion_result.first, this->m_host_chunk->_free_blocks);
         }
     }
 };
@@ -224,8 +227,8 @@ struct nondestructive_generic_deleter final : public generic_deleter_base<ChunkC
 template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 struct pool_deleter<T, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator> final : public generic_deleter_base<ChunkCapacity, Alignment>
 {
-    FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-    FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+    FE_STATIC_ASSERT(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+    FE_STATIC_ASSERT(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
     using base_type = generic_deleter_base<ChunkCapacity, Alignment>;
     using chunk_type = typename base_type::chunk_type;
@@ -241,8 +244,7 @@ public:
 
     void operator()(void* ptr_p) const noexcept
     {
-        FE_SUSPECT(this->m_host_chunk == nullptr, "${%s@0}: ${%s@1} was nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(this->m_host_chunk));
-        FE_SUSPECT(this->m_size_in_bytes < this->m_element_count, "Assertion Failed: Detected arguments with illegal values.");
+        FE_ASSERT(this->m_size_in_bytes < this->m_element_count, "Assertion Failed: Detected arguments with illegal values.");
 
         if (ptr_p == nullptr || this->m_host_chunk == nullptr) { return; }
      
@@ -258,12 +260,14 @@ public:
             }
         }
 
-        FE_EXIT(this->m_size_in_bytes == 0, MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE, "FATAL ERROR: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
-        this->m_host_chunk->_unused_blocks.push(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
+        FE_ASSERT(this->m_size_in_bytes == 0, "FATAL ERROR: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
+        
+        auto l_insertion_result = this->m_host_chunk->_free_blocks.insert(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
+        FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
 
-        if (this->m_host_chunk->_unused_blocks.size() > 1)
+        if (this->m_host_chunk->_free_blocks.size() > 1)
         {
-            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(base_type::tl_s_temporary_storage, this->m_host_chunk->_unused_blocks);
+            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(l_insertion_result.first, this->m_host_chunk->_free_blocks);
         }
     }
 
@@ -275,12 +279,12 @@ public:
 
 
 
-// + memory pool regions
+
 template<typename T, size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 class pool<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>
 {
-    FE_STATIC_SUSPICION(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-    FE_STATIC_SUSPICION(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
+    FE_STATIC_ASSERT(std::is_array<T>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+    FE_STATIC_ASSERT(std::is_const<T>::value == true, "Static Assertion Failed: The T must not be a const type.");
 
 public:
     using chunk_type = internal::pool::chunk<T, POOL_TYPE::_BLOCK, ChunkCapacity, Alignment>;
@@ -292,8 +296,8 @@ public:
 
     constexpr static count_t chunk_capacity = ChunkCapacity;
 
-    FE_STATIC_SUSPICION((std::is_same<T, typename chunk_type::value_type>::value == false), "Static Assertion Failed: The value_type does not match.");
-    FE_STATIC_SUSPICION((std::is_same<T*, typename chunk_type::pointer>::value == false), "Static Assertion Failed: The value_type* does not match.");
+    FE_STATIC_ASSERT((std::is_same<T, typename chunk_type::value_type>::value == false), "Static Assertion Failed: The value_type does not match.");
+    FE_STATIC_ASSERT((std::is_same<T*, typename chunk_type::pointer>::value == false), "Static Assertion Failed: The value_type* does not match.");
 
 private:
     thread_local static typename global_pool_type tl_s_global_memory;
@@ -315,9 +319,9 @@ public:
             if (l_list_iterator->is_full() == false)
             {
                 T* l_value;
-                if (l_list_iterator->_unused_blocks.is_empty() == false)
+                if (l_list_iterator->_free_blocks.is_empty() == false)
                 {
-                    l_value = l_list_iterator->_unused_blocks.pop()._address;
+                    l_value = l_list_iterator->_free_blocks.pop()._address;
                     
                     if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
                     {
@@ -351,7 +355,7 @@ public:
 
     _FORCE_INLINE_ static void create_pages(size_t chunk_count_p) noexcept
     {
-        FE_SUSPECT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
+        FE_ASSERT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
 
         for (var::size_t i = 0; i < chunk_count_p; ++i)
         {
@@ -365,16 +369,16 @@ public:
         typename global_pool_type::const_iterator l_cend = tl_s_global_memory.cend();
         if(l_list_iterator == l_cend) 
         {
-            FE_SUSPECT(l_list_iterator == l_cend, "Unable to shrink_to_fit() an empty pool.");
+            FE_ASSERT(l_list_iterator == l_cend, "Unable to shrink_to_fit() an empty pool.");
             return; 
         }
 
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
-            var::size_t l_unused_element_size = l_list_iterator->_unused_blocks.size();
+            var::size_t l_unused_element_size = l_list_iterator->_free_blocks.size();
 
-            FE_SUSPECT((l_list_iterator->_end - l_list_iterator->_begin) != ChunkCapacity, "The chunk range is invalid.");
+            FE_ASSERT((l_list_iterator->_end - l_list_iterator->_begin) != ChunkCapacity, "The chunk range is invalid.");
           
             if (l_list_iterator->_page_iterator < l_list_iterator->_end)
             {
@@ -416,9 +420,9 @@ public:
             if (l_list_iterator->second.is_full() == false)
             {
                 T* l_value;
-                if (l_list_iterator->second._unused_blocks.is_empty() == false)
+                if (l_list_iterator->second._free_blocks.is_empty() == false)
                 {
-                    l_value = l_list_iterator->second._unused_blocks.pop()._address;
+                    l_value = l_list_iterator->second._free_blocks.pop()._address;
 
                     if constexpr (FE::is_trivial<T>::value == FE::TYPE_TRIVIALITY::_NOT_TRIVIAL)
                     {
@@ -452,7 +456,7 @@ public:
 
     _FORCE_INLINE_ static void create_pages(const char* region_name_p, size_t chunk_count_p) noexcept
     {
-        FE_SUSPECT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
+        FE_ASSERT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
 
         static chunk_type l_s_initial_value;
   
@@ -469,16 +473,16 @@ public:
         typename namespace_pool_type::const_iterator l_cend = tl_s_memory_regions.cend(l_bucket_index);
         if (l_list_iterator == l_cend)
         {
-            FE_SUSPECT(true, "Unable to shrink_to_fit() an empty pool.");
+            FE_ASSERT(true, "Unable to shrink_to_fit() an empty pool.");
             return;
         }
 
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
-            var::size_t l_unused_element_size = l_list_iterator->second._unused_blocks.size();
+            var::size_t l_unused_element_size = l_list_iterator->second._free_blocks.size();
 
-            FE_SUSPECT((l_list_iterator->second._end - l_list_iterator->second._begin) != ChunkCapacity, "The chunk range is invalid.");
+            FE_ASSERT((l_list_iterator->second._end - l_list_iterator->second._begin) != ChunkCapacity, "The chunk range is invalid.");
 
             if (l_list_iterator->second._page_iterator < l_list_iterator->second._end)
             {
@@ -521,6 +525,8 @@ class pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator,
 
 public:
     using chunk_type = internal::pool::chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>;
+    using recycler_type = typename chunk_type::recycler_type;
+    using recycler_iterator = typename chunk_type::recycler_iterator;
 
     template<typename U>
     using deleter_type = pool_deleter<U, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>;
@@ -542,10 +548,10 @@ public:
     template<typename U>
     static std::unique_ptr<U, deleter_type<U>> allocate(count_t size_p = 1) noexcept
     {
-        FE_STATIC_SUSPICION((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
-        FE_STATIC_SUSPICION(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-        FE_STATIC_SUSPICION(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
-        FE_SUSPECT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
+        FE_STATIC_ASSERT((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
+        FE_STATIC_ASSERT(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+        FE_STATIC_ASSERT(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
+        FE_ASSERT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
         FE_EXIT(size_p > ChunkCapacity, MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY, "Fatal Error: Unable to allocate the size of memmory that exceeds the pool chunk's capacity.");
 
 
@@ -564,13 +570,13 @@ public:
             if (l_list_iterator->is_full() == false)
             {
                 void* l_allocation_result = nullptr;
-                block_info_type l_memblock_info;
+                internal::pool::block_info<void, POOL_TYPE::_GENERIC> l_memblock_info;
 
-                if (l_list_iterator->_unused_blocks.is_empty() == false)
+                if (l_list_iterator->_free_blocks.is_empty() == false)
                 {
                     /*
-                    block_info_type's _address contains the address of the memory block.
-                    block_info_type's _size_in_bytes contains the size of the memory block.
+                    first contains the address of the memory block.
+                    second contains the size of the memory block.
                     */
 
                     __recycle<U>(l_memblock_info, *l_list_iterator, l_queried_allocation_size_in_bytes);
@@ -580,7 +586,7 @@ public:
                         if ((l_list_iterator->_page_iterator + l_queried_allocation_size_in_bytes) >= l_list_iterator->_end)
                         {
                             create_pages(1);
-                            continue;;
+                            continue;
                         }
 
                         l_allocation_result = l_list_iterator->_page_iterator;
@@ -635,7 +641,7 @@ public:
 
     _FORCE_INLINE_ static void create_pages(size_t chunk_count_p) noexcept
     {
-        FE_SUSPECT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
+        FE_ASSERT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
 
         for (var::size_t i = 0; i < chunk_count_p; ++i)
         {
@@ -647,20 +653,19 @@ public:
     {
         typename global_pool_type::iterator  l_list_iterator = tl_s_global_memory.begin();
         typename global_pool_type::const_iterator l_cend = tl_s_global_memory.cend();
-        if (l_list_iterator == l_cend) 
-        { 
-            FE_SUSPECT(true, "Unable to shrink_to_fit() an empty pool.");
-            return; 
-        }
-
+        FE_ASSERT(l_list_iterator == l_cend, "Unable to shrink_to_fit() an empty pool.");
+        
+        /*
+                  first contains the address of the memory block.
+                  second contains the size of the memory block.
+        */
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
             var::size_t l_unused_memory_size_in_bytes = 0;
-            auto l_container = l_list_iterator->_unused_blocks.get_container();
-            for (auto block : l_container)
+            for (auto block : l_list_iterator->_free_blocks)
             {
-                l_unused_memory_size_in_bytes += block._size_in_bytes;
+                l_unused_memory_size_in_bytes += block.second;
             }
 
             if (l_list_iterator->_page_iterator < l_list_iterator->_end)
@@ -687,8 +692,7 @@ public:
     {
         typename global_pool_type::iterator  l_list_iterator = tl_s_global_memory.begin();
         typename global_pool_type::const_iterator l_cend = tl_s_global_memory.cend();
-
-        FE_EXIT(l_list_iterator == l_cend, MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR, "Unable to shrink_to_fit() an empty pool.");
+        FE_ASSERT(l_list_iterator == l_cend, "Unable to request deallocate() to an empty pool.");
 
 
         std::byte* const l_value = reinterpret_cast<std::byte*>(pointer_p);
@@ -705,11 +709,13 @@ public:
                         ++pointer_p;
                     }
                 }
-                l_list_iterator->_unused_blocks.push(block_info_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
 
-                if (l_list_iterator->_unused_blocks.size() > 1)
+                auto l_insertion_result = l_list_iterator->_free_blocks.insert(block_info_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
+                FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+                
+                if (l_list_iterator->_free_blocks.size() > 1)
                 {
-                    __merge(deleter_type<T>::base_type::tl_s_temporary_storage, l_list_iterator->_unused_blocks);
+                    __merge(l_insertion_result.first, l_list_iterator->_free_blocks);
                 }
                 return;
             }
@@ -724,10 +730,10 @@ public:
     template<typename U>
     static std::unique_ptr<U, deleter_type<U>> allocate(const char* region_name_p, count_t size_p = 1) noexcept
     {
-        FE_STATIC_SUSPICION((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
-        FE_STATIC_SUSPICION(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
-        FE_STATIC_SUSPICION(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
-        FE_SUSPECT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
+        FE_STATIC_ASSERT((Alignment::size % 2) != 0, "Static Assertion Failed: The Alignment::size must be an even number.");
+        FE_STATIC_ASSERT(std::is_array<U>::value == true, "Static Assertion Failed: The T must not be an array[] type.");
+        FE_STATIC_ASSERT(std::is_const<U>::value == true, "Static Assertion Failed: The T must not be a const type.");
+        FE_ASSERT(size_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(size_p));
         FE_EXIT(size_p > ChunkCapacity, MEMORY_ERROR_1XX::_FATAL_ERROR_OUT_OF_CAPACITY, "Fatal Error: Unable to allocate the size of memmory that exceeds the pool chunk's capacity.");
 
 
@@ -747,13 +753,13 @@ public:
             if (l_list_iterator->second.is_full() == false)
             {
                 void* l_allocation_result = nullptr;
-                block_info_type l_memblock_info;
+                internal::pool::block_info<void, POOL_TYPE::_GENERIC> l_memblock_info;
 
-                if (l_list_iterator->second._unused_blocks.is_empty() == false)
+                if (l_list_iterator->second._free_blocks.is_empty() == false)
                 {
                     /*
-                    block_info_type's _address contains the address of the memory block.
-                    block_info_type's _size_in_bytes contains the size of the memory block.
+                    first contains the address of the memory block.
+                    second contains the size of the memory block.
                     */
 
                     __recycle<U>(l_memblock_info, l_list_iterator->second, l_queried_allocation_size_in_bytes);
@@ -818,7 +824,7 @@ public:
 
     _FORCE_INLINE_ static void create_pages(const char* region_name_p, size_t chunk_count_p) noexcept
     {
-        FE_SUSPECT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
+        FE_ASSERT(chunk_count_p == 0, "${%s@0}: ${%s@1} was 0", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(chunk_count_p));
 
         static chunk_type l_s_initial_value;
         for (var::size_t i = 0; i < chunk_count_p; ++i)
@@ -832,20 +838,19 @@ public:
         index_t l_bucket_index = tl_s_memory_regions.bucket(region_name_p);
         typename namespace_pool_type::iterator  l_list_iterator = tl_s_memory_regions.begin(l_bucket_index);
         typename namespace_pool_type::const_iterator l_cend = tl_s_memory_regions.cend(l_bucket_index);
-        if (l_list_iterator == l_cend)
-        {
-            FE_SUSPECT(true, "Unable to shrink_to_fit() an empty pool.");
-            return;
-        }
+        FE_ASSERT(l_list_iterator == l_cend, "Unable to shrink_to_fit() an empty pool.");
 
+        /*
+                  first contains the address of the memory block.
+                  second contains the size of the memory block.
+        */
 
         var::size_t l_unused_memory_size_in_bytes = 0;
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
-            auto l_container = l_list_iterator->second._unused_blocks.get_container();
-            for (auto block : l_container)
+            for (auto block : l_list_iterator->second._free_blocks)
             {
-                l_unused_memory_size_in_bytes += block._size_in_bytes;
+                l_unused_memory_size_in_bytes += block.second;
             }
 
             if (l_list_iterator->second._page_iterator < l_list_iterator->second._end)
@@ -866,8 +871,7 @@ public:
         index_t l_bucket_index = tl_s_memory_regions.bucket(region_name_p);
         typename namespace_pool_type::iterator  l_list_iterator = tl_s_memory_regions.begin(l_bucket_index);
         typename namespace_pool_type::const_iterator l_cend = tl_s_memory_regions.cend(l_bucket_index);
-
-        FE_EXIT(l_list_iterator == l_cend, MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR, "Unable to shrink_to_fit() an empty pool.");
+        FE_ASSERT(l_list_iterator == l_cend, "Unable to request deallocate() to an empty pool.");
 
 
         std::byte* const l_value = reinterpret_cast<std::byte*>(pointer_p);
@@ -884,11 +888,13 @@ public:
                         ++pointer_p;
                     }
                 }
-                l_list_iterator->second._unused_blocks.push(block_info_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
 
-                if (l_list_iterator->second._unused_blocks.size() > 1)
+                auto l_insertion_result = l_list_iterator->second._free_blocks.insert(block_info_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
+                FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+
+                if (l_list_iterator->second._free_blocks.size() > 1)
                 {
-                    __merge(deleter_type<T>::base_type::tl_s_temporary_storage, l_list_iterator->second._unused_blocks);
+                    __merge(l_insertion_result.first, l_list_iterator->second._free_blocks);
                 }
                 return;
             }
@@ -896,99 +902,128 @@ public:
     }
 
 private:
-    /*To do:
-    Minimize de-allocation overheads. This function costs O(N/2) at the most worst case if memory blocks are evenly fragmented.
-    1. Replace priority_queue with heap
-    2. Reduce algorithm time-complexity
+    /*
+    FE.generic_pool
 
-    Previous method:
-    1. Start merging free blocks if the queue has more than one.
-    2. Compare boundaries of each free block range and merge them if they are contiguous. Push them back if not. O(N/2) at the worst case
+    allocation:
+        Best -  O(1)+ (Amortised)
+        Worst - O(N)
 
-    New method:
-    1. Push a de-allocated memory range into the heap (key has to be address value and arranged in the ascending order.)
-    2. Check if next_to or previous_of is connected to the recently free-ed memory block range.
-    3. Merge them if they are sequence. This only requires O(2) of memory block boundary checking. It is much better than the previous merge algorithm that might cost O(N/2).
-
+    deallocation:
+        Best - O(2 * log N)+ (Amortised)
+        Worst - O(N * log N)
     */
-    static void __merge(FE::fstack<block_info_type, recycler_capacity>& temporary_storage_p, FE::fpriority_queue<block_info_type, recycler_capacity, internal::pool::from_low_address>& unused_scattered_blocks_p) noexcept
+    static void __merge(recycler_iterator recently_deleted_p, recycler_type& free_block_list_p) noexcept
     {
         /*
-                        block_info_type's _address contains the address of the memory block.
-                        block_info_type's _size_in_bytes contains the size of the memory block.
+                        first contains the address of the memory block.
+                        second contains the size of the memory block.
         */
 
-        while (unused_scattered_blocks_p.size() > 1)
-        {
-            auto l_prev = unused_scattered_blocks_p.top();
-            unused_scattered_blocks_p.pop();
-            
-            auto l_next = unused_scattered_blocks_p.top();
-        
-            FE_SUSPECT(l_prev._address >= l_next._address, "${%s@0}: The priority queue has illegal address order. ${%s@1} always has lower address value than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION), TO_STRING(l_prev._address), TO_STRING(l_next._address));
-            FE_SUSPECT(l_prev._address + l_prev._size_in_bytes > l_next._address, "${%s@0}: Free-ed memory block range collision detected!\nPlease check if the count value passed to generic_pool<>::deallocate<T>(T* ptr_p, count_t element_count_p) was incorrect or not.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION));
+        auto l_cend = free_block_list_p.cend();
+        auto l_next_block_address = recently_deleted_p->first + recently_deleted_p->second;
+        auto l_result = free_block_list_p.find(l_next_block_address);
 
-            if ((l_prev._address + l_prev._size_in_bytes) == l_next._address)
-            {
-                unused_scattered_blocks_p.pop();
-                unused_scattered_blocks_p.push({ l_prev._address, l_prev._size_in_bytes + l_next._size_in_bytes });
-            }
-            else
-            { 
-                temporary_storage_p.push(l_prev);
-            }
+        while (l_cend != l_result)
+        {
+            recently_deleted_p->second += l_result->second;
+            l_next_block_address = l_result->first + l_result->second;
+            free_block_list_p.erase(l_result);
+            l_result = free_block_list_p.find(l_next_block_address);
         }
-       
-        while(temporary_storage_p.is_empty() == false)
-		{
-			unused_scattered_blocks_p.push(std::move(temporary_storage_p.pop()));
-		}
+
+  //      while (free_block_list_p.size() > 1)
+  //      {
+  //          auto l_prev = free_block_list_p.top();
+  //          free_block_list_p.pop();
+  //          
+  //          auto l_next = free_block_list_p.top();
+  //      
+  //          FE_ASSERT(l_prev._address >= l_next._address, "${%s@0}: The priority queue has illegal address order. ${%s@1} always has lower address value than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION), TO_STRING(l_prev._address), TO_STRING(l_next._address));
+  //          FE_ASSERT(l_prev._address + l_prev._size_in_bytes > l_next._address, "${%s@0}: Free-ed memory block range collision detected!\nPlease check if the count value passed to generic_pool<>::deallocate<T>(T* ptr_p, count_t element_count_p) was incorrect or not.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION));
+
+  //          if ((l_prev._address + l_prev._size_in_bytes) == l_next._address)
+  //          {
+  //              free_block_list_p.pop();
+  //              free_block_list_p.push({ l_prev._address, l_prev._size_in_bytes + l_next._size_in_bytes });
+  //          }
+  //          else
+  //          { 
+  //              temporary_storage_p.push(l_prev);
+  //          }
+  //      }
+  //     
+  //      while(temporary_storage_p.is_empty() == false)
+		//{
+		//	free_block_list_p.push(std::move(temporary_storage_p.pop()));
+		//}
     }
 
     template <typename T>
-    static void __recycle(block_info_type& in_out_memblock_info_p, chunk_type& memory_p, size_t queried_allocation_size_in_bytes_p) noexcept
+    static void __recycle(internal::pool::block_info<void, POOL_TYPE::_GENERIC>& out_memblock_info_p, chunk_type& memory_p, size_t queried_allocation_size_in_bytes_p) noexcept
     {
-        FE_SUSPECT(memory_p._unused_blocks.is_empty() == true, "Assertion Failure: Cannot recycle from an empty bin.");
+        FE_ASSERT(memory_p._free_blocks.is_empty() == true, "Assertion Failure: Cannot recycle from an empty bin.");
 
         /*
-           block_info_type's _address contains the address of the memory block.
-           block_info_type's _size_in_bytes contains the size of the memory block.
-           */
+                     first contains the address of the memory block.
+                     second contains the size of the memory block.
+        */
 
-        in_out_memblock_info_p = memory_p._unused_blocks.top();
-        while (in_out_memblock_info_p._size_in_bytes < queried_allocation_size_in_bytes_p)
+        auto l_cend = memory_p._free_blocks.cend();
+
+        for (auto free_block_iterator = memory_p._free_blocks.begin(); free_block_iterator != l_cend; ++free_block_iterator)
         {
-            deleter_type<T>::base_type::tl_s_temporary_storage.push(std::move(in_out_memblock_info_p));
-            memory_p._unused_blocks.pop();
+            if (free_block_iterator->second >= queried_allocation_size_in_bytes_p)
+            {
+                out_memblock_info_p._address = free_block_iterator->first;
+                out_memblock_info_p._size_in_bytes = queried_allocation_size_in_bytes_p;
+                auto l_leftover_address = free_block_iterator->first + queried_allocation_size_in_bytes_p;
+                auto l_leftover_size = free_block_iterator->second - queried_allocation_size_in_bytes_p;
+                
+                if (l_leftover_size > 0)
+                {
+                    _MAYBE_UNUSED_ auto l_insertion_result = memory_p._free_blocks.insert(block_info_type{ l_leftover_address, l_leftover_size });
+                    FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+                }
+                memory_p._free_blocks.erase(free_block_iterator);
+                return;
+            }
+        }
 
-            if (memory_p._unused_blocks.is_empty() == true)
+       /* out_memblock_info_p = memory_p._free_blocks.top();
+        while (out_memblock_info_p._size_in_bytes < queried_allocation_size_in_bytes_p)
+        {
+            deleter_type<T>::base_type::tl_s_temporary_storage.push(std::move(out_memblock_info_p));
+            memory_p._free_blocks.pop();
+
+            if (memory_p._free_blocks.is_empty() == true)
             {
                 break;
             }
             else
             {
-                in_out_memblock_info_p = memory_p._unused_blocks.top();
+                out_memblock_info_p = memory_p._free_blocks.top();
             }
         }
 
-        if (memory_p._unused_blocks.is_empty() == false)
+        if (memory_p._free_blocks.is_empty() == false)
         {
-            memory_p._unused_blocks.pop();
+            memory_p._free_blocks.pop();
         }
 
-        int64 l_remaining_size = (in_out_memblock_info_p._size_in_bytes - queried_allocation_size_in_bytes_p);
+        int64 l_remaining_size = (out_memblock_info_p._size_in_bytes - queried_allocation_size_in_bytes_p);
         if (l_remaining_size > 0)
         {
-            memory_p._unused_blocks.push(block_info_type{ (in_out_memblock_info_p._address + queried_allocation_size_in_bytes_p), static_cast<size_t>(l_remaining_size) });
-            in_out_memblock_info_p._size_in_bytes = queried_allocation_size_in_bytes_p;
+            memory_p._free_blocks.push(block_info_type{ (out_memblock_info_p._address + queried_allocation_size_in_bytes_p), static_cast<size_t>(l_remaining_size) });
+            out_memblock_info_p._size_in_bytes = queried_allocation_size_in_bytes_p;
         }
 
         while (deleter_type<T>::base_type::tl_s_temporary_storage.is_empty() == false)
         {
-            memory_p._unused_blocks.push(std::move(deleter_type<T>::base_type::tl_s_temporary_storage.pop()));
+            memory_p._free_blocks.push(std::move(deleter_type<T>::base_type::tl_s_temporary_storage.pop()));
         }
 
-        deleter_type<T>::base_type::tl_s_temporary_storage.pop_all();
+        deleter_type<T>::base_type::tl_s_temporary_storage.pop_all();*/
     }
 };
 

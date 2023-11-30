@@ -35,7 +35,7 @@ TEST(function_table, general)
 
 void FE_function_table_invocation_overhead_benchmark(benchmark::State& state_p) noexcept
 {
-	FE_SUSPECT(FE::framework::function_table::check_presence("FE::boolean Jesus_loves_you() noexcept") == false, "Could not find the target function.");
+	FE_ASSERT(FE::framework::function_table::check_presence("FE::boolean Jesus_loves_you() noexcept") == false, "Could not find the target function.");
 
 
 	for(auto _ : state_p)

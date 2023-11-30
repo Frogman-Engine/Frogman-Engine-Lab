@@ -56,8 +56,8 @@ public:
 	template<class TaskType, typename FunctionPtr>
 	_FORCE_INLINE_ static void register_method(const underlying_container::key_type& key_p, FunctionPtr function_p) noexcept
 	{	
-		FE_STATIC_SUSPICION((std::is_pointer<FunctionPtr>::value == false), "An invalid function type detected.");
-		FE_STATIC_SUSPICION((std::is_base_of<FE::task_base, TaskType>::value == false), "An invalid function type detected.");
+		FE_STATIC_ASSERT((std::is_pointer<FunctionPtr>::value == false), "An invalid function type detected.");
+		FE_STATIC_ASSERT((std::is_base_of<FE::task_base, TaskType>::value == false), "An invalid function type detected.");
 
 		{
 			std::lock_guard<std::mutex> l_lock(s_mutex);

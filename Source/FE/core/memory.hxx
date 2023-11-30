@@ -68,7 +68,8 @@ enum struct MEMORY_ERROR_1XX : int32
 	_FATAL_ERROR_OUT_OF_RANGE = 104,
 	_FATAL_ERROR_OUT_OF_CAPACITY = 105,
 	_FATAL_ERROR_ACCESS_VIOLATION = 106,
-	_FATAL_ERROR_HEAP_CORRUPTION = 107
+	_FATAL_ERROR_HEAP_CORRUPTION = 107,
+	_FATAL_ERROR_DOUBLE_FREE = 108
 };
 
 struct total_memory_utilization_data
@@ -193,8 +194,8 @@ enum struct ADDRESS : boolean
 #ifdef _AVX512_
 _FORCE_INLINE_ void unaligned_memset_with_avx512(void* const out_dest_pointer_p, int8 value_p, size_t total_bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
 
 	__m512i* l_m512i_dest_ptr = static_cast<__m512i*>(out_dest_pointer_p);
 	const __m512i l_m512i_value_to_be_assigned = _mm512_set1_epi8(value_p);
@@ -224,9 +225,9 @@ _FORCE_INLINE_ void unaligned_memset_with_avx512(void* const out_dest_pointer_p,
 
 _FORCE_INLINE_ void aligned_memset_with_avx512(void* const out_dest_pointer_p, int8 value_p, size_t total_bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
-	FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: The address is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
+	FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: The address is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
 
 	__m512i* l_m512i_dest_ptr = static_cast<__m512i*>(out_dest_pointer_p);
 	const __m512i l_m512i_value_to_be_assigned = _mm512_set1_epi8(value_p);
@@ -257,10 +258,10 @@ _FORCE_INLINE_ void aligned_memset_with_avx512(void* const out_dest_pointer_p, i
 
 _FORCE_INLINE_ void unaligned_memcpy_with_avx512(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m512i* l_m512i_dest_ptr = static_cast<__m512i*>(out_dest_pointer_p);
 	const __m512i* l_m512i_source_ptr = static_cast<const __m512i*>(source_pointer_p);
@@ -293,12 +294,12 @@ _FORCE_INLINE_ void unaligned_memcpy_with_avx512(void* const out_dest_pointer_p,
 
 _FORCE_INLINE_ void aligned_memcpy_with_avx512(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@}: out_dest_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
-	FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@}: source_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@}: out_dest_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
+	FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@}: source_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m512i* l_m512i_dest_ptr = static_cast<__m512i*>(out_dest_pointer_p);
 	const __m512i* l_m512i_source_ptr = static_cast<const __m512i*>(source_pointer_p);
@@ -331,11 +332,11 @@ _FORCE_INLINE_ void aligned_memcpy_with_avx512(void* const out_dest_pointer_p, c
 
 _FORCE_INLINE_ void dest_aligned_memcpy_with_avx512(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@}: out_dest_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@}: out_dest_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m512i* l_m512i_dest_ptr = static_cast<__m512i*>(out_dest_pointer_p);
 	const __m512i* l_m512i_source_ptr = static_cast<const __m512i*>(source_pointer_p);
@@ -368,11 +369,11 @@ _FORCE_INLINE_ void dest_aligned_memcpy_with_avx512(void* const out_dest_pointer
 
 _FORCE_INLINE_ void source_aligned_memcpy_with_avx512(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(MODULO_BY_64(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@}: source_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(MODULO_BY_64(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@}: source_pointer_p is not aligned by 64.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m512i* l_m512i_dest_ptr = static_cast<__m512i*>(out_dest_pointer_p);
 	const __m512i* l_m512i_source_ptr = static_cast<const __m512i*>(source_pointer_p);
@@ -406,10 +407,10 @@ _FORCE_INLINE_ void source_aligned_memcpy_with_avx512(void* const out_dest_point
 
 _FORCE_INLINE_ void unaligned_memmove_with_avx512(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_move_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	if (source_pointer_p < out_dest_pointer_p)
 	{
@@ -457,10 +458,10 @@ _FORCE_INLINE_ void unaligned_memmove_with_avx512(void* const out_dest_pointer_p
 
 _FORCE_INLINE_ void aligned_memmove_with_avx512(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_move_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	if (source_pointer_p < out_dest_pointer_p)
 	{
@@ -509,8 +510,8 @@ _FORCE_INLINE_ void aligned_memmove_with_avx512(void* const out_dest_pointer_p, 
 #elif defined(_AVX_)
 _FORCE_INLINE_ void unaligned_memset_with_avx(void* const out_dest_pointer_p, int8 value_p, size_t total_bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
 
 	__m256i* l_m512i_dest_ptr = static_cast<__m256i*>(out_dest_pointer_p);
 	const __m256i l_m256i_value_to_be_assigned = _mm256_set1_epi8(value_p);
@@ -542,9 +543,9 @@ _FORCE_INLINE_ void unaligned_memset_with_avx(void* const out_dest_pointer_p, in
 
 _FORCE_INLINE_ void aligned_memset_with_avx(void* const out_dest_pointer_p, int8 value_p, size_t total_bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
-	FE_SUSPECT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: The address is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(total_bytes_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(total_bytes_p));
+	FE_ASSERT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: The address is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT));
 
 	__m256i* l_m512i_dest_ptr = static_cast<__m256i*>(out_dest_pointer_p);
 	const __m256i l_m256i_value_to_be_assigned = _mm256_set1_epi8(value_p);
@@ -577,10 +578,10 @@ _FORCE_INLINE_ void aligned_memset_with_avx(void* const out_dest_pointer_p, int8
 
 _FORCE_INLINE_ void unaligned_memcpy_with_avx(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m256i* l_m512i_dest_ptr = static_cast<__m256i*>(out_dest_pointer_p);
 	const __m256i* l_m512i_source_ptr = static_cast<const __m256i*>(source_pointer_p);
@@ -617,12 +618,12 @@ _FORCE_INLINE_ void unaligned_memcpy_with_avx(void* const out_dest_pointer_p, co
 
 _FORCE_INLINE_ void aligned_memcpy_with_avx(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(MODULO_BY_32(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(source_pointer_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(MODULO_BY_32(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(source_pointer_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m256i* l_m512i_dest_ptr = static_cast<__m256i*>(out_dest_pointer_p);
 	const __m256i* l_m512i_source_ptr = static_cast<const __m256i*>(source_pointer_p);
@@ -659,11 +660,11 @@ _FORCE_INLINE_ void aligned_memcpy_with_avx(void* const out_dest_pointer_p, cons
 
 _FORCE_INLINE_ void dest_aligned_memcpy_with_avx(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m256i* l_m512i_dest_ptr = static_cast<__m256i*>(out_dest_pointer_p);
 	const __m256i* l_m512i_source_ptr = static_cast<const __m256i*>(source_pointer_p);
@@ -700,11 +701,11 @@ _FORCE_INLINE_ void dest_aligned_memcpy_with_avx(void* const out_dest_pointer_p,
 
 _FORCE_INLINE_ void source_aligned_memcpy_with_avx(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_copy_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
-	FE_SUSPECT(MODULO_BY_32(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(source_pointer_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_copy_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_copy_p));
+	FE_ASSERT(MODULO_BY_32(reinterpret_cast<uintptr_t>(source_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(source_pointer_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	__m256i* l_m512i_dest_ptr = static_cast<__m256i*>(out_dest_pointer_p);
 	const __m256i* l_m512i_source_ptr = static_cast<const __m256i*>(source_pointer_p);
@@ -742,10 +743,10 @@ _FORCE_INLINE_ void source_aligned_memcpy_with_avx(void* const out_dest_pointer_
 
 _FORCE_INLINE_ void unaligned_memmove_with_avx(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_move_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
 
 	if (source_pointer_p < out_dest_pointer_p)
 	{
@@ -795,11 +796,11 @@ _FORCE_INLINE_ void unaligned_memmove_with_avx(void* const out_dest_pointer_p, c
 
 _FORCE_INLINE_ void aligned_memmove_with_avx(void* const out_dest_pointer_p, const void* const source_pointer_p, FE::size_t bytes_to_move_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
-	FE_SUSPECT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
-	FE_SUSPECT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_to_move_p == 0, "${%s@0}: ${%s@1} is 0.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(bytes_to_move_p));
+	FE_ASSERT(out_dest_pointer_p == source_pointer_p, "Assertion Failure: A destination pointer and a source pointer cannot point to the same address.");
+	FE_ASSERT(MODULO_BY_32(reinterpret_cast<uintptr_t>(out_dest_pointer_p)) != 0, "${%s@0}: ${%s@1} is not aligned by 32.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), TO_STRING(out_dest_pointer_p));
 
 	if (source_pointer_p < out_dest_pointer_p)
 	{
@@ -888,10 +889,10 @@ template<class ConstIterator>
 _FORCE_INLINE_ boolean memcmp(ConstIterator left_iterator_begin_p, ConstIterator left_iterator_end_p, ConstIterator right_iterator_begin_p, ConstIterator right_iterator_end_p) noexcept
 {
 	static_assert(std::is_class<ConstIterator>::value == true);
-	FE_SUSPECT(left_iterator_begin_p == nullptr, "ERROR: left_iterator_begin_p is nullptr.");
-	FE_SUSPECT(left_iterator_end_p == nullptr, "ERROR: left_iterator_end_p is nullptr.");
-	FE_SUSPECT(right_iterator_begin_p == nullptr, "ERROR: right_iterator_begin_p is nullptr.");
-	FE_SUSPECT(right_iterator_end_p == nullptr, "ERROR: right_iterator_end_p is nullptr.");
+	FE_ASSERT(left_iterator_begin_p == nullptr, "ERROR: left_iterator_begin_p is nullptr.");
+	FE_ASSERT(left_iterator_end_p == nullptr, "ERROR: left_iterator_end_p is nullptr.");
+	FE_ASSERT(right_iterator_begin_p == nullptr, "ERROR: right_iterator_begin_p is nullptr.");
+	FE_ASSERT(right_iterator_end_p == nullptr, "ERROR: right_iterator_end_p is nullptr.");
 
 	ConstIterator l_left_iterator_begin = left_iterator_begin_p;
 
@@ -920,10 +921,10 @@ _FORCE_INLINE_ boolean memcmp(ConstIterator left_iterator_begin_p, ConstIterator
 template<ADDRESS DestAddressAlignment = ADDRESS::_NOT_ALIGNED, ADDRESS SourceAddressAlignment = ADDRESS::_NOT_ALIGNED>
 _FORCE_INLINE_ void memcpy(void* const out_dest_pointer_p, size_t dest_capacity_in_bytes_p, const void* const source_pointer_p, count_t bytes_p) noexcept
 	{
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-	FE_SUSPECT(dest_capacity_in_bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_in_bytes_p));
-	FE_SUSPECT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+	FE_ASSERT(dest_capacity_in_bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_in_bytes_p));
+	FE_ASSERT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
 
 	if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED && SourceAddressAlignment == ADDRESS::_ALIGNED)
 	{
@@ -946,9 +947,9 @@ _FORCE_INLINE_ void memcpy(void* const out_dest_pointer_p, size_t dest_capacity_
 template<ADDRESS DestAddressAlignment = ADDRESS::_NOT_ALIGNED, ADDRESS SourceAddressAlignment = ADDRESS::_NOT_ALIGNED>
 _FORCE_INLINE_ void memcpy(void* const out_dest_pointer_p, const void* const source_pointer_p, count_t bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-	FE_SUSPECT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+	FE_ASSERT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
 
 	if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED && SourceAddressAlignment == ADDRESS::_ALIGNED)
 	{
@@ -971,8 +972,8 @@ _FORCE_INLINE_ void memcpy(void* const out_dest_pointer_p, const void* const sou
 template<ADDRESS DestAddressAlignment = ADDRESS::_NOT_ALIGNED>
 _FORCE_INLINE_ void memset(void* const out_dest_pointer_p, int8 value_p, count_t bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
 
 	if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED)
 	{
@@ -987,8 +988,8 @@ _FORCE_INLINE_ void memset(void* const out_dest_pointer_p, int8 value_p, count_t
 template<ADDRESS DestAddressAlignment = ADDRESS::_NOT_ALIGNED>
 _FORCE_INLINE_ void memmove(void* const out_dest_pointer_p, const void* const source_pointer_p, size_t bytes_p) noexcept
 {
-	FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-	FE_SUSPECT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
+	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+	FE_ASSERT(bytes_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(bytes_p));
 
 	if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED)
 	{
@@ -1030,10 +1031,10 @@ public:
 	{
 		static_assert(std::is_constructible<T>::value == true, "static assertion failed: The typename T must be copy constructible.");
 
-		FE_SUSPECT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
 		
 		if constexpr (std::is_class<Iterator>::value == true)
 		{
@@ -1068,10 +1069,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_construct(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		if constexpr (std::is_pointer<Iterator>::value == true)
 		{
@@ -1101,9 +1102,9 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_construct(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		if constexpr (std::is_pointer<Iterator>::value == true)
 		{
@@ -1131,10 +1132,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_construct(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		memory_traits<T>::copy_construct<Iterator>(out_dest_pointer_p, dest_capacity_p, source_pointer_p, source_count_p);
 	}
@@ -1142,9 +1143,9 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_construct(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		memory_traits<T>::copy_construct<Iterator>(out_dest_pointer_p, source_pointer_p, count_to_copy_p);
 	}
@@ -1158,7 +1159,7 @@ public:
 	template<class Iterator>
 	_FORCE_INLINE_ static void destruct(_MAYBE_UNUSED_ Iterator in_out_dest_first_p, _MAYBE_UNUSED_ Iterator in_out_dest_last_p) noexcept
 	{
-		FE_SUSPECT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
 
 	}
 
@@ -1166,10 +1167,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_assign(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		memory_traits<T>::copy_construct<Iterator>(out_dest_pointer_p, dest_capacity_p, source_pointer_p, source_count_p);
 	}
@@ -1177,9 +1178,9 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_assign(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		memory_traits<T>::copy_construct<Iterator>(out_dest_pointer_p, source_pointer_p, count_to_copy_p);
 	}
@@ -1188,10 +1189,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_assign(Iterator out_dest_pointer_p, count_t dest_count_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(dest_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(dest_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		memory_traits<T>::copy_construct<Iterator>(out_dest_pointer_p, dest_count_p, source_pointer_p, source_count_p);
 	}
@@ -1199,9 +1200,9 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_assign(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		memory_traits<T>::copy_construct<Iterator>(out_dest_pointer_p, source_pointer_p, count_to_copy_p);
 	}
@@ -1212,10 +1213,10 @@ public:
 	{
 		static_assert(std::is_constructible<T>::value == true, "static assertion failed: The typename T must be copy constructible.");
 
-		FE_SUSPECT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
 
 		memory_traits<T>::construct<Iterator>(in_out_dest_first_p, in_out_dest_last_p, value_p);
 	}
@@ -1248,9 +1249,9 @@ public:
 	{
 		static_assert(std::is_constructible<T>::value == true, "static assertion failed: The typename T must be copy constructible.");
 
-		FE_SUSPECT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
 
 		while (in_out_dest_first_p != in_out_dest_last_p)
 		{
@@ -1263,11 +1264,11 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_construct(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		if (dest_capacity_p <= source_count_p)
 		{
@@ -1295,10 +1296,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_construct(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		for (var::count_t i = 0; i < count_to_copy_p; ++i)
 		{
@@ -1312,11 +1313,11 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_construct(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		if (dest_capacity_p <= source_count_p)
 		{
@@ -1344,10 +1345,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_construct(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		for (var::count_t i = 0; i < count_to_copy_p; ++i)
 		{
@@ -1368,9 +1369,9 @@ public:
 	_FORCE_INLINE_ static void destruct(_MAYBE_UNUSED_ Iterator in_out_dest_first_p, Iterator in_out_dest_last_p) noexcept
 	{
 		static_assert(std::is_destructible<T>::value == true, "static assertion failed: The typename T must be destructible.");
-		FE_SUSPECT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_dest_first_p));
-		FE_SUSPECT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_dest_last_p));
-		FE_SUSPECT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(in_out_dest_last_p));
+		FE_ASSERT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
 
 		while (in_out_dest_first_p != in_out_dest_last_p)
 		{
@@ -1383,11 +1384,11 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_assign(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		if (dest_capacity_p <= source_count_p)
 		{
@@ -1414,10 +1415,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void copy_assign(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		for (var::count_t i = 0; i < count_to_copy_p; ++i)
 		{
@@ -1431,11 +1432,11 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_assign(Iterator out_dest_pointer_p, count_t dest_capacity_p, InputIterator source_pointer_p, count_t source_count_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
-		FE_SUSPECT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
+		FE_ASSERT(dest_capacity_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(dest_capacity_p));
+		FE_ASSERT(source_count_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_count_p));
 
 		if (dest_capacity_p <= source_count_p)
 		{
@@ -1462,10 +1463,10 @@ public:
 	template<class Iterator, class InputIterator>
 	_FORCE_INLINE_ static void move_assign(Iterator out_dest_pointer_p, InputIterator source_pointer_p, count_t count_to_copy_p) noexcept
 	{
-		FE_SUSPECT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(source_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
 
-		FE_SUSPECT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
+		FE_ASSERT(count_to_copy_p == 0, "${%s@0}: ${%s@1} is zero", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(count_to_copy_p));
 
 		for (var::count_t i = 0; i < count_to_copy_p; ++i)
 		{
@@ -1481,9 +1482,9 @@ public:
 	{
 		static_assert(std::is_constructible<T>::value == true, "static assertion failed: The typename T must be copy constructible.");
 
-		FE_SUSPECT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
-		FE_SUSPECT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
-		FE_SUSPECT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
+		FE_ASSERT(in_out_dest_first_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(out_dest_pointer_p));
+		FE_ASSERT(in_out_dest_last_p == nullptr, "${%s@0}: ${%s@1} is nullptr", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(source_pointer_p));
+		FE_ASSERT(in_out_dest_first_p > in_out_dest_last_p, "${%s@0}: The begin iterator ${%s@1} must be pointing at the first element of a container.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(in_out_dest_first_p));
 
 		while (in_out_dest_first_p != in_out_dest_last_p)
 		{
@@ -1495,9 +1496,9 @@ public:
 
 
 template<typename T, class Alignment>
-_FORCE_INLINE_ constexpr size_t calculate_aligned_memory_size_in_bytes(count_t elements_p) noexcept
+_FORCE_INLINE_ size_t calculate_aligned_memory_size_in_bytes(count_t elements_p) noexcept
 {
-	FE_SUSPECT(elements_p == 0, "Assertion Failure: ${%s@0} cannot be zero.", TO_STRING(elements_p));
+	FE_ASSERT(elements_p == 0, "Assertion Failure: ${%s@0} cannot be zero.", TO_STRING(elements_p));
 
 	size_t l_actual_size = sizeof(T) * elements_p;
 	var::size_t l_multiplier = l_actual_size / sizeof(FE::aligned<T, Alignment>);

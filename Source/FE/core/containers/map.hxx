@@ -1,8 +1,8 @@
-﻿#ifndef _FE_CORE_SET_HXX_
-#define _FE_CORE_SET_HXX_
+﻿#ifndef _FE_CORE_MAP_HXX_
+#define _FE_CORE_MAP_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <set>
+#include <map>
 #include <memory_resource>
 
 
@@ -11,11 +11,11 @@
 BEGIN_NAMESPACE(FE)
 
 
-template<class Key, size_t Capacity, class Comparator = std::less<Key>>
-class fset : public std::pmr::set<Key, Comparator>
+template<typename Key, typename T, size_t Capacity, class Comparator = std::greater<Key>>
+class fmap : public std::pmr::map<Key, T, Comparator>
 {
 public:
-	using base_type = std::pmr::set<Key, Comparator>;
+	using base_type = std::pmr::map<Key, T, Comparator>;
     using key_type = Key;
     using key_compare = Comparator;
     using value_compare = typename base_type::value_compare;
@@ -33,15 +33,15 @@ public:
     using const_reverse_iterator = typename base_type::const_reverse_iterator;
 
 private:
-    std::array<std::byte, sizeof(Key)* Capacity> m_actual_memory;
+    std::array<std::byte, sizeof(value_type)* Capacity> m_actual_memory;
     std::pmr::monotonic_buffer_resource m_memory_resource;
 
 public:
-	_FORCE_INLINE_ fset() noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
+	_FORCE_INLINE_ fmap() noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
     {
         base_type(std::pmr::polymorphic_allocator<Key>{&m_memory_resource}); 
     }
-	_FORCE_INLINE_ fset(const fset& other_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
+	_FORCE_INLINE_ fmap(const fmap& other_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
     {
         base_type(std::pmr::polymorphic_allocator<Key>{&m_memory_resource});
         const base_type* l_other = &other_p;
@@ -49,7 +49,7 @@ public:
 
         *l_this = *l_other;
     }
-	_FORCE_INLINE_ fset(fset&& rvalue_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
+	_FORCE_INLINE_ fmap(fmap&& rvalue_p) noexcept : m_actual_memory(), m_memory_resource(m_actual_memory.data(), m_actual_memory.size()) 
     {
         base_type(std::pmr::polymorphic_allocator<Key>{&m_memory_resource});
         base_type* l_rvalue = &rvalue_p;

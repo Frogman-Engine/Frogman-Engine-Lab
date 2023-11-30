@@ -182,8 +182,8 @@ public:
 	template<class Container>
 	heap(container::range<Container>&& range_p, const key_comparator& comparator_p = Comparator()) noexcept : m_pool(), m_allocator(m_pool), m_root(), m_comparator(comparator_p) 
 	{
-		FE_SUSPECT(range_p._begin >= range_p._end, "%{%s@0}: The container range %{%s@1} index cannot be greater or equal to the container range %{%s@2} index.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(range_p._begin), TO_STRING(range_p._end));
-		FE_SUSPECT(range_p._container.is_null() == true, "The container range reference was null.");
+		FE_ASSERT(range_p._begin >= range_p._end, "%{%s@0}: The container range %{%s@1} index cannot be greater or equal to the container range %{%s@2} index.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(range_p._begin), TO_STRING(range_p._end));
+		FE_ASSERT(range_p._container.is_null() == true, "The container range reference was null.");
 	}
 
 	~heap() noexcept
@@ -209,7 +209,7 @@ public:
 private:
 	void __create_new_node(T value_p) noexcept
 	{
-		FE_SUSPECT(this->m_root.get() == nullptr, "Unable to append a new node. The root is null.");
+		FE_ASSERT(this->m_root.get() == nullptr, "Unable to append a new node. The root is null.");
 
 		// TO DO
 		// 1. iterator impl
@@ -219,22 +219,22 @@ private:
 	template<class InputIterator>
 	void __copy_data_from_input_iterator(InputIterator first_p, InputIterator last_p) noexcept
 	{
-		FE_SUSPECT(first_p >= last_p, "%{%s@0}: The iterator %{%s@1}'s address value cannot be greater or equal to the iterator %{%s@2}'s address.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
-		FE_SUSPECT(first_p == nullptr, "The iterator %{%s@0} was nullptr.", TO_STRING(first_p));
-		FE_SUSPECT(last_p == nullptr, "The iterator %{%s@0} was nullptr.", TO_STRING(last_p));
+		FE_ASSERT(first_p >= last_p, "%{%s@0}: The iterator %{%s@1}'s address value cannot be greater or equal to the iterator %{%s@2}'s address.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(first_p), TO_STRING(last_p));
+		FE_ASSERT(first_p == nullptr, "The iterator %{%s@0} was nullptr.", TO_STRING(first_p));
+		FE_ASSERT(last_p == nullptr, "The iterator %{%s@0} was nullptr.", TO_STRING(last_p));
 	}
 
 	void __move_data_from_initializer_list(std::initializer_list<value_type>&& initializer_list_p) noexcept
 	{
 		size_type l_input_size = initializer_list_p.size();
-		FE_SUSPECT(l_input_size == 0, "An initializer_list passed to a heap constructor was empty.");
+		FE_ASSERT(l_input_size == 0, "An initializer_list passed to a heap constructor was empty.");
 	}
 
 	template<class Container>
 	void __copy_data_from_container_range(container::range<Container>&& range_p) noexcept
 	{
-		FE_SUSPECT(range_p._begin >= range_p._end, "%{%s@0}: The container range %{%s@1} index cannot be greater or equal to the container range %{%s@2} index.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(range_p._begin), TO_STRING(range_p._end));
-		FE_SUSPECT(range_p._container.is_null() == true, "The container range reference was null.");
+		FE_ASSERT(range_p._begin >= range_p._end, "%{%s@0}: The container range %{%s@1} index cannot be greater or equal to the container range %{%s@2} index.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_ILLEGAL_POSITION), TO_STRING(range_p._begin), TO_STRING(range_p._end));
+		FE_ASSERT(range_p._container.is_null() == true, "The container range reference was null.");
 	}
 
 /*

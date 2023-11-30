@@ -15,7 +15,7 @@ BEGIN_NAMESPACE(FE)
 template <typename T>
 class random_integer final
 {
-    FE_STATIC_SUSPICION(::std::is_integral<T>::value == false, "typename T is not an integral type");
+    FE_STATIC_ASSERT(::std::is_integral<T>::value == false, "typename T is not an integral type");
 
     std::optional<::std::mt19937_64> m_value_generator;
     std::optional<::std::uniform_int_distribution<T>> m_uniform_int_distribution;

@@ -19,7 +19,7 @@ initialization_arguments application::s_options;
 
 discard_t application::set_application(initialization_arguments initialization_arguments_p) noexcept
 {
-	FE_SUSPECT(initialization_arguments_p._application_pointer == nullptr, "ERROR: initialization_arguments_p._application_pointer cannot be nullptr");
+	FE_ASSERT(initialization_arguments_p._application_pointer == nullptr, "ERROR: initialization_arguments_p._application_pointer cannot be nullptr");
 	s_options._application_pointer = initialization_arguments_p._application_pointer;
 	s_options._initial_function_table_size = initialization_arguments_p._initial_function_table_size;
 	return true;
@@ -95,7 +95,7 @@ int main(int argc_p, char** argv_p)
 		FE::framework::application::s_restart_or_not = FE::framework::RESTART_OR_NOT::_NO_OPERATION;
 
 		auto l_config_args = FE::framework::application::get_application();
-		FE_SUSPECT(FE::framework::application::s_options._application_pointer == nullptr, "Assertion Failure: ${%s@0} is nullptr.", TO_STRING(FE::framework::application::s_options._application_pointer));
+		FE_ASSERT(FE::framework::application::s_options._application_pointer == nullptr, "Assertion Failure: ${%s@0} is nullptr.", TO_STRING(FE::framework::application::s_options._application_pointer));
 		FE::framework::application::__launch_main(l_config_args);
 
 		FE::framework::application::s_options._application_pointer->set_up(argc_p, argv_p);

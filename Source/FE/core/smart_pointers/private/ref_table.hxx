@@ -92,7 +92,7 @@ private:
 			base_type::tl_s_ref_table_recycler.pop_back();
 			base_type::tl_s_ref_table[l_index_key] = pointer_p;
 
-			FE_SUSPECT(base_type::tl_s_ref_table[l_index_key] != pointer_p, "Assertion Failed: failed to register a reference to the table.\n${%s@0} must be equal to ${%p@1}.", TO_STRING(base_type::tl_s_ref_table[l_index_key]), pointer_p);
+			FE_ASSERT(base_type::tl_s_ref_table[l_index_key] != pointer_p, "Assertion Failed: failed to register a reference to the table.\n${%s@0} must be equal to ${%p@1}.", TO_STRING(base_type::tl_s_ref_table[l_index_key]), pointer_p);
 			//FE_LOG("Registered a key value: ${%lu@0}.\n\n\n", &l_index_key);
 			return l_index_key;
 		}
@@ -100,14 +100,14 @@ private:
 		l_index_key = base_type::tl_s_ref_table.size();
 		base_type::tl_s_ref_table.emplace_back(pointer_p);
 
-		FE_SUSPECT(base_type::tl_s_ref_table[l_index_key] != pointer_p, "Assertion Failed: failed to register a reference to the table.\n${%s@0} must be equal to ${%p@1}.", TO_STRING(base_type::tl_s_ref_table[l_index_key]), pointer_p);
+		FE_ASSERT(base_type::tl_s_ref_table[l_index_key] != pointer_p, "Assertion Failed: failed to register a reference to the table.\n${%s@0} must be equal to ${%p@1}.", TO_STRING(base_type::tl_s_ref_table[l_index_key]), pointer_p);
 		//FE_LOG("Registered a key value: ${%lu@0}.\n\n\n", &l_index_key);
 		return l_index_key;
 	}
 
 	_FORCE_INLINE_ static void __unregister_ref(ref_table_key_type index_key_p, _MAYBE_UNUSED_ ref_table_value_type auth_p) noexcept
 	{
-		FE_SUSPECT(index_key_p >= base_type::tl_s_ref_table.size(), "${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(index_key_p));
+		FE_ASSERT(index_key_p >= base_type::tl_s_ref_table.size(), "${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(index_key_p));
 		base_type::tl_s_ref_table[index_key_p] = nullptr;
 		
 		//FE_LOG("Unregistered a key value: ${%lu@0}.\n\n\n", &index_key_p);
@@ -121,11 +121,11 @@ private:
 
 		while(l_begin != l_end)
 		{
-			FE_SUSPECT(base_type::tl_s_ref_table[*l_begin] != nullptr, "Assertion Failed: unregistered keys' value must be nullptr.");
+			FE_ASSERT(base_type::tl_s_ref_table[*l_begin] != nullptr, "Assertion Failed: unregistered keys' value must be nullptr.");
 			
 			for (auto it = l_begin + 1; it != l_end; ++it)
 			{
-				FE_SUSPECT(*l_begin == *it, "Assertion Failed: Keys are always unique.");
+				FE_ASSERT(*l_begin == *it, "Assertion Failed: Keys are always unique.");
 			}
 			++l_begin;
 		}
@@ -134,8 +134,8 @@ private:
 
 	_FORCE_INLINE_ static void __update_ref(ref_table_key_type index_key_p, ref_table_value_type pointer_p) noexcept
 	{
-		FE_SUSPECT(pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(pointer_p));
-		FE_SUSPECT(index_key_p >= base_type::tl_s_ref_table.size(), "${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(index_key_p));
+		FE_ASSERT(pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(pointer_p));
+		FE_ASSERT(index_key_p >= base_type::tl_s_ref_table.size(), "${%s@0}: ${%s@1} is an invalid key.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR), TO_STRING(index_key_p));
 		base_type::tl_s_ref_table[index_key_p] = pointer_p;
 	}
 };
