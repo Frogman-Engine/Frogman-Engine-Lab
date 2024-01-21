@@ -59,12 +59,12 @@ public:
 			return nullptr;
 		}
 
-		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
+		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<var::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 		if (l_result != pointer_p) _LIKELY_
 		{
 			FE::memcpy<is_address_aligned, is_address_aligned>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
-			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte*>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
+			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(reinterpret_cast<var::byte*>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 		}
 
 		return l_result;
@@ -120,23 +120,23 @@ public:
 	{
 		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
-		return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
+		return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<var::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer const pointer_p, const size_type prev_count_p, const size_type new_count_p) noexcept
 	{
 		if (new_count_p == 0)
 		{
-			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
+			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(reinterpret_cast<var::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 			return nullptr;
 		}
 
-		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<std::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
+		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<var::byte>(FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 		if (l_result != pointer_p) _LIKELY_
 		{
 			FE::memcpy<is_address_aligned, is_address_aligned>(l_result, sizeof(T) * new_count_p, pointer_p, sizeof(T) * prev_count_p);
-			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
+			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(reinterpret_cast<var::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 		}
 
 		return l_result;
@@ -147,7 +147,7 @@ public:
 		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
-		FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
+		FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(reinterpret_cast<var::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
 	}
 };
 
@@ -209,12 +209,12 @@ public:
 			return nullptr;
 		}
 
-		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<std::byte>(this->m_namespace.data(), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
+		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<var::byte>(this->m_namespace.data(), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 		if (l_result != pointer_p) _LIKELY_
 		{
 			FE::memcpy<is_address_aligned, is_address_aligned>(l_result, new_count_p * sizeof(value_type), pointer_p, prev_count_p * sizeof(value_type));
-			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(this->m_namespace.data(), reinterpret_cast<std::byte*>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
+			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(this->m_namespace.data(), reinterpret_cast<var::byte*>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 		}
 
 		return l_result;
@@ -277,23 +277,23 @@ public:
 	{
 		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 
-		return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<std::byte>(this->m_namespace.data(), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
+		return (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<var::byte>(this->m_namespace.data(), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p)).release();
 	}
 
 	_NODISCARD_ _FORCE_INLINE_ pointer reallocate(pointer const pointer_p, const size_type prev_count_p, const size_type new_count_p) noexcept
 	{
 		if (new_count_p == 0)
 		{
-			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(this->m_namespace.data(), reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
+			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(this->m_namespace.data(), reinterpret_cast<var::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 			return nullptr;
 		}
 
-		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<std::byte>(this->m_namespace.data(), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
+		pointer l_result = (T*)FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::allocate<var::byte>(this->m_namespace.data(), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(new_count_p)).release();
 
 		if (l_result != pointer_p) _LIKELY_
 		{
 			FE::memcpy<is_address_aligned, is_address_aligned>(l_result, sizeof(T) * new_count_p, pointer_p, sizeof(T) * prev_count_p);
-			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(this->m_namespace.data(), reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
+			FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(this->m_namespace.data(), reinterpret_cast<var::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(prev_count_p));
 		}
 
 		return l_result;
@@ -304,7 +304,7 @@ public:
 		FE_ASSERT(count_p == 0, "${%s@0}: queried allocation size is ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), &count_p);
 		FE_ASSERT(pointer_p == nullptr, "${%s@0}: attempted to delete nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 
-		FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<std::byte>(this->m_namespace.data(), reinterpret_cast<std::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
+		FE::generic_pool<ChunkCapacity::size, Alignment, GlobalAllocator, NamespaceAllocator>::deallocate<var::byte>(this->m_namespace.data(), reinterpret_cast<var::byte* const>(pointer_p), FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(count_p));
 	}
 };
 

@@ -2,8 +2,8 @@
 #define _FE_CORE_MAP_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <map>
 #include <memory_resource>
+#include <map>
 
 
 
@@ -33,7 +33,7 @@ public:
     using const_reverse_iterator = typename base_type::const_reverse_iterator;
 
 private:
-    std::array<std::byte, sizeof(value_type)* Capacity> m_actual_memory;
+    std::array<var::byte, sizeof(value_type)* Capacity> m_actual_memory;
     std::pmr::monotonic_buffer_resource m_memory_resource;
 
 public:

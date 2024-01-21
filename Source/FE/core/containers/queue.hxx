@@ -32,7 +32,7 @@ public:
 	using const_reference = typename container_type::const_reference;
 
 private:
-	std::array<std::byte, sizeof(T) * Capacity> m_actual_memory;
+	std::array<var::byte, sizeof(T) * Capacity> m_actual_memory;
 	std::pmr::monotonic_buffer_resource m_memory_resource;
 
 public:

@@ -1038,7 +1038,7 @@ public:
 		
 		if constexpr (std::is_class<Iterator>::value == true)
 		{
-			if constexpr (std::is_same<typename Iterator::iterator_category, typename FE::contiguous_iterator<typename Iterator::value_type>::category>::value == true && sizeof(T) == sizeof(std::byte))
+			if constexpr (std::is_same<typename Iterator::iterator_category, typename FE::contiguous_iterator<typename Iterator::value_type>::category>::value == true && sizeof(T) == sizeof(var::byte))
 			{
 				UNALIGNED_MEMSET(iterator_cast<T*>(in_out_dest_first_p), (int8)value_p, (in_out_dest_last_p - in_out_dest_first_p) * sizeof(T));
 			}
@@ -1051,7 +1051,7 @@ public:
 				}
 			}
 		}
-		else if constexpr ((std::is_pointer<Iterator>::value == true) && (sizeof(T) == sizeof(std::byte)))
+		else if constexpr ((std::is_pointer<Iterator>::value == true) && (sizeof(T) == sizeof(var::byte)))
 		{
 			UNALIGNED_MEMSET(iterator_cast<T*>(in_out_dest_first_p), (int8)value_p, (in_out_dest_last_p - in_out_dest_first_p) * sizeof(T));
 		}

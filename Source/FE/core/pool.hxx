@@ -46,7 +46,7 @@ namespace internal::pool
     template <>
     struct block_info<void, POOL_TYPE::_GENERIC>
     {
-        std::byte* _address = nullptr;
+        var::byte* _address = nullptr;
         var::size_t _size_in_bytes = 0;
     };
 
@@ -57,6 +57,20 @@ namespace internal::pool
         {
             return (left_p._address > right_p._address);
         }
+    };
+
+
+    template<size_t ChunkCapacity, class Alignment>
+    struct address_tree
+    {
+        constexpr static count_t chunk_capacity = ChunkCapacity;
+        constexpr static size_t recycler_capacity = ChunkCapacity / Alignment::size;
+
+        using underlying_container_type = FE::fmap<var::byte*, var::size_t, recycler_capacity>;
+        using iterator = typename underlying_container_type::iterator;
+
+        typename underlying_container_type _begin_tree;
+        typename underlying_container_type _end_tree;
     };
 
 
@@ -71,7 +85,7 @@ namespace internal::pool
         using pointer = typename block_info_type::pointer;
 
     private:
-        alignas(FE::SIMD_auto_alignment::alignment_type::size) std::array<std::byte, sizeof(T)* ChunkCapacity> m_memory;
+        alignas(FE::SIMD_auto_alignment::alignment_type::size) std::array<var::byte, sizeof(T)* ChunkCapacity> m_memory;
 
     public:
         constexpr static size_t chunk_capacity = ChunkCapacity;
@@ -90,17 +104,15 @@ namespace internal::pool
     template<size_t ChunkCapacity, class Alignment>
     struct chunk<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment>
     {
-    public:
         constexpr static count_t chunk_capacity = ChunkCapacity;
         constexpr static size_t recycler_capacity = ChunkCapacity / Alignment::size;
 
-        //using block_info_type = block_info<void, POOL_TYPE::_GENERIC>;
-        using block_info_type = typename FE::fmap<std::byte*, var::size_t, recycler_capacity, from_low_address>::value_type;
-        using recycler_type = FE::fmap<std::byte*, var::size_t, recycler_capacity>;
+        using block_info_type = typename FE::fmap<var::byte*, var::size_t, recycler_capacity, from_low_address>::value_type;
+        using recycler_type = address_tree<recycler_capacity, Alignment>;
         using recycler_iterator = typename recycler_type::iterator;
 
     private:
-        alignas(FE::SIMD_auto_alignment::alignment_type::size) std::array<std::byte, ChunkCapacity> m_memory;
+        alignas(FE::SIMD_auto_alignment::alignment_type::size) std::array<var::byte, ChunkCapacity> m_memory;
         /*
          std::pair's first contains the address of the memory block.
          std::pair's second contains the size of the memory block.
@@ -108,13 +120,13 @@ namespace internal::pool
 
     public:
         recycler_type _free_blocks;
-        std::byte* const _begin = m_memory.data();
-        std::byte* _page_iterator = _begin;
-        std::byte* const _end = _begin + m_memory.size();
+        var::byte* const _begin = m_memory.data();
+        var::byte* _page_iterator = _begin;
+        var::byte* const _end = _begin + m_memory.size();
 
         _FORCE_INLINE_ boolean is_full() const noexcept
         {
-            return (_free_blocks.is_empty() == true) && (_page_iterator >= _end);
+            return (_free_blocks._begin_tree.is_empty() == true) && (_page_iterator >= _end);
         }
     };
 }
@@ -176,7 +188,6 @@ struct generic_deleter_base
 protected:
     chunk_type* m_host_chunk = nullptr;
     var::size_t m_size_in_bytes = 0;
-    //thread_local static FE::fstack<block_info_type, temporary_storage_capacity> tl_s_temporary_storage;
 
 public:
     _FORCE_INLINE_ generic_deleter_base() noexcept : m_host_chunk(), m_size_in_bytes() {}
@@ -193,9 +204,6 @@ public:
     }
 };
 
-//template<size_t ChunkCapacity, class Alignment>
-//thread_local FE::fstack<typename generic_deleter_base<ChunkCapacity, Alignment>::block_info_type, generic_deleter_base<ChunkCapacity, Alignment>::temporary_storage_capacity> generic_deleter_base<ChunkCapacity, Alignment>::tl_s_temporary_storage;
-
 
 template<size_t ChunkCapacity, class Alignment, class GlobalAllocator, class NamespaceAllocator>
 struct nondestructive_generic_deleter final : public generic_deleter_base<ChunkCapacity, Alignment>
@@ -207,18 +215,21 @@ struct nondestructive_generic_deleter final : public generic_deleter_base<ChunkC
     _FORCE_INLINE_ nondestructive_generic_deleter() noexcept : base_type() {}
     _FORCE_INLINE_ nondestructive_generic_deleter(chunk_type* host_p, size_t size_in_bytes_p) noexcept : base_type(host_p, size_in_bytes_p) {}
 
-    _FORCE_INLINE_ void operator()(void* ptr_p) const noexcept
+    void operator()(void* ptr_p) const noexcept
     {
         if (ptr_p == nullptr || this->m_host_chunk == nullptr) { return; }
 
         FE_ASSERT(this->m_size_in_bytes == 0, "Assertion Failed: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
-        
-        auto l_insertion_result = this->m_host_chunk->_free_blocks.insert(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
-        FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
 
-        if (this->m_host_chunk->_free_blocks.size() > 1)
+        auto l_begin_tree_insertion_result = this->m_host_chunk->_free_blocks._begin_tree.insert(block_info_type{ static_cast<var::byte*>(ptr_p), this->m_size_in_bytes });
+        FE_EXIT(l_begin_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+
+        auto l_end_tree_insertion_result = this->m_host_chunk->_free_blocks._end_tree.insert(block_info_type{ static_cast<var::byte*>(ptr_p) + this->m_size_in_bytes,  this->m_size_in_bytes });
+        FE_EXIT(l_end_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+
+        if (this->m_host_chunk->_free_blocks._begin_tree.size() > 1)
         {
-            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(l_insertion_result.first, this->m_host_chunk->_free_blocks);
+            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(l_begin_tree_insertion_result.first, this->m_host_chunk->_free_blocks);
         }
     }
 };
@@ -262,12 +273,15 @@ public:
 
         FE_ASSERT(this->m_size_in_bytes == 0, "FATAL ERROR: ${%s@0} cannot be zero.", TO_STRING(this->m_size_in_bytes));
         
-        auto l_insertion_result = this->m_host_chunk->_free_blocks.insert(block_info_type{ static_cast<std::byte*>(ptr_p), this->m_size_in_bytes });
-        FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+        auto l_begin_tree_insertion_result = this->m_host_chunk->_free_blocks._begin_tree.insert(block_info_type{ static_cast<var::byte*>(ptr_p), this->m_size_in_bytes });
+        FE_EXIT(l_begin_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
 
-        if (this->m_host_chunk->_free_blocks.size() > 1)
+        auto l_end_tree_insertion_result = this->m_host_chunk->_free_blocks._end_tree.insert(block_info_type{ static_cast<var::byte*>(ptr_p) + this->m_size_in_bytes,  this->m_size_in_bytes });
+        FE_EXIT(l_end_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+
+        if (this->m_host_chunk->_free_blocks._begin_tree.size() > 1)
         {
-            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(l_insertion_result.first, this->m_host_chunk->_free_blocks);
+            pool<void, POOL_TYPE::_GENERIC, ChunkCapacity, Alignment, GlobalAllocator, NamespaceAllocator>::__merge(l_begin_tree_insertion_result.first, this->m_host_chunk->_free_blocks);
         }
     }
 
@@ -572,7 +586,7 @@ public:
                 void* l_allocation_result = nullptr;
                 internal::pool::block_info<void, POOL_TYPE::_GENERIC> l_memblock_info;
 
-                if (l_list_iterator->_free_blocks.is_empty() == false)
+                if (l_list_iterator->_free_blocks._begin_tree.is_empty() == false)
                 {
                     /*
                     first contains the address of the memory block.
@@ -663,7 +677,7 @@ public:
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
             var::size_t l_unused_memory_size_in_bytes = 0;
-            for (auto block : l_list_iterator->_free_blocks)
+            for (auto block : l_list_iterator->_free_blocks._begin_tree)
             {
                 l_unused_memory_size_in_bytes += block.second;
             }
@@ -695,7 +709,7 @@ public:
         FE_ASSERT(l_list_iterator == l_cend, "Unable to request deallocate() to an empty pool.");
 
 
-        std::byte* const l_value = reinterpret_cast<std::byte*>(pointer_p);
+        var::byte* const l_value = reinterpret_cast<var::byte*>(pointer_p);
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
@@ -710,12 +724,16 @@ public:
                     }
                 }
 
-                auto l_insertion_result = l_list_iterator->_free_blocks.insert(block_info_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
-                FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
-                
-                if (l_list_iterator->_free_blocks.size() > 1)
+                size_t l_block_size_in_bytes = FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p);
+                auto l_begin_tree_insertion_result = l_list_iterator->_free_blocks._begin_tree.insert(block_info_type{ l_value, l_block_size_in_bytes });
+                FE_EXIT(l_begin_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+
+                auto l_end_tree_insertion_result = l_list_iterator->_free_blocks._end_tree.insert(block_info_type{ l_value + l_block_size_in_bytes, l_block_size_in_bytes });
+                FE_EXIT(l_end_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+
+                if (l_list_iterator->_free_blocks._begin_tree.size() > 1)
                 {
-                    __merge(l_insertion_result.first, l_list_iterator->_free_blocks);
+                    __merge(l_begin_tree_insertion_result.first, l_list_iterator->_free_blocks);
                 }
                 return;
             }
@@ -755,7 +773,7 @@ public:
                 void* l_allocation_result = nullptr;
                 internal::pool::block_info<void, POOL_TYPE::_GENERIC> l_memblock_info;
 
-                if (l_list_iterator->second._free_blocks.is_empty() == false)
+                if (l_list_iterator->second._free_blocks._begin_tree.is_empty() == false)
                 {
                     /*
                     first contains the address of the memory block.
@@ -848,7 +866,7 @@ public:
         var::size_t l_unused_memory_size_in_bytes = 0;
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
-            for (auto block : l_list_iterator->second._free_blocks)
+            for (auto block : l_list_iterator->second._free_blocks._begin_tree)
             {
                 l_unused_memory_size_in_bytes += block.second;
             }
@@ -874,7 +892,7 @@ public:
         FE_ASSERT(l_list_iterator == l_cend, "Unable to request deallocate() to an empty pool.");
 
 
-        std::byte* const l_value = reinterpret_cast<std::byte*>(pointer_p);
+        var::byte* const l_value = reinterpret_cast<var::byte*>(pointer_p);
 
         for (; l_list_iterator != l_cend; ++l_list_iterator)
         {
@@ -889,13 +907,18 @@ public:
                     }
                 }
 
-                auto l_insertion_result = l_list_iterator->second._free_blocks.insert(block_info_type{ l_value, FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p) });
-                FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+                size_t l_block_size_in_bytes = FE::calculate_aligned_memory_size_in_bytes<T, Alignment>(element_count_p);
+                auto l_begin_tree_insertion_result = l_list_iterator->second._free_blocks._begin_tree.insert(block_info_type{ l_value, l_block_size_in_bytes });
+                FE_EXIT(l_begin_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+                
+                auto l_end_tree_insertion_result = l_list_iterator->second._free_blocks._end_tree.insert(block_info_type{ l_value + l_block_size_in_bytes, l_block_size_in_bytes });
+                FE_EXIT(l_end_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
 
-                if (l_list_iterator->second._free_blocks.size() > 1)
+                if (l_list_iterator->second._free_blocks._begin_tree.size() > 1)
                 {
-                    __merge(l_insertion_result.first, l_list_iterator->second._free_blocks);
+                    __merge(l_begin_tree_insertion_result.first, l_list_iterator->second._free_blocks);
                 }
+ 
                 return;
             }
         }
@@ -906,72 +929,73 @@ private:
     FE.generic_pool
 
     allocation:
-        Best -  O(1)+ (Amortised)
-        Worst - O(N)
+
 
     deallocation:
-        Best - O(2 * log N)+ (Amortised)
-        Worst - O(N * log N)
+  
     */
-    static void __merge(recycler_iterator recently_deleted_p, recycler_type& free_block_list_p) noexcept
+    _FORCE_INLINE_ static void __merge(recycler_iterator in_out_recently_deleted_p, recycler_type& in_out_free_block_list_p) noexcept
     {
-        /*
-                        first contains the address of the memory block.
-                        second contains the size of the memory block.
-        */
-
-        auto l_cend = free_block_list_p.cend();
-        auto l_next_block_address = recently_deleted_p->first + recently_deleted_p->second;
-        auto l_result = free_block_list_p.find(l_next_block_address);
-
-        while (l_cend != l_result)
+        // merge high
+        auto l_failed_to_find = in_out_free_block_list_p._begin_tree.cend();
+        var::size_t l_merged_block_size_in_bytes = in_out_recently_deleted_p->second;
+        var::byte* l_next_block_address = in_out_recently_deleted_p->first + l_merged_block_size_in_bytes;
         {
-            recently_deleted_p->second += l_result->second;
-            l_next_block_address = l_result->first + l_result->second;
-            free_block_list_p.erase(l_result);
-            l_result = free_block_list_p.find(l_next_block_address);
+            recycler_iterator l_search_result = in_out_free_block_list_p._begin_tree.find(l_next_block_address);
+
+            while (l_failed_to_find != l_search_result)
+            {
+                recycler_iterator l_barrier = in_out_free_block_list_p._end_tree.find(l_next_block_address);
+                in_out_free_block_list_p._end_tree.erase(l_barrier);
+
+                l_merged_block_size_in_bytes += l_search_result->second;
+                l_next_block_address += l_search_result->second;
+
+                in_out_free_block_list_p._begin_tree.erase(l_search_result);
+                l_search_result = in_out_free_block_list_p._begin_tree.find(l_next_block_address);
+            }
         }
+        recycler_iterator l_end_address_of_block = in_out_free_block_list_p._end_tree.find(l_next_block_address);
+        l_end_address_of_block->second = l_merged_block_size_in_bytes;
 
-  //      while (free_block_list_p.size() > 1)
-  //      {
-  //          auto l_prev = free_block_list_p.top();
-  //          free_block_list_p.pop();
-  //          
-  //          auto l_next = free_block_list_p.top();
-  //      
-  //          FE_ASSERT(l_prev._address >= l_next._address, "${%s@0}: The priority queue has illegal address order. ${%s@1} always has lower address value than ${%s@2}.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION), TO_STRING(l_prev._address), TO_STRING(l_next._address));
-  //          FE_ASSERT(l_prev._address + l_prev._size_in_bytes > l_next._address, "${%s@0}: Free-ed memory block range collision detected!\nPlease check if the count value passed to generic_pool<>::deallocate<T>(T* ptr_p, count_t element_count_p) was incorrect or not.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_HEAP_CORRUPTION));
+        //// merge low
+        l_failed_to_find = in_out_free_block_list_p._end_tree.cend();
+        {
+            l_merged_block_size_in_bytes = in_out_recently_deleted_p->second;
+            var::byte* l_next_block_end_address = in_out_recently_deleted_p->first;
+            recycler_iterator l_search_result = in_out_free_block_list_p._end_tree.find(l_next_block_end_address);
 
-  //          if ((l_prev._address + l_prev._size_in_bytes) == l_next._address)
-  //          {
-  //              free_block_list_p.pop();
-  //              free_block_list_p.push({ l_prev._address, l_prev._size_in_bytes + l_next._size_in_bytes });
-  //          }
-  //          else
-  //          { 
-  //              temporary_storage_p.push(l_prev);
-  //          }
-  //      }
-  //     
-  //      while(temporary_storage_p.is_empty() == false)
-		//{
-		//	free_block_list_p.push(std::move(temporary_storage_p.pop()));
-		//}
+            // merge high
+            while (l_failed_to_find != l_search_result)
+            {
+                recycler_iterator l_barrier = in_out_free_block_list_p._begin_tree.find(l_next_block_end_address);
+                in_out_free_block_list_p._begin_tree.erase(l_barrier);
+
+                l_merged_block_size_in_bytes += l_search_result->second;
+                l_next_block_end_address -= l_search_result->second;
+
+                in_out_free_block_list_p._end_tree.erase(l_search_result);
+                l_search_result = in_out_free_block_list_p._end_tree.find(l_next_block_end_address);
+            }
+
+            in_out_free_block_list_p._begin_tree.find(l_next_block_end_address)->second = l_merged_block_size_in_bytes;
+            l_end_address_of_block->second = l_merged_block_size_in_bytes;
+        }
     }
 
     template <typename T>
-    static void __recycle(internal::pool::block_info<void, POOL_TYPE::_GENERIC>& out_memblock_info_p, chunk_type& memory_p, size_t queried_allocation_size_in_bytes_p) noexcept
+    _FORCE_INLINE_ static void __recycle(internal::pool::block_info<void, POOL_TYPE::_GENERIC>& out_memblock_info_p, chunk_type& in_out_memory_p, size_t queried_allocation_size_in_bytes_p) noexcept
     {
-        FE_ASSERT(memory_p._free_blocks.is_empty() == true, "Assertion Failure: Cannot recycle from an empty bin.");
+        FE_ASSERT(in_out_memory_p._free_blocks._begin_tree.is_empty() == true, "Assertion Failure: Cannot recycle from an empty bin.");
 
         /*
                      first contains the address of the memory block.
                      second contains the size of the memory block.
         */
 
-        auto l_cend = memory_p._free_blocks.cend();
+        auto l_cend = in_out_memory_p._free_blocks._begin_tree.cend();
 
-        for (auto free_block_iterator = memory_p._free_blocks.begin(); free_block_iterator != l_cend; ++free_block_iterator)
+        for (auto free_block_iterator = in_out_memory_p._free_blocks._begin_tree.begin(); free_block_iterator != l_cend; ++free_block_iterator)
         {
             if (free_block_iterator->second >= queried_allocation_size_in_bytes_p)
             {
@@ -979,51 +1003,23 @@ private:
                 out_memblock_info_p._size_in_bytes = queried_allocation_size_in_bytes_p;
                 auto l_leftover_address = free_block_iterator->first + queried_allocation_size_in_bytes_p;
                 auto l_leftover_size = free_block_iterator->second - queried_allocation_size_in_bytes_p;
+                auto l_end_of_block = in_out_memory_p._free_blocks._end_tree.find(free_block_iterator->first + free_block_iterator->second);
                 
                 if (l_leftover_size > 0)
                 {
-                    _MAYBE_UNUSED_ auto l_insertion_result = memory_p._free_blocks.insert(block_info_type{ l_leftover_address, l_leftover_size });
-                    FE_EXIT(l_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
+                    _MAYBE_UNUSED_ auto l_begin_tree_insertion_result = in_out_memory_p._free_blocks._begin_tree.insert(block_info_type{ l_leftover_address, l_leftover_size });
+                    l_end_of_block->second = l_leftover_size;
+                    FE_EXIT(l_begin_tree_insertion_result.second == false, FE::MEMORY_ERROR_1XX::_FATAL_ERROR_DOUBLE_FREE, "Double-free detected.");
                 }
-                memory_p._free_blocks.erase(free_block_iterator);
+                in_out_memory_p._free_blocks._begin_tree.erase(free_block_iterator);
+                
+                if (l_leftover_size == 0)
+                {
+                    in_out_memory_p._free_blocks._end_tree.erase(l_end_of_block);
+                }
                 return;
             }
         }
-
-       /* out_memblock_info_p = memory_p._free_blocks.top();
-        while (out_memblock_info_p._size_in_bytes < queried_allocation_size_in_bytes_p)
-        {
-            deleter_type<T>::base_type::tl_s_temporary_storage.push(std::move(out_memblock_info_p));
-            memory_p._free_blocks.pop();
-
-            if (memory_p._free_blocks.is_empty() == true)
-            {
-                break;
-            }
-            else
-            {
-                out_memblock_info_p = memory_p._free_blocks.top();
-            }
-        }
-
-        if (memory_p._free_blocks.is_empty() == false)
-        {
-            memory_p._free_blocks.pop();
-        }
-
-        int64 l_remaining_size = (out_memblock_info_p._size_in_bytes - queried_allocation_size_in_bytes_p);
-        if (l_remaining_size > 0)
-        {
-            memory_p._free_blocks.push(block_info_type{ (out_memblock_info_p._address + queried_allocation_size_in_bytes_p), static_cast<size_t>(l_remaining_size) });
-            out_memblock_info_p._size_in_bytes = queried_allocation_size_in_bytes_p;
-        }
-
-        while (deleter_type<T>::base_type::tl_s_temporary_storage.is_empty() == false)
-        {
-            memory_p._free_blocks.push(std::move(deleter_type<T>::base_type::tl_s_temporary_storage.pop()));
-        }
-
-        deleter_type<T>::base_type::tl_s_temporary_storage.pop_all();*/
     }
 };
 

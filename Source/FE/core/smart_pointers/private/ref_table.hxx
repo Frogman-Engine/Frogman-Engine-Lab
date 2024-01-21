@@ -46,13 +46,13 @@ public:
 	static constexpr auto ref_table_recycler_initial_size = ref_table_initial_size >> 1;
 	
 protected:
-	thread_local static tbb::memory_pool<FE::cache_aligned_allocator<std::byte>> tl_s_memory_resource;
+	thread_local static tbb::memory_pool<FE::cache_aligned_allocator<var::byte>> tl_s_memory_resource;
 	thread_local static ref_table_type tl_s_ref_table;
 	thread_local static ref_table_recycler_type tl_s_ref_table_recycler;
 };
 
 template<typename T>
-thread_local tbb::memory_pool<FE::cache_aligned_allocator<std::byte>> ref_table_base<T>::tl_s_memory_resource;
+thread_local tbb::memory_pool<FE::cache_aligned_allocator<var::byte>> ref_table_base<T>::tl_s_memory_resource;
 
 template<typename T>
 thread_local typename ref_table_base<T>::ref_table_type ref_table_base<T>::tl_s_ref_table{ typename ref_table_base<T>::ref_table_type::allocator_type{ref_table_base<T>::tl_s_memory_resource} };
