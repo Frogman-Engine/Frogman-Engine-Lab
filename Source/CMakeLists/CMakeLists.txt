@@ -227,6 +227,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	SET(STACK_RESERVE_COMMIT_SIZE_SETTING /STACK:134217728,67108864)
 	SET(HEAP_RESERVE_COMMIT_SIZE_SETTING /HEAP:8589934592,4294967296)
 
+	LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp)
+
 	SET(TBB_WINDOWS 
 		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbb12_debug.lib>
 		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbb12.lib>
