@@ -228,17 +228,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	SET(HEAP_RESERVE_COMMIT_SIZE_SETTING /HEAP:8589934592,4294967296)
 
 	SET(TBB_WINDOWS 
-		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbb12_debug.lib>
-		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbb12.lib>
-		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbb12.lib>
-		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbb12.lib>
+		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbb12_debug.lib>
+		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbb12.lib>
+		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbb12.lib>
+		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbb12.lib>
 	)
 
 	SET(TBB_MALLOC_WINDOWS 
-		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbbmalloc_debug.lib>
-		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbbmalloc.lib>
-		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbbmalloc.lib>
-		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/oneapi-tbb-2021.10.0/lib/intel64/vc14_uwp/tbbmalloc.lib>
+		$<$<CONFIG:DEBUG>:			${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbbmalloc_debug.lib>
+		$<$<CONFIG:RELWITHDEBINFO>: ${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbbmalloc.lib>
+		$<$<CONFIG:RELEASE>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbbmalloc.lib>
+		$<$<CONFIG:MINSIZEREL>:		${CMAKE_CURRENT_SOURCE_DIR}/../../Third-Party-Libraries/oneapi-tbb/windows/2021.11.0/intel64/vc14_uwp/tbbmalloc.lib>
 	)
 	
 	SET(BOOST_STACKTRACE_WINDOWS 
