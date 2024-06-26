@@ -34,7 +34,28 @@
 // SIMD
 #include <immintrin.h>
 
-//std
+#ifdef __AVX__
+#define _AVX_
+#endif
+#ifdef __AVX2__
+#define _AVX2_
+#endif
+#ifdef __AVX512F__
+#define _AVX512F_
+#endif
+
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#define _ARM_NEON_
+#endif
+#ifdef __ARM_NEON_FP
+#define _ARM_NEON_FP_
+#endif
+
+#if defined(_ARM_NEON_) || defined(_ARM_NEON_FP_)
+#include <arm_neon.h>
+#endif
+
+//std: will be removed
 #include <cstring>
 
 
@@ -42,12 +63,6 @@
 
 BEGIN_NAMESPACE(FE)
 
-
-enum struct OBJECT_STATUS : boolean
-{
-	_CONSTRUCTED = true,
-	_DESTRUCTED = false
-};
 
 enum struct MEMORY_ERROR_1XX : int32
 {
@@ -129,14 +144,11 @@ struct align_CPU_L1_cache_line final
 	#endif
 };
 
-
-
 template<uint64 PaddingSize>
 struct align_custom_bytes final
 {
 	_MAYBE_UNUSED_ static constexpr inline uint64 size = PaddingSize;
 };
-
 
 struct SIMD_auto_alignment
 {
@@ -150,7 +162,6 @@ struct SIMD_auto_alignment
 
 	_MAYBE_UNUSED_ static constexpr size size = alignment_type::size;
 };
-
 
 #pragma warning(push)
 #pragma warning(disable:4324)
