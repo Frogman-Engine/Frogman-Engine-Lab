@@ -1,0 +1,41 @@
+name: Frogman-Engine-CI.yml
+
+on:
+  push:
+    branches:
+      - main
+      - in-dev
+      - chaos
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+      
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build and Run Google Benchmark and Unit Tests
+      run: |
+        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/build-tests.sh Debug
+        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/run-tests.sh Debug
+
+        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/build-tests.sh RelWithDebInfo
+        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/run-tests.sh RelWithDebInfo
+
+        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/build-tests.sh Release
+        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/run-tests.sh Release
+
+    - name: LLVM libfuzzer Tests
+      run: |
+        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/build-fuzz.sh Debug
+        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/run-fuzz.sh
+
+        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/build-fuzz.sh RelWithDebInfo
+        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/run-fuzz.sh
+
+        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/build-fuzz.sh Release
+        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/run-fuzz.sh
