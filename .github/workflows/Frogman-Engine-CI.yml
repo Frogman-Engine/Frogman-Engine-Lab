@@ -20,22 +20,24 @@ jobs:
 
     - name: Build and Run Google Benchmark and Unit Tests
       run: |
-        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/build-tests.sh Debug
-        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/run-tests.sh Debug
+        cd Frogman-Engine-Tests/FE-Tests/Unit-Tests
+        ./build-tests.sh Debug
+        ./run-tests.sh
 
-        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/build-tests.sh RelWithDebInfo
-        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/run-tests.sh RelWithDebInfo
+        ./build-tests.sh RelWithDebInfo
+        ./run-tests.sh
 
-        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/build-tests.sh Release
-        ./Frogman-Engine-Tests/FE-Tests/Unit-Tests/run-tests.sh Release
+        ./build-tests.sh Release
+        ./run-tests.sh
 
     - name: LLVM libfuzzer Tests
       run: |
-        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/build-fuzz.sh Debug
-        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/run-fuzz.sh
+        cd Frogman-Engine-Tests/FE-Tests/Fuzz-Tests
+        ./build-fuzz.sh Debug
+        ./run-fuzz.sh
 
-        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/build-fuzz.sh RelWithDebInfo
-        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/run-fuzz.sh
+        ./build-fuzz.sh RelWithDebInfo
+        ./run-fuzz.sh
 
-        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/build-fuzz.sh Release
-        ./Frogman-Engine-Tests/FE-Tests/Fuzz-Tests/run-fuzz.sh
+        ./build-fuzz.sh Release
+        ./run-fuzz.sh
