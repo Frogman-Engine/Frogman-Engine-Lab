@@ -152,7 +152,7 @@ struct align_custom_bytes final
 
 struct SIMD_auto_alignment
 {
-#ifdef _AVX512_
+#ifdef _AVX512F_
 	using alignment_type = align_64bytes;
 #elif defined(_AVX_) || defined(_AVX2_)
 	using alignment_type = align_32bytes;
@@ -183,7 +183,7 @@ enum struct ADDRESS : boolean
 };
 
 
-#ifdef _AVX512_
+#ifdef _AVX512F_
 _FORCE_INLINE_ void unaligned_memset_with_avx512(void* const out_dest_pointer_p, int8 value_p, size total_bytes_p) noexcept
 {
 	FE_ASSERT(out_dest_pointer_p == nullptr, "${%s@0}: ${%s@1} is nullptr.", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_INVALID_SIZE), TO_STRING(out_dest_pointer_p));
@@ -628,6 +628,7 @@ _FORCE_INLINE_ void aligned_memcpy_with_avx(void* const out_dest_pointer_p, cons
 	const __m128i* l_m128i_source_ptr = reinterpret_cast<const __m128i*>(l_m256i_source_ptr);
 	if (l_leftover_bytes >= 16)
 	{
+		// SSE 2
 		_mm_store_si128(l_m128i_dest_ptr, _mm_load_si128(l_m128i_source_ptr));
 		++l_m128i_dest_ptr;
 		++l_m128i_source_ptr;
@@ -832,7 +833,7 @@ _FORCE_INLINE_ void aligned_memmove_with_avx(void* const out_dest_pointer_p, con
 #endif
 
 
-#ifdef _AVX512_
+#ifdef _AVX512F_
 #define UNALIGNED_MEMSET(out_dest_pointer_p, value_p, total_bytes_p) ::FE::unaligned_memset_with_avx512(out_dest_pointer_p, value_p, total_bytes_p)
 #define ALIGNED_MEMSET(out_dest_pointer_p, value_p, total_bytes_p) ::FE::aligned_memset_with_avx512(out_dest_pointer_p, value_p, total_bytes_p)
 #define UNALIGNED_MEMCPY(out_dest_pointer_p, source_pointer_p, bytes_to_copy_p) ::FE::unaligned_memcpy_with_avx512(out_dest_pointer_p, source_pointer_p, bytes_to_copy_p)

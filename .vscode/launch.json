@@ -8,7 +8,7 @@
             "name": "Clang++ Debug",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/Frogman-Engine-Tests/FE-Tests/Unit-Tests/FE.core.adjacency_graph/FE.core.adjacency_graph_test",
+            "program": "${workspaceFolder}/Frogman-Engine-Tests/FE-Tests/Unit-Tests/FE.core.memory/FE.core.memory_test",
             "args": [],
             "stopOnEntry": true,
             "cwd": "${workspaceFolder}"

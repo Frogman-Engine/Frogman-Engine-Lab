@@ -170,9 +170,9 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:-finline-functions;-funroll-loops;-fomit-frame-pointer;-O3>")
 	ADD_COMPILE_OPTIONS("$<$<CONFIG:MINSIZEREL>:-finline-functions;-funroll-loops;-fomit-frame-pointer;-O3>")
 	
-
+    #
 	ADD_LINK_OPTIONS(-pthread -ldl)
-
+	
 
 	IF(DEFINED AVX2)
 		ADD_COMPILE_OPTIONS(-mavx2)

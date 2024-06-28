@@ -141,8 +141,22 @@ TEST(memset, _)
 
 
 
-
 #define _MAGICAL_SIZE_ 102400
+/*
+void prototype_memcpy_benchmark(benchmark::State& state_p) noexcept
+{
+	alignas(64) static std::byte l_dest[_MAGICAL_SIZE_];
+	benchmark::DoNotOptimize(l_dest);
+	alignas(64) static std::byte l_source[_MAGICAL_SIZE_];
+	benchmark::DoNotOptimize(l_source);
+
+	for (auto _ : state_p)
+	{
+		x86_64_aligned_memcpy(l_dest, l_source, _MAGICAL_SIZE_);
+		x86_64_aligned_memcpy(l_source, l_dest, _MAGICAL_SIZE_);
+	}
+}
+BENCHMARK(prototype_memcpy_benchmark);*/
 
 void FE_aligned_memcpy_benchmark(benchmark::State& state_p) noexcept
 {
