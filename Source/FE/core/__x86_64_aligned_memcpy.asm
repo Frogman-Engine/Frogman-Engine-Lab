@@ -48,15 +48,19 @@ __x86_64_aligned_memcpy:
     cmpq %rdx, 16 # Compare the qword integer 16 with %rdx.
     jae copy_128bits_using_sse2 # Jump to copy_128bits_using_sse2 label if %rdx is greater or equal to 16.
 
+leftovers_are_less_than_16_bytes:
     cmpq %rdx, 8 # Compare the qword integer 8 with %rdx.
     jae copy_64bits # Jump to copy_64bits label if %rdx is greater or equal to 8.
 
+leftovers_are_less_than_8_bytes:
     cmpq %rdx, 4 # Compare the qword integer 4 with %rdx.
     jae copy_32bits # Jump to copy_32bits label if %rdx is greater or equal to 4.
 
+leftovers_are_less_than_4_bytes:
     cmpq %rdx, 2 # Compare the qword integer 2 with %rdx.
     jae copy_16bits # Jump to copy_16bits label if %rdx is greater or equal to 2.
 
+leftovers_are_less_than_2_bytes:
     cmpq %rdx, 1 # Compare the qword integer 1 with %rdx.
     jae copy_8bits # Jump to copy_8bits label if %rdx is greater or equal to 1.
 
@@ -81,7 +85,7 @@ copy_128bits_using_sse2:
     addq 16, %rdi # Increment the void* by 16 bytes
     addq 16, %rsi # Increment the void* by 16 bytes
     subq 16, %rdx # Decrement the size to copy by 16 bytes
-    jmp __x86_64_aligned_memcpy
+    jmp leftovers_are_less_than_16_bytes
 
 
 
@@ -92,7 +96,7 @@ copy_64bits:
     addq 8, %rdi # Increment the void* by 8 bytes
     addq 8, %rsi # Increment the void* by 8 bytes
     subq 8, %rdx # Decrement the size to copy by 8 bytes
-    jmp __x86_64_aligned_memcpy
+    jmp leftovers_are_less_than_8_bytes
 
 
 
@@ -103,7 +107,7 @@ copy_32bits:
     addq 4, %rdi # Increment the void* by 4 bytes
     addq 4, %rsi # Increment the void* by 4 bytes
     subq 4, %rdx # Decrement the size to copy by 4 bytes
-    jmp __x86_64_aligned_memcpy
+    jmp leftovers_are_less_than_4_bytes
 
 
 
@@ -114,7 +118,7 @@ copy_16bits:
     addq 2, %rdi # Increment the void* by 2 bytes
     addq 2, %rsi # Increment the void* by 2 bytes
     subq 2, %rdx # Decrement the size to copy by 2 bytes
-    jmp __x86_64_aligned_memcpy
+    jmp leftovers_are_less_than_2_bytes
 
 
 
@@ -125,4 +129,4 @@ copy_8bits:
     addq 1, %rdi # Increment the void* by a byte
     addq 1, %rsi # Increment the void* by a byte
     subq 1, %rdx # Decrement the size to copy by a byte
-    jmp __x86_64_aligned_memcpy
+    ret
