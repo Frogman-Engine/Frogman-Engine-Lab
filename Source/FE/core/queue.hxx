@@ -2,17 +2,14 @@
 #define _FE_CORE_QUEUE_HXX_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <FE/core/private/memory_traits.hxx>
 #include <FE/core/algorithm/utility.hxx>
 #include <FE/core/iterator.hxx>
-#include <FE/core/memory.hxx>
 
 // std
-#include <array>
 #include <initializer_list>
-#include <memory_resource>
 
 #pragma warning(push)
-
 
 
 
@@ -22,7 +19,7 @@ BEGIN_NAMESPACE(FE)
 
 
 
-template<class T, size Capacity, class Traits = FE::memory_traits<T>>
+template<class T, size Capacity, class Traits = FE::internal::memory_traits<T>>
 class fqueue final
 {
 	FE_STATIC_ASSERT((std::is_same<T, typename Traits::value_type>::value == false), "Static Assertion Failed: The template argument T and Traits' value_type have be the same type.");

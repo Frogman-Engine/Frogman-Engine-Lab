@@ -42,7 +42,6 @@ https://github.com/google/googletest/releases/tag/v1.14.0
 https://github.com/google/benchmark/releases/tag/v1.8.4
 
 # Help:
-(NOTE: This project will drop msvc compiler v143 support and use LLVM clang cl as its main compiler on Windows)
 The default settings use /MTd (Static C++ Standard Library Debug Build) for debug configuration and /MT (Static C++ Standard Library Release Build) for release.
 
 LINK_LIBRARIES(advapi32.lib shlwapi.lib) to use Google Benchmark on Windows.
@@ -50,7 +49,7 @@ LINK_LIBRARIES(advapi32.lib shlwapi.lib) to use Google Benchmark on Windows.
 In order to build boost libraries using Microsoft Visual Studio 2022 Clang CL:
 1. Download the LLVM Clang CL from Visual Studio Installer.
 2. Download Boost libraries from https://www.boost.org/
-3. Build b2.exe by running bootstrap.bat
+3. Build b2.exe by running bootstrap.bat(.sh)
 4. Run the commands: 
 
 ./b2 toolset=clang-win architecture=x86 address-model=64 link=static runtime-link=static threading=multi variant=debug 

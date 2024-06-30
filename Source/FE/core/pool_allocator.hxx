@@ -12,10 +12,10 @@ BEGIN_NAMESPACE(FE)
 
 
 template <typename T, class PageCapacity = FE::size_in_bytes<1 MB>, class Alignment = FE::SIMD_auto_alignment>
-class pool_allocator : public allocator_base 
+class pool_allocator : public FE::internal::allocator_base 
 {
 public:
-	using base_type = allocator_base;
+	using base_type = FE::internal::allocator_base;
 	using pool_type = FE::dynamic_pool<PageCapacity::size, Alignment>;
 	using value_type = T;
 	using pointer = value_type*;

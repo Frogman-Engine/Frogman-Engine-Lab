@@ -1,6 +1,6 @@
 ﻿#include "FE/core/log/format_string.h"
 #include <FE/core/algorithm/utility.hxx>
-#include <FE/core/memory_metrics.h>
+#include <FE/core/private/allocator_base.hpp>
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #define _OPEN_CURLY_BRACKET_ 1
 #define _FORMAT_SPECIFIER_PERCENT_ 2

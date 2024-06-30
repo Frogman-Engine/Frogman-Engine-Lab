@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/Frogman-Engine-Tests/FE-Tests/Unit-Tests/FE.core.memory/FE.core.memory_test",
             "args": [],
             "stopOnEntry": true,
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
         }
     ]
 }

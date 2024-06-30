@@ -131,7 +131,7 @@ public:
         }
 
         this->m_smart_string.reset(FE::resize_to{ count_p + _FE_NULL_ESCAPE_SIZE_ });
-        UNALIGNED_MEMCPY(this->m_smart_string.get(), other_p.m_smart_string.get() + position_p, sizeof(CharT) * count_p);
+        FE_UNALIGNED_MEMCPY(this->m_smart_string.get(), other_p.m_smart_string.get() + position_p, sizeof(CharT) * count_p);
         this->m_length = count_p;
         this->m_smart_string[count_p] = _FE_NULL_;
     }

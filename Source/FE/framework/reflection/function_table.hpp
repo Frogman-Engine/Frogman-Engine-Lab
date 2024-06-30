@@ -2,9 +2,9 @@
 #define _FE_FRAMEWORK_REFLECTION_FUNCTION_TABLE_HPP_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <FE/core/private/allocator_base.hpp>
 #include <FE/core/function.hxx>
 #include <FE/core/hash.hpp>
-#include <FE/core/memory_metrics.h>
 #include <FE/core/string.hxx>
 
 // std
@@ -45,7 +45,7 @@ public:
 		FE_ASSERT(s_task_map != nullptr, "Assertion failure: cannot initialize FE::framework::reflection::function_table more than once.");
 		if(s_task_map == nullptr)
 		{
-			s_task_map = (underlying_container*)ALIGNED_ALLOC(sizeof(underlying_container), FE::align_CPU_L1_cache_line::size);
+			s_task_map = (underlying_container*)FE_ALIGNED_ALLOC(sizeof(underlying_container), FE::align_CPU_L1_cache_line::size);
 			new(s_task_map) underlying_container(function_table::initial_capacity);
 			return true;
 		}
@@ -60,7 +60,7 @@ public:
 		if(s_task_map != nullptr)
 		{
 			s_task_map->~underlying_container();
-			ALIGNED_FREE(s_task_map);
+			FE_ALIGNED_FREE(s_task_map);
 			s_task_map = nullptr;
 			return true;
 		}

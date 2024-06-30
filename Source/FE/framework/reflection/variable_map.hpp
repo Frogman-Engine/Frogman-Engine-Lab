@@ -2,8 +2,8 @@
 #define _FE_FRAMEWORK_REFLECTION_VARIABLE_MAP_HPP_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
+#include <FE/core/private/allocator_base.hpp>
 #include <FE/core/hash.hpp>
-#include <FE/core/memory_metrics.h>
 #include <FE/core/string.hxx>
 
 // std
@@ -47,7 +47,7 @@ public:
 		FE_ASSERT(s_variable_map != nullptr, "Assertion failure: cannot initialize FE::framework::reflection::variable_map more than once.");
 		if(s_variable_map == nullptr)
 		{
-			s_variable_map = (underlying_container*)ALIGNED_ALLOC(sizeof(underlying_container), FE::align_CPU_L1_cache_line::size);
+			s_variable_map = (underlying_container*)FE_ALIGNED_ALLOC(sizeof(underlying_container), FE::align_CPU_L1_cache_line::size);
 			new(s_variable_map) underlying_container(variable_map::initial_capacity);
 			return true;
 		}
@@ -62,7 +62,7 @@ public:
 		if(s_variable_map != nullptr)
 		{
 			s_variable_map->~underlying_container();
-			ALIGNED_FREE(s_variable_map);
+			FE_ALIGNED_FREE(s_variable_map);
 			s_variable_map = nullptr;
 			return true;
 		}

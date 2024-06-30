@@ -3,6 +3,7 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
 #include <FE/core/private/allocator_base.hpp>
+#include <FE/core/type_traits.hxx>
 
 // std
 #include <memory>
@@ -14,10 +15,10 @@ BEGIN_NAMESPACE(FE)
 
 
 template <class Implementation>
-class new_delete_allocator : public allocator_base
+class new_delete_allocator : public FE::internal::allocator_base
 {
 public:
-	using base_type = allocator_base;
+	using base_type = FE::internal::allocator_base;
 	using value_type = typename Implementation::value_type;
 	using pointer = typename Implementation::pointer;
 	using const_pointer = typename Implementation::const_pointer;
@@ -148,10 +149,10 @@ public:
 
 
 template<typename T, class Alignment = typename FE::SIMD_auto_alignment>
-class aligned_allocator : public allocator_base
+class aligned_allocator : public FE::internal::allocator_base
 {
 public:
-	using base_type = allocator_base;
+	using base_type = FE::internal::allocator_base;
 	using value_type = T;
 	using pointer = value_type*;
 	using const_pointer = const pointer;

@@ -395,8 +395,8 @@ public:
 	_FORCE_INLINE_ _CONSTEXPR20_ exclusive_ptr(FE::reserve&& array_size_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p)
 	{
 		this->m_ref_block = internal::managed::ref_table::tl_s_ref_block_pool.template allocate<ref_block_type>();
-		this->m_ref_block->_address = this->m_allocator.allocate(array_size_p._value);
-		this->m_smart_ptr_end = static_cast<pointer>(this->m_ref_block->_address) + array_size_p._value;
+		this->m_ref_block->_address = this->m_allocator.allocate(array_size_p);
+		this->m_smart_ptr_end = static_cast<pointer>(this->m_ref_block->_address) + array_size_p;
 	}
 
 	_FORCE_INLINE_ _CONSTEXPR20_ exclusive_ptr(std::initializer_list<element_type>&& values_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p)
@@ -455,7 +455,7 @@ public:
 			this->m_ref_block = internal::managed::ref_table::tl_s_ref_block_pool.template allocate<ref_block_type>();
 		}
 
-		this->__reallocate(new_array_size_p._value);
+		this->__reallocate(new_array_size_p);
 
 		return *this;
 	}

@@ -3,3 +3,6 @@
 *.idb
 *.pdb
 *.exe
+
+FE-Tests/Fuzz-Tests/build/
+FE-Tests/Unit-Tests/build/

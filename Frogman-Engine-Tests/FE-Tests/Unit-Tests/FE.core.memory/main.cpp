@@ -5,6 +5,7 @@
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/memory.hxx>
 #include <FE/core/algorithm/string.hxx>
+#include <FE/asm/__x86_64_memcpy.h>
 using namespace FE;
 
 /*
@@ -77,7 +78,6 @@ int main(int argc_p, char** argv_p)
 
 
 
-
 TEST(memmove, string_insertion)
 {
 	std::unique_ptr<char[]> l_string(new char[64] {"Freddy's Pizza\0"});
@@ -142,8 +142,8 @@ TEST(memset, _)
 
 
 #define _MAGICAL_SIZE_ 102400
-/*
-void prototype_memcpy_benchmark(benchmark::State& state_p) noexcept
+
+void x86_64_aligned_memcpy_written_in_asm_benchmark(benchmark::State& state_p) noexcept
 {
 	alignas(64) static std::byte l_dest[_MAGICAL_SIZE_];
 	benchmark::DoNotOptimize(l_dest);
@@ -152,11 +152,11 @@ void prototype_memcpy_benchmark(benchmark::State& state_p) noexcept
 
 	for (auto _ : state_p)
 	{
-		x86_64_aligned_memcpy(l_dest, l_source, _MAGICAL_SIZE_);
-		x86_64_aligned_memcpy(l_source, l_dest, _MAGICAL_SIZE_);
+		__x86_64_memcpy(l_dest, l_source, _MAGICAL_SIZE_);
+		__x86_64_memcpy(l_source, l_dest, _MAGICAL_SIZE_);
 	}
 }
-BENCHMARK(prototype_memcpy_benchmark);*/
+BENCHMARK(x86_64_aligned_memcpy_written_in_asm_benchmark);
 
 void FE_aligned_memcpy_benchmark(benchmark::State& state_p) noexcept
 {

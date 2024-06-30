@@ -261,7 +261,7 @@ public:
 		rvalue_p.m_smart_ptr_end = nullptr;
 	}
 
-	_FORCE_INLINE_ _CONSTEXPR20_ unique_ptr(FE::reserve&& array_size_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(array_size_p._value)), m_smart_ptr_end(m_smart_ptr + array_size_p._value)
+	_FORCE_INLINE_ _CONSTEXPR20_ unique_ptr(FE::reserve&& array_size_p, const Allocator& allocator_p = Allocator()) noexcept : m_allocator(allocator_p), m_smart_ptr(m_allocator.allocate(array_size_p)), m_smart_ptr_end(m_smart_ptr + array_size_p)
 	{
 	}
 
@@ -313,7 +313,7 @@ public:
 
 	_FORCE_INLINE_ _CONSTEXPR20_ unique_ptr& operator=(FE::resize_to&& new_array_size_p) noexcept
 	{
-		this->__reallocate(new_array_size_p._value);
+		this->__reallocate(new_array_size_p);
 		return *this;
 	}
 

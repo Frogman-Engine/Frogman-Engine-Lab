@@ -24,19 +24,19 @@ _FORCE_INLINE_ void copy(CharT* const destination_out_p, const CharT* const sour
 
     if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED && SourceAddressAlignment == ADDRESS::_ALIGNED)
     {
-        ALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
+        FE_ALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
     }
     else if constexpr (DestAddressAlignment == ADDRESS::_ALIGNED && SourceAddressAlignment == ADDRESS::_NOT_ALIGNED)
     {
-        DEST_ALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
+        FE_DEST_ALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
     }
     else if constexpr (DestAddressAlignment == ADDRESS::_NOT_ALIGNED && SourceAddressAlignment == ADDRESS::_ALIGNED)
     {
-        SOURCE_ALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
+        FE_SOURCE_ALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
     }
     else if constexpr (DestAddressAlignment == ADDRESS::_NOT_ALIGNED && SourceAddressAlignment == ADDRESS::_NOT_ALIGNED)
     {
-        UNALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
+        FE_UNALIGNED_MEMCPY(destination_out_p, source_p, sizeof(CharT) * count_p);
     }
 
     destination_out_p[count_p] = _FE_NULL_;

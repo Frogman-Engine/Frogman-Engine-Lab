@@ -1,36 +1,54 @@
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
+# Copyright © 2023~ UNKNOWN STRYKER. All Rights Reserved.
 # Frogman Engine leverages LLVM across all platforms.
 
 
 MESSAGE("
+Define a cmake macro if you want to make changes on the settings.
 Available -D macro options:
 -DLEAVE_OUT_ALL_EXCEPTIONS=1 
 -DENABLE_MEMORY_TRACKER=1
 -DMEMORY_POOL_FE_STRINGS=1
 -DMEMORY_POOL_FE_SMART_PTR_PROPERTIES=1
 
-This project uses AVX as the default SIMD option.
-Define a cmake macro if you want to change the setting.
-SIMD options:
--DAVX=1
+Frogman Engine SIMD Extension Requirements:
+an x86-64 cpu with AVX and SSE2 (AVX-512F is optional). Please Check if the x86-64 cpu has ymm and xmm vector registers.
+        or
+an ARM64 cpu with NEON
+
+The target CPU architecture is x86-64 by the default.
+It can be overridden by -DTARGET_CPU_ARCHITECTURE=arm64
+NOTE: This project does not support arm64 yet.
+
+This project uses AVX and SSE2 as the default SIMD options on x86-64 CPUs.
+The intrinsics option can be added by -D
+Available x86-64 -D macro SIMD options:
 -DAVX2=1
 -DAVX512F=1
 
+Overriding the cmake macro TARGET_CPU_ARCHITECTURE with arm64 automatically sets the default SIMD option as NEON.
 ")
 
 
 IF(NOT ((CMAKE_CXX_STANDARD EQUAL 17) OR (CMAKE_CXX_STANDARD EQUAL 20) OR (CMAKE_CXX_STANDARD EQUAL 23)))
-    MESSAGE(FATAL_ERROR "Frogman Engine supports C++ 17, C++ 20, and C++ 23.")
+    MESSAGE("Frogman Engine supports C++ 17, C++ 20, and C++ 23.")
+	MESSAGE(WARNING "No C++ standard version has been specified: this project will use C++17 as the standard.")
+	SET(CMAKE_CXX_STANDARD 17)
 ENDIF()
 
+IF(NOT ((TARGET_CPU_ARCHITECTURE STREQUAL "x86-64") OR (TARGET_CPU_ARCHITECTURE STREQUAL "arm64")))
+	MESSAGE("Frogman Engine supports x86-64 and arm64.")
+	MESSAGE(WARNING "No CPU architecture has been specified: this project will set the target cpu architecture as x86-64.")
+	SET(TARGET_CPU_ARCHITECTURE "x86-64")
+ENDIF()
 
 FILE(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" OS_NATIVE_CMAKE_CURRENT_SOURCE_DIR)
 
 
 
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND TARGET_CPU_ARCHITECTURE STREQUAL "x86-64")
 	MESSAGE("Configurating The Build Environment for Windows X86-64.")
 	ADD_COMPILE_OPTIONS(/D_WINDOWS_X86_64_ /D_ALLOWED_DIRECTORY_LENGTH_=256)
 	STRING(REPLACE "\\" "\\\\" OS_NATIVE_CMAKE_CURRENT_SOURCE_DIR "${OS_NATIVE_CMAKE_CURRENT_SOURCE_DIR}")
@@ -122,7 +140,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
 
 
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET_CPU_ARCHITECTURE STREQUAL "x86-64")
 	MESSAGE("Configurating The Build Environment for Linux X86-64 Distributions.")
 	ADD_COMPILE_OPTIONS(-D_LINUX_X86_64_ -D_ALLOWED_DIRECTORY_LENGTH_=4096)
 	MESSAGE("CMake detected a C++ compiler at: ${CMAKE_CXX_COMPILER}.")
@@ -157,7 +175,7 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 
 	# Common Compile Options
-	ADD_COMPILE_OPTIONS(-D_CLANG_=1 -Wall -Wextra -Werror -Wno-unknown-pragmas -march=x86-64)
+	ADD_COMPILE_OPTIONS(-D_CLANG_=1 -Wall -Wextra -Werror -Wno-unknown-pragmas -march=x86-64 -mavx -msse2)
 
 	
 	ADD_COMPILE_OPTIONS("$<$<CONFIG:DEBUG>:-D_DEBUG_;-D_ENABLE_ASSERT_;-D_ENABLE_ABORT_IF_;-D_ENABLE_LOG_;-D_ENABLE_EXIT_>")
@@ -170,22 +188,17 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:-finline-functions;-funroll-loops;-fomit-frame-pointer;-O3>")
 	ADD_COMPILE_OPTIONS("$<$<CONFIG:MINSIZEREL>:-finline-functions;-funroll-loops;-fomit-frame-pointer;-O3>")
 	
-    #
+    
 	ADD_LINK_OPTIONS(-pthread -ldl)
 	
 
 	IF(DEFINED AVX2)
 		ADD_COMPILE_OPTIONS(-mavx2)
-		MESSAGE("AVX-2 has been selected.")
+		MESSAGE("AVX-2 has been added to the SIMD intrinsic extension list.")
 
 	ELSEIF(DEFINED AVX512F)
 		ADD_COMPILE_OPTIONS(-mavx512f)
-		MESSAGE("AVX-512F has been selected.")
-
-	ELSE()
-		ADD_COMPILE_OPTIONS(-mavx)
-		MESSAGE("AVX has been selected.")
-
+		MESSAGE("AVX-512F has been added to the SIMD intrinsic extension list.")
 	ENDIF()
 
 

@@ -12,10 +12,10 @@ BEGIN_NAMESPACE(FE)
 
 
 template <typename T, class PageCapacity = FE::object_count<128>>
-class new_delete_block_pool_allocator : public allocator_base
+class new_delete_block_pool_allocator : public FE::internal::allocator_base
 {
 public:
-	using base_type = allocator_base;
+	using base_type = FE::internal::allocator_base;
 	using page_capacity = PageCapacity;
 	using pool_type = FE::block_pool<sizeof(T), PageCapacity::size>;
 	using value_type = T;
@@ -89,10 +89,10 @@ public:
 
 
 template <typename T, class PageCapacity = FE::object_count<128>>
-class block_pool_allocator : public allocator_base
+class block_pool_allocator : public FE::internal::allocator_base
 {
 public:
-	using base_type = allocator_base;
+	using base_type = FE::internal::allocator_base;
 	using page_capacity = PageCapacity;
 	using pool_type = FE::block_pool<sizeof(T), PageCapacity::size>;
 	using value_type = T;

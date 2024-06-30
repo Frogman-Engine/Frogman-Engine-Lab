@@ -2,21 +2,25 @@
 #define _FE_CORE_PRIVATE_ALLOCATOR_BASE_HPP_
 // Copyright © from 2023 to current, UNKNOWN STRYKER. All Rights Reserved.
 #include <FE/core/prerequisites.h>
-#include <FE/core/memory_metrics.h>
 #include <FE/core/memory.hxx>
 #include <FE/core/thread.hpp>
 #include <cstdlib>
 
 
-#ifdef _WINDOWS_X86_64_
-#define ALIGNED_ALLOC(size_p, alignment_p) ::_aligned_malloc(size_p, alignment_p)
-#define ALIGNED_FREE(ptr_to_memory_p) ::_aligned_free(ptr_to_memory_p)
 
-#else
-	#ifdef _LINUX_X86_64_
-	#define ALIGNED_ALLOC(size_p, alignment_p) ::aligned_alloc(alignment_p, size_p)
-	#define ALIGNED_FREE(ptr_to_memory_p) ::free(ptr_to_memory_p)
-	#endif
+
+#ifdef FE_ALIGNED_ALLOC
+	#error FE_ALIGNED_ALLOC is a reserved Frogman Engine macro function.
+#endif
+#ifdef FE_ALIGNED_FREE
+	#error FE_ALIGNED_FREE is a reserved Frogman Engine macro function.
+#endif
+#ifdef _WINDOWS_X86_64_
+	#define FE_ALIGNED_ALLOC(size_p, alignment_p) ::_aligned_malloc(size_p, alignment_p)
+	#define FE_ALIGNED_FREE(ptr_to_memory_p) ::_aligned_free(ptr_to_memory_p)
+#elif defined(_LINUX_X86_64_)
+	#define FE_ALIGNED_ALLOC(size_p, alignment_p) _mm_malloc(size_p, alignment_p)
+	#define FE_ALIGNED_FREE(ptr_to_memory_p) _mm_free(ptr_to_memory_p)
 #endif
 
 
@@ -24,6 +28,63 @@
 
 BEGIN_NAMESPACE(FE)
 
+_MAYBE_UNUSED_ constexpr var::uint64 invalid_memory_util_query = max_value<var::uint64>;
+
+_MAYBE_UNUSED_ constexpr uint64 one_kb = 1024;
+_MAYBE_UNUSED_ constexpr uint64 one_mb = 1048576;
+_MAYBE_UNUSED_ constexpr uint64 one_gb = 1073741824;
+
+#define KB * ::FE::one_kb
+#define MB * ::FE::one_mb
+#define GB * ::FE::one_gb
+
+enum struct HEAP_MEMORY_UTIL_INFO : FE::uint8
+{
+	_TOTAL_VIRTUAL_MEMORY_SIZE = 0,
+	_TOTAL_VIRTUAL_MEMORY_UTIL = 1,
+
+	_THIS_PROCESS_VIRTUAL_MEMORY_UTIL = 2,
+
+	_TOTAL_PHYSICAL_MEMORY_SIZE = 3,
+	_TOTAL_PHYSICAL_MEMORY_UTIL = 4,
+
+	_THIS_PROCESS_PHYSICAL_MEMORY_UTIL = 5,
+
+	_LIBRARY_TOTAL_HEAP_UTIL_SIZE = 6,
+
+	_LIBRARY_HEAP_UTIL_SIZE_BY_THREAD_ID = 7,
+	_LIBRARY_HEAP_UTIL_SIZE_BY_TYPE = 8
+};
+
+enum struct SIZE_BYTE_UNIT : FE::uint8
+{
+	_BYTE = 0,
+	_KILOBYTE = 1,
+	_MEGABYTE = 2,
+	_GIGABYTE = 3
+};
+
+_FORCE_INLINE_ var::float64 convert_bytes_to_kilobytes(uint64 bytes_p) noexcept
+{
+	return static_cast<var::float64>(bytes_p) / static_cast<var::float64>(one_kb);
+}
+_FORCE_INLINE_ var::float64 convert_bytes_to_megabytes(uint64 bytes_p) noexcept
+{
+	return static_cast<var::float64>(bytes_p) / static_cast<var::float64>(one_mb);
+}
+_FORCE_INLINE_ var::float64 convert_bytes_to_gigabytes(uint64 bytes_p) noexcept
+{
+	return static_cast<var::float64>(bytes_p) / static_cast<var::float64>(one_gb);
+}
+
+var::uint64 request_app_memory_utilization(const HEAP_MEMORY_UTIL_INFO select_data_p) noexcept;
+
+END_NAMESPACE
+
+
+
+
+BEGIN_NAMESPACE(FE::internal)
 
 struct memory_utilization
 {
@@ -123,11 +184,11 @@ public:
 	template<typename T, class Alignment = typename FE::SIMD_auto_alignment>
 	_FORCE_INLINE_ T* trackable_alloc(size bytes_p) noexcept
 	{
-		T* const l_result = (T*)ALIGNED_ALLOC(bytes_p, Alignment::size);
+		T* const l_result = (T*)FE_ALIGNED_ALLOC(bytes_p, Alignment::size);
 		FE_ASSERT(l_result == nullptr, "${%s@0}: Failed to allocate memory from scalable_aligned_malloc()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 		FE_ASSERT((reinterpret_cast<uintptr>(l_result) % Alignment::size) != 0, "${%s@0}: The allocated heap memory address not aligned by ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), &Alignment::size);
 #ifndef _RELEASE_
-		ALIGNED_MEMSET(l_result, _FE_NULL_, bytes_p);
+		FE_ALIGNED_MEMSET(l_result, _FE_NULL_, bytes_p);
 #endif
 #ifdef _ENABLE_MEMORY_TRACKER_
 		allocator_base::__log_heap_memory_allocation<T>(bytes_p, l_result);
@@ -141,7 +202,7 @@ public:
 	{
 		FE_ASSERT((reinterpret_cast<uintptr>(ptr_to_memory_p) % Alignment::size) != 0, "${%s@0}: The allocated heap memory address not aligned by ${%lu@1}.", TO_STRING(MEMORY_ERROR_1XX::_ERROR_ILLEGAL_ADDRESS_ALIGNMENT), &Alignment::size);
 
-		ALIGNED_FREE(ptr_to_memory_p);
+		FE_ALIGNED_FREE(ptr_to_memory_p);
 
 #ifdef _ENABLE_MEMORY_TRACKER_
 		allocator_base::__log_heap_memory_deallocation<T>(bytes_p, ptr_to_memory_p);
@@ -156,28 +217,28 @@ public:
 
 		if (l_realloc_result == nullptr) _UNLIKELY_
 		{
-			l_realloc_result = (T*)ALIGNED_ALLOC(new_bytes_p, Alignment::size);
-			FE_ASSERT(l_realloc_result == nullptr, "${%s@0}: Failed to re-allocate memory from ALIGNED_ALLOC()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+			l_realloc_result = (T*)FE_ALIGNED_ALLOC(new_bytes_p, Alignment::size);
+			FE_ASSERT(l_realloc_result == nullptr, "${%s@0}: Failed to re-allocate memory from FE_ALIGNED_ALLOC()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 	#ifndef _RELEASE_
-			ALIGNED_MEMSET(l_realloc_result, _FE_NULL_, new_bytes_p);
+			FE_ALIGNED_MEMSET(l_realloc_result, _FE_NULL_, new_bytes_p);
 	#endif
 			FE::memcpy<ADDRESS::_ALIGNED, ADDRESS::_ALIGNED>(l_realloc_result, new_bytes_p, ptr_to_memory_p, prev_bytes_p);
 			if (l_realloc_result != ptr_to_memory_p) _LIKELY_
 			{
-				ALIGNED_FREE(ptr_to_memory_p);
+				FE_ALIGNED_FREE(ptr_to_memory_p);
 			}
 		}
 
 #elif defined(_LINUX_X86_64_)
-		T* l_realloc_result = (T*)ALIGNED_ALLOC(new_bytes_p, Alignment::size);
-		FE_ASSERT(l_realloc_result == nullptr, "${%s@0}: Failed to re-allocate memory from ALIGNED_ALLOC()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
+		T* l_realloc_result = (T*)FE_ALIGNED_ALLOC(new_bytes_p, Alignment::size);
+		FE_ASSERT(l_realloc_result == nullptr, "${%s@0}: Failed to re-allocate memory from FE_ALIGNED_ALLOC()", TO_STRING(MEMORY_ERROR_1XX::_FATAL_ERROR_NULLPTR));
 #ifndef _RELEASE_
-		ALIGNED_MEMSET(l_realloc_result, _FE_NULL_, new_bytes_p);
+		FE_ALIGNED_MEMSET(l_realloc_result, _FE_NULL_, new_bytes_p);
 #endif
 		if (ptr_to_memory_p != nullptr)
 		{
 			FE::memcpy<ADDRESS::_ALIGNED, ADDRESS::_ALIGNED>(l_realloc_result, new_bytes_p, ptr_to_memory_p, prev_bytes_p);
-			ALIGNED_FREE(ptr_to_memory_p);
+			FE_ALIGNED_FREE(ptr_to_memory_p);
 		}
 #endif
 
@@ -189,7 +250,6 @@ public:
 		return l_realloc_result;
 	}
 };
-
 
 END_NAMESPACE
 #endif 

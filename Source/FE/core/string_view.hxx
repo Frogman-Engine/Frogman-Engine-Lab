@@ -57,7 +57,7 @@ public:
 
 
 	template<class Allocator>
-	_CONSTEXPR20_ basic_string_view(const FE::exclusive_ptr<CharT[], Allocator>& source_pointer_p) noexcept : m_watcher(source_pointer_p), m_begin(), m_end()
+	_CONSTEXPR20_ basic_string_view(const FE::exclusive_ptr<CharT[], Allocator>& source_p) noexcept : m_watcher(source_p), m_begin(), m_end()
 	{
 		if (this->m_watcher.is_expired() == true)
 		{
@@ -101,16 +101,16 @@ public:
 	}
 
 	template<class Allocator>
-	_CONSTEXPR20_ basic_string_view& operator=(const FE::exclusive_ptr<CharT[], Allocator>& source_pointer_p) noexcept
+	_CONSTEXPR20_ basic_string_view& operator=(const FE::exclusive_ptr<CharT[], Allocator>& source_p) noexcept
 	{
-		if (source_pointer_p == nullptr)
+		if (source_p == nullptr)
 		{
 			return *this;
 		}
 
 		this->m_begin = 0;
-		this->m_end = algorithm::string::length(source_pointer_p.get());
-		this->m_watcher = source_pointer_p;
+		this->m_end = algorithm::string::length(source_p.get());
+		this->m_watcher = source_p;
 	}
 
 

@@ -31,7 +31,7 @@ set "PWD=%CD%"
 cd /d "%WORKING_DIRECTORY%\%BUILD_FILES_FOLDER_NAME%"
 
 :: Run CMake configuration
-cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_CXX_STANDARD=17 .. -G "Visual Studio 17 2022" -T "clangcl"
+cmake -DCMAKE_SYSTEM_NAME=Windows .. -G "Visual Studio 17 2022" -T "clangcl"
 
 :: Change back to the original directory
 cd /d "%PWD%"
