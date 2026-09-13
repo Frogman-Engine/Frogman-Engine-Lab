@@ -769,19 +769,19 @@ END_NAMESPACE
 BEGIN_NAMESPACE(FE::Test::EdgeCases)
 
 
-//template <typename T>
-//class BraceInjectionAttackClass
-//{
-//	char _bowoh = '}';
-//	const char* _waer = "asdadsa}d";
-//};
-//
-//template <typename T>
-//struct BraceInjectionAttackStruct
-//{
-//	char _bowoh = '}';
-//	const char* _waer = "asdadsa}d";
-//};
+template <typename T>
+class BraceInjectionAttackClass
+{
+	char _bowoh = '}';
+	const char* _waer = "asdadsa}d";
+};
+
+template <typename T>
+struct BraceInjectionAttackStruct
+{
+	char _bowoh = '}';
+	const char* _waer = "asdadsa}d";
+};
 
 
 // Struct with nested structs

@@ -71,6 +71,11 @@ namespace FHT::tokenizer
 				continue;
 			}
 
+			if (l_context_stack.back() == FHT::Context::_Template)
+			{
+				l_token._vocabulary = Vocabulary::_TemplateBody;
+			}
+
 			if (l_token._vocabulary == Vocabulary::_Macro)
 			{
 				auto l_macro_pos = iterator - file_p.c_str();
@@ -351,10 +356,11 @@ namespace FHT::tokenizer
 			return l_token; // return if the text is a forward declaration.
 		}
 
-
 		tokenize_template_body(l_token, code_iterator_p, context_stack_p);
-
-
+		if (l_token._vocabulary != Vocabulary::_Undefined)
+		{
+			return l_token; 
+		}
 
 
 		l_token._code.reserve(100);
@@ -368,8 +374,6 @@ namespace FHT::tokenizer
 			l_token._code += *code_iterator_p;
 			++code_iterator_p;
 		}
-
-
 
 
 		file_buffer_t l_brace_stack(framework::get_framework().get_memory_resource());
@@ -1066,82 +1070,115 @@ namespace FHT::tokenizer
 
 	void tokenize_template(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p)
 	{
-		constexpr FE::UTF8* l_template_keyword = u8"template";
-		FE::algorithm::string::range l_template = { 0, FE::algorithm::string::length(l_template_keyword) };
-		if (FE::algorithm::string::compare_ranged<FE::UTF8>(code_iterator_p, l_template,
-			l_template_keyword, l_template)
-			== true)
-		{
-			auto l_code_line_end = FE::algorithm::string::find_the_first(code_iterator_p, u8';');
-			THROW_CPP_SYNTAX_ERROR(l_code_line_end == std::nullopt, "C++ code syntax Error C2143: the template declaration is incomplete; ; is missing.");
-
-			if (FE::algorithm::string::space_insensitive_contains(code_iterator_p, l_code_line_end->_begin, u8"template<") == false)
-			{
-				// is a template class forward declaration: template class BasicTemplateTypename<int>;
-				out_token_p._vocabulary = Vocabulary::_ClassStructEnumMethodForwardDeclaration;
-				out_token_p._code.assign(code_iterator_p, l_code_line_end->_end);
-				return;
-			}
-
-			out_token_p._vocabulary = Vocabulary::_Template;
-			out_token_p._code = l_template_keyword;
-			context_stack_p.emplace_back(FHT::Context::_Template);
-			return;
-		}
-
-
 		switch (context_stack_p.back())
 		{
 		case FHT::Context::_Template:
+			while (*code_iterator_p <= ' ')
+			{
+				++code_iterator_p;
+			}
+
 			if (*code_iterator_p == '<')
 			{
 				out_token_p._vocabulary = Vocabulary::_BeginTemplateArgs;
 				out_token_p._code = *code_iterator_p;
-				context_stack_p.emplace_back(FHT::Context::_TemplateArgs);
+				context_stack_p.push_back(FHT::Context::_Typename);
 				return;
 			}
 			break;
 
 
-		case FHT::Context::_TemplateArgs:
-			if (*code_iterator_p == '>')
+		case FHT::Context::_Typename:
 			{
-				out_token_p._vocabulary = Vocabulary::_EndTemplateArgs;
-				out_token_p._code = *code_iterator_p;
-				context_stack_p.pop_back();
-
-				if (context_stack_p.size() >= 3)
+				while (*code_iterator_p <= ' ')
 				{
-					auto l_right_before_back = context_stack_p.begin() + (context_stack_p.size() - 3);
-					if (*l_right_before_back == FHT::Context::_Template) // is the C++ 17 nested template template argument: template <template <typename T> class C> class C {};
-					{
-						context_stack_p.pop_back(); // pop the template template arg
-					}
+					++code_iterator_p;
 				}
-				return;
-			}
-			else
-			{
-				auto l_end_args = FE::algorithm::string::find_the_first<FE::UTF8>(code_iterator_p, '>');
-				auto l_nested_begin_args = FE::algorithm::string::find_the_first_within_range<FE::UTF8>(code_iterator_p, FE::algorithm::string::range{ 0, l_end_args->_begin }, '<');
 
-				THROW_CPP_SYNTAX_ERROR(l_end_args == std::nullopt, "C++ code syntax Error C2988: the template argument list is incomplete.");
-
-				if (l_nested_begin_args == std::nullopt) // not found '<'
+				var::uint64 l_keyword_end_pos = 0;
+				for (auto it = code_iterator_p; is_a_valid_letter_for_identifiers(*it); ++it)
 				{
-					// found '>'; copy until '>'
-					out_token_p._vocabulary = Vocabulary::_TemplateArg;
-					out_token_p._code.assign(code_iterator_p, l_end_args->_begin);
+					++l_keyword_end_pos;
+				}
+
+				if (l_keyword_end_pos == 0)
+				{
 					return;
 				}
 
-				out_token_p._vocabulary = Vocabulary::_TemplateArg;
-				out_token_p._code.assign(code_iterator_p, l_nested_begin_args->_end); // found '<'; copy until '<'
-				return;
+				out_token_p._code.assign(code_iterator_p, l_keyword_end_pos);
+				out_token_p._vocabulary = Vocabulary::_Typename;
+				context_stack_p.push_back(FHT::Context::_TemplateArgs);
 			}
+			break;
+
+
+		case FHT::Context::_TemplateArgs:
+			{
+				while (*code_iterator_p <= ' ')
+				{
+					++code_iterator_p;
+				}
+
+				if (*code_iterator_p == '>')
+				{
+					out_token_p._vocabulary = Vocabulary::_EndTemplateArgs;
+					out_token_p._code = *code_iterator_p;
+
+					while (context_stack_p.back() != FHT::Context::_Template)
+					{
+						context_stack_p.pop_back();
+					}
+					return;
+				}
+
+				var::uint64 l_keyword_end_pos = 0;
+				for (auto it = code_iterator_p; is_a_valid_letter_for_identifiers(*it); ++it)
+				{
+					++l_keyword_end_pos;
+				}
+
+				if (l_keyword_end_pos == 0)
+				{
+					return;
+				}
+
+				out_token_p._code.assign(code_iterator_p, l_keyword_end_pos);
+				out_token_p._vocabulary = Vocabulary::_TemplateArg;
+
+				if (code_iterator_p[l_keyword_end_pos] == ',')
+				{
+					context_stack_p.push_back(FHT::Context::_Typename);
+				}
+			}
+			break;
 
 
 		default:
+			{
+				while (*code_iterator_p <= ' ') 
+				{
+					++code_iterator_p;
+				}
+
+				var::uint64 l_keyword_end_pos = 0;
+				for (auto it = code_iterator_p; is_a_valid_letter_for_identifiers(*it); ++it)
+				{
+					++l_keyword_end_pos;
+				}
+				out_token_p._code.assign(code_iterator_p, l_keyword_end_pos);
+
+				if (out_token_p._code.starts_with(u8"template"))
+				{
+					out_token_p._vocabulary = Vocabulary::_Template;
+					context_stack_p.emplace_back(FHT::Context::_Template);
+					out_token_p._code.resize(FE::algorithm::string::compiletime::length(u8"template"));
+					return;
+				}
+
+				out_token_p._code.clear();
+				return;
+			}
 			break;
 		}
 	}
@@ -2241,8 +2278,6 @@ namespace FHT::tokenizer
 				THROW_CPP_SYNTAX_ERROR(*code_iterator_p == '\0', "C++ Code Syntax Error C1075: missing '}' in class declaration, or found an explicit null terminator \0");
 			} while (l_brace_stack.size() > 0);
 			context_stack_p.pop_back(); // pop the template context.
-			THROW_CPP_SYNTAX_ERROR(*code_iterator_p != ';', "C++ Code Syntax Error C2143: missing ';' after class declaration");
-			out_token_p._code += *code_iterator_p;
 			return;
 		}
 	}

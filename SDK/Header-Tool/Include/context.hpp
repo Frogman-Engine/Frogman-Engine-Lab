@@ -33,8 +33,7 @@ namespace FHT
 		_StringLiteral,
 		_CharLiteral,
 		
-		_Template,
-		_TemplateArgs,
+		_Template, _Typename, _TemplateArgs,
 
 		_BeginNamespace,
 		_Namespace,
