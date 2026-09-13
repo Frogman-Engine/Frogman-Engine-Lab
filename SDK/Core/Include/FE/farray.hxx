@@ -117,12 +117,12 @@ public:
 	}
 	
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ iterator begin() noexcept 
+	_FE_FORCE_INLINE_ constexpr iterator begin() noexcept 
 	{
 		return base_type::begin().operator->();
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_iterator begin() const noexcept
+	_FE_FORCE_INLINE_ constexpr const_iterator begin() const noexcept
 	{
 		return base_type::begin().operator->();
 	}
@@ -133,49 +133,49 @@ public:
 	}
 
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ iterator end() noexcept 
+	_FE_FORCE_INLINE_ constexpr iterator end() noexcept 
 	{
 		return begin() + m_array_size;
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_iterator end() const noexcept
+	_FE_FORCE_INLINE_ constexpr const_iterator end() const noexcept
 	{
 		return begin() + m_array_size;
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_iterator cend() const noexcept 
+	_FE_FORCE_INLINE_ constexpr const_iterator cend() const noexcept 
 	{
 		return cbegin() + m_array_size;
 	}
 
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ reverse_iterator rbegin() noexcept 
+	_FE_FORCE_INLINE_ constexpr reverse_iterator rbegin() noexcept 
 	{
 		return (begin() + m_array_size) - 1;
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_reverse_iterator rbegin() const noexcept 
+	_FE_FORCE_INLINE_ constexpr const_reverse_iterator rbegin() const noexcept 
 	{
 		return (begin() + m_array_size) - 1;
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_reverse_iterator crbegin() const noexcept 
+	_FE_FORCE_INLINE_ constexpr const_reverse_iterator crbegin() const noexcept 
 	{
 		return (cbegin() + m_array_size) - 1;
 	}
 
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ reverse_iterator rend() noexcept 
+	_FE_FORCE_INLINE_ constexpr reverse_iterator rend() noexcept 
 	{
 		return begin() - 1;
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_reverse_iterator rend() const noexcept 
+	_FE_FORCE_INLINE_ constexpr const_reverse_iterator rend() const noexcept 
 	{
 		return begin() - 1;
 	}
 
-	_FE_FORCE_INLINE_ _FE_CONSTEXPR17_ const_reverse_iterator crend() const noexcept 
+	_FE_FORCE_INLINE_ constexpr const_reverse_iterator crend() const noexcept 
 	{
 		return cbegin() - 1;
 	}

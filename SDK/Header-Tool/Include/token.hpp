@@ -31,7 +31,7 @@ struct token
 {
 	Vocabulary _vocabulary;
 	var::uint16 _macro_identifier_length;
-	var::uint32 _line_number;
+	var::uint32 _token_line_number;
 	file_buffer_t _code;
 	FE::wchar* _header_file_path;
 

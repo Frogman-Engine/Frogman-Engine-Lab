@@ -1,5 +1,5 @@
-﻿#ifndef _FE_CORE_MACRO_DEFINITIONS_HXX_
-#define _FE_CORE_MACRO_DEFINITIONS_HXX_
+﻿#ifndef _FE_CORE_DEFINITIONS_HXX_
+#define _FE_CORE_DEFINITIONS_HXX_
 /*
 Copyright © from 2022 to present, UNKNOWN STRYKER (Hojin Lee / Joey). All Rights Reserved.
 
@@ -15,8 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-
 #ifdef _MSC_VER
     #define _FE_WITH_MSVC_
     #include <vcruntime.h>
@@ -39,6 +37,15 @@ limitations under the License.
 #endif
 
 
+#ifdef _FE_ON_WINDOWS_X86_64_
+#define FE_TEXT(s) L#s
+#define FE_CHAR(s) (*(static_cast<const wchar_t*>( FE_TEXT(s) )))
+#elif defined(_FE_ON_LINUX_X86_64_)
+#define FE_TEXT(s) #s
+#define FE_CHAR(s) (*(static_cast<const char*>( FE_TEXT(s) )))
+#endif
+
+
 #if __cplusplus >= 202004L
     #define _FE_HAS_CXX23_
     #define _FE_HAS_CXX20_
@@ -46,12 +53,12 @@ limitations under the License.
 #elif __cplusplus >= 202002L
     #define _FE_HAS_CXX20_
     #define _FE_HAS_CXX17_
-#elif __cplusplus >= 201703L
-    #define _FE_HAS_CXX17_
 #else
 // please add /Zc:__cplusplus to the aditional options. [ C/C++ -> Command Line -> Aditional Options ]
     #error Archaic C++ version detected. Use C++ 17 or later versions. Please add /Zc:__cplusplus to the aditional options. [ C/C++ -> Command Line -> Aditional Options ]
 #endif
+
+
 
 
 #ifdef _FE_WITH_MSVC_
@@ -60,23 +67,18 @@ limitations under the License.
     #define _FE_FORCE_INLINE_ inline __attribute__((always_inline))
 #endif
 
+
 #define _FE_VECTOR_CALL_ __vectorcall
 #define _FE_CDECL_ __cdecl
 
 
-#ifdef _FE_HAS_CXX17_
-    #define _FE_CONSTEXPR17_ constexpr
-#else
-    #define _FE_CONSTEXPR17_
-#endif
+
 
 #ifdef _FE_HAS_CXX20_
-    #define _CONSTEXPR20_ constexpr
+    #define _FE_CONSTEXPR20_ constexpr
     #define _FE_CONSTEVAL20_ consteval
-#else
-    #define constexpr
-    #define _FE_CONSTEVAL20_
 #endif
+
 
 #ifdef _FE_HAS_CXX23_
     #define _FE_CONSTEXPR23_ constexpr
@@ -87,13 +89,6 @@ limitations under the License.
 #endif
 
 
-#ifdef _FE_ON_WINDOWS_X86_64_
-    #define FE_TEXT(s) L#s
-    #define FE_CHAR(s) (*(static_cast<const wchar_t*>( FE_TEXT(s) )))
-#elif defined(_FE_ON_LINUX_X86_64_)
-    #define FE_TEXT(s) #s
-    #define FE_CHAR(s) (*(static_cast<const char*>( FE_TEXT(s) )))
-#endif
 
 
 #define _FE_NODISCARD_ [[nodiscard]]
@@ -102,78 +97,24 @@ limitations under the License.
 #define _FE_DISCARD_ _FE_MAYBE_UNUSED_
 #define _FE_NORETURN_ [[noreturn]]
 #define _FE_DEPRECATED_ [[deprecated]]
-#define _FE_IN_DEVELOPMENT_ _FE_DEPRECATED_
 
 
-#ifdef _FE_HAS_CXX20_
-	#define _FE_LIKELY_ [[likely]]
-	#define _FE_UNLIKELY_ [[unlikely]]
-	#define FE_LIKELY(c) (c)
-	#define FE_UNLIKELY(c) (c)
-	#define _FE_NO_UNIQUE_ADDRESS_ [[no_unique_address]]
-
-#else
-	#ifdef _FE_ON_LINUX_X86_64_
-		#define FE_LIKELY(c) __builtin_expect((c), 1)
-		#define FE_UNLIKELY(c) __builtin_expect((c), 0)
-	#else
-		#define FE_LIKELY(c) (c)
-		#define FE_UNLIKELY(c) (c)
-	#endif
-
-	#define _FE_LIKELY_ 
-	#define _FE_UNLIKELY_
-	#define _FE_NO_UNIQUE_ADDRESS_
-#endif
+#define _FE_LIKELY_ [[likely]]
+#define _FE_UNLIKELY_ [[unlikely]]
+#define _FE_NO_UNIQUE_ADDRESS_ [[no_unique_address]]
 
 
 
 
-#define BEGIN_NAMESPACE(NAME_P) namespace NAME_P {
+#define BEGIN_NAMESPACE(name) namespace name {
 #define END_NAMESPACE }
+
 #define CLASS_FORWARD_DECLARATION(namespace_p, class_p) namespace namespace_p { class class_p; }
 #define STRUCT_FORWARD_DECLARATION(namespace_p, struct_p) namespace namespace_p { struct struct_p; }
 #define ENUM_STRUCT_FORWARD_DECLARATION(namespace_p, enum_struct_p) namespace namespace_p { enum struct enum_struct_p; }
+
 #define _SOURCE_CODE_LOCATION_ __FILE__, __func__, __LINE__
-
 #define _MAX_PATH_LENGTH_ 4096 // hard-code the limit regardless of platform.
-
-
-
-
-#ifdef FE_CLASS_HAS_A_BASE
-    #error FE_CLASS_HAS_A_BASE is a reserved Frogman Engine macro keyword.
-#else
-    #define FE_CLASS_HAS_A_BASE(base_class) \
-    using base_type = base_class; 
-#endif
-
-#ifdef FE_CLASS
-    #error FE_CLASS is a reserved Frogman Engine macro keyword.
-#else
-    #define FE_CLASS() // THis is an indicator for the FHT.
-#endif
-
-#ifdef FE_STRUCT
-    #error FE_STRUCT is a reserved Frogman Engine macro keyword.
-#else
-    #define FE_STRUCT() // THis is an indicator for the FHT.
-#endif
-
-#ifdef FE_ENUM_STRUCT
-    #error FE_ENUM_STRUCT is a reserved Frogman Engine macro keyword.
-#else
-    #define FE_ENUM_STRUCT() // THis is an indicator for the FHT.
-#endif
-
-#ifdef ENABLE_SERIALIZATION
-    #error ENABLE_SERIALIZATION is a reserved Frogman Engine macro keyword.
-#else
-#define ENABLE_SERIALIZATION() using IsSerializable = decltype(true); // This is an indicator for the FE runtime reflection.
-#endif
-
-
-
 
 #define STBI_MALLOC(s) _aligned_malloc(s, FE::CPU_L1_cache_line::size)
 #define STBI_REALLOC(p, s) _aligned_realloc(p, s, FE::CPU_L1_cache_line::size)

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "preprocessor.hpp"
+#include "tokenizer.hpp"
 
 
 
@@ -28,7 +29,7 @@ namespace FHT::preprocessor
 		}
 
 		var::uint16 l_macro_identifier_length = 0;
-		for (auto it = code_iterator_p; !(*it <= ' '); ++it)
+		for (auto it = code_iterator_p; FHT::tokenizer::is_a_valid_letter_for_identifiers(*it); ++it)
 		{
 			++l_macro_identifier_length;
 		}

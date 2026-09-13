@@ -15,6 +15,7 @@ limitations under the License.
 */
 #include "FE/log/format_string.hxx"
 #include <FE/algorithm/utility.hxx>
+#include <FE/do_once.hxx>
 #include <FE/memory.hxx>
 
 // std::snprintf
@@ -31,6 +32,8 @@ limitations under the License.
 
 #include <boost/hash2/fnv1a.hpp>
 #include <boost/hash2/hash_append.hpp>
+
+constexpr inline FE::uint32 string_formatter_buffer_size = FE::one_MiB;
 
 
 
@@ -371,11 +374,13 @@ void format_string(char* out_buffer_pointer_p, const char* string_format_p, size
 const char* buffered_string_formatter(std::initializer_list<const void*> arguments_p) noexcept
 {
 	thread_local static char tl_s_buffer[string_formatter_buffer_size];
-    std::memset(tl_s_buffer, null, string_formatter_buffer_size);
-    if (arguments_p.begin() != nullptr)
+	FE_DO_ONCE(_DO_ONCE_PER_THREAD_, std::memset(tl_s_buffer, null, string_formatter_buffer_size) );
+	std::memset(tl_s_buffer, null, strlen(tl_s_buffer));
+    
+	if (arguments_p.begin() != nullptr)
     {
         format_string(tl_s_buffer, static_cast<const char*>(*arguments_p.begin()), string_formatter_buffer_size, const_cast<const void**>(arguments_p.begin()+1), arguments_p.size()-1);
-    }
+	}
     return tl_s_buffer;
 }
 

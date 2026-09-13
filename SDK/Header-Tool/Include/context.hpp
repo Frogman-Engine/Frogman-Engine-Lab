@@ -39,12 +39,13 @@ namespace FHT
 		_BeginNamespace,
 		_Namespace,
 
-		_Class,
-		_Struct,
 		_EnumStruct, _EnumStructIdentifier, _EnumStructExtension, _EnumStructBody,
 		_EnumStructFieldValue,
+		_StructIdentifier,
+		_Class, _ClassExtension, _ClassBody,
+		_AnyDecl,
 
-		_Attribute,
+		_ProbablyAttribute, _Attribute,
 
 		_FrogmanEngineSystemMacro
 	};

@@ -33,23 +33,36 @@ using identifier = std::pmr::basic_string<var::UTF8>;
 
 struct class_node
 {
+	var::boolean _is_forward_decl = false;
 	var::boolean _has_marker = false;
 	var::boolean _has_pure_virtual = false;
+
+	var::boolean _has_explicit_default_public_constructor = false;
+	var::boolean _has_constructor_variants = false;
+	var::boolean _is_destructor_deleted_or_not_public = false;
+
 	identifier _this_class_name;
-	identifier _base_class_name;
 };
 
 
 struct struct_node
 {
+	var::boolean _is_forward_decl = false;
 	var::boolean _has_marker = false;
+
+	var::boolean _has_explicit_default_public_constructor = false;
+	var::boolean _has_constructor_variants = false;
+	var::boolean _is_destructor_deleted_or_not_public = false;
+
 	identifier _identifier;
 };
 
 
 struct enum_struct_node
 {
+	var::boolean _is_forward_decl = true;
 	var::boolean _has_marker = false;
+
 	identifier _target_enum_struct_name;
 	std::pmr::vector<identifier> _enum_struct_fields;
 };

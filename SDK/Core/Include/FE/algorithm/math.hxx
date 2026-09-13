@@ -44,41 +44,41 @@ when the function body is defined within a .cpp file.
 FE::int64 approx_log2(FE::float64 value_p) noexcept;
 
 template<typename T>
-_FE_CONSTEXPR17_ T abs(const T& x_p) noexcept
+constexpr T abs(const T& x_p) noexcept
 {
 	return (x_p < 0) ? (x_p * -1) : x_p;
 }
 
 
 template<typename T>
-_FE_CONSTEXPR17_ T max(const T& lhs_p, const T& rhs_p) noexcept
+constexpr T max(const T& lhs_p, const T& rhs_p) noexcept
 {
 	return (lhs_p >= rhs_p) ? lhs_p : rhs_p;
 }
 
 template<typename T>
-_FE_CONSTEXPR17_ T min(const T& lhs_p, const T& rhs_p) noexcept
+constexpr T min(const T& lhs_p, const T& rhs_p) noexcept
 {
 	return (lhs_p <= rhs_p) ? lhs_p : rhs_p;
 }
 
 
 template<typename T>
-_FE_CONSTEXPR17_ T clamp(const T& value_p, const T& min_p, const T& max_p) noexcept
+constexpr T clamp(const T& value_p, const T& min_p, const T& max_p) noexcept
 {
 	return ((min_p > value_p) ? min_p : ((value_p > max_p) ? max_p : value_p));
 }
 
 
 template<typename T>
-_FE_CONSTEXPR17_ FE::boolean is_nearly_equal(const T& lhs_p, const T& rhs_p, const T& offset_p) noexcept
+constexpr FE::boolean is_nearly_equal(const T& lhs_p, const T& rhs_p, const T& offset_p) noexcept
 {
 	return  ::FE::algorithm::math::abs(lhs_p - rhs_p) <= offset_p;
 }
 
 
 template<typename N>
-_FE_CONSTEXPR17_ N calculate_index_of_a_matrix(const N coordinate_x_p, const N coordinate_y_p, const N row_p) noexcept
+constexpr N calculate_index_of_a_matrix(const N coordinate_x_p, const N coordinate_y_p, const N row_p) noexcept
 {
 	static_assert(FE::is_numeric<N>::value == true, "static assertion failed: the template argument N must be a numerical type.");
 	return coordinate_x_p + (row_p * coordinate_y_p);
@@ -110,12 +110,12 @@ _FE_FORCE_INLINE_ movement calculate_movement(FE::float64 forward_p, FE::float64
 }
 
 
-_FE_CONSTEXPR17_ FE::float64 radian_to_degree(FE::float64 radian_p) noexcept
+constexpr FE::float64 radian_to_degree(FE::float64 radian_p) noexcept
 {
 	return (radian_p * 180.0) / pi;
 }
 
-_FE_CONSTEXPR17_ FE::float64 degree_to_radian(FE::float64 degree_p) noexcept
+constexpr FE::float64 degree_to_radian(FE::float64 degree_p) noexcept
 {
 	return (degree_p * pi) / 180.0;
 }

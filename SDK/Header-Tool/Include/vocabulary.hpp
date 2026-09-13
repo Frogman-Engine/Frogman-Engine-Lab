@@ -27,6 +27,7 @@ enum struct Vocabulary : FE::uint16
 {
 	_Undefined, _EndOfCode,
 
+	_Identifier,
 	_AnyDecl, _Attribute,
 
 	_LineComment, _LineEnd,
@@ -39,10 +40,11 @@ enum struct Vocabulary : FE::uint16
 	_Template, _BeginTemplateArgs, _Typename, _TemplateArg, _EndTemplateArgs,
 	_TemplateBody,
 
-	_Class, _Struct, 
 	_EnumStruct, _StructKeywordOfEnumStruct, _EnumStructIdentifier, _EnumStructExtension,
+	_EnumStructField, _EnumStructFieldValue,
+	_Struct, _StructIdentifier,
+	_Class, _ClassIdentifier, _BaseClassIdentifier,
 	_ClassStructEnumMethodForwardDeclaration,
-	_FieldType, _FieldIdentifier, _EnumStructField, _EnumStructFieldValue,
 
 	_Colon, _Semicolon, _Comma,
 
@@ -50,7 +52,7 @@ enum struct Vocabulary : FE::uint16
 
 	_TextLiteralPrefix,
 	_StringLiteral, _CharLiteral, _NumberValue,
-	_Operator, _AssignmentOperator,
+	_Operator, _AssignmentOperator, _BitwiseNot,
 
 	_Virtual, _Override, _Final, _This,
 
@@ -128,8 +130,7 @@ const tsl::htrie_map<var::ASCII, Vocabulary> g_vocabulary =
 	{ "FE_CLASS", Vocabulary::_FrogmanEngineClassReflectionMacro },
 	{ "FE_STRUCT", Vocabulary::_FrogmanEngineStructReflectionMacro },
 	{ "FE_ENUM_STRUCT", Vocabulary::_FrogmanEngineEnumStructReflectionMacro },
-	{ "FE_SYSTEM", Vocabulary::_FrogmanEngineSystemMacro },
-	{ "ENABLE_SERIALIZATION", Vocabulary::_FrogmanEngineEnableSerialization }
+	{ "FE_SYSTEM", Vocabulary::_FrogmanEngineSystemMacro }
 };
 
 

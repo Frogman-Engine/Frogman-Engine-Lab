@@ -197,7 +197,7 @@ _FE_MAYBE_UNUSED_ extern FE::uint64 system_page_allocation_granularity;
 
 
 // The FE::is_power_of_two function is a constexpr function that checks if a given size_t value is a power of two by using a bitwise operation.
-_FE_CONSTEXPR17_ FE::boolean is_power_of_two(FE::size value_p) noexcept
+constexpr FE::boolean is_power_of_two(FE::size value_p) noexcept
 {
 	if (value_p == 0)
 	{

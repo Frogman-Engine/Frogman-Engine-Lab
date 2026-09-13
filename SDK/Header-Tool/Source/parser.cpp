@@ -17,6 +17,7 @@ limitations under the License.
 #include "error_code.hpp"
 #include "parser.hpp"
 #include "symbol_counter.hpp"
+#include "tokenizer.hpp"
 
 
 
@@ -71,18 +72,20 @@ namespace FHT::parser
 				l_root._namespaces.emplace_back(build_namespace_node_recursive(u8"::", iterator, token_list_p.end(), l_context_stack));
 				break;
 
-			case Vocabulary::_Class:
-				l_context_stack.push_back(Context::_Class);
+			case Vocabulary::_FrogmanEngineClassReflectionMacro:
+				_FE_FALLTHROUGH_;
+			case Vocabulary::_ClassIdentifier:
 				l_root._classes.emplace_back(build_class_node(u8"::", iterator, token_list_p.end()));
-				l_context_stack.pop_back();
 				break;
 
-			case Vocabulary::_Struct:
-				l_context_stack.push_back(Context::_Struct);
+			case Vocabulary::_FrogmanEngineStructReflectionMacro:
+				_FE_FALLTHROUGH_;
+			case Vocabulary::_StructIdentifier:
 				l_root._structs.emplace_back(build_struct_node(u8"::", iterator, token_list_p.end()));
-				l_context_stack.pop_back();
 				break;
 
+			case Vocabulary::_FrogmanEngineEnumStructReflectionMacro:
+				_FE_FALLTHROUGH_;
 			case Vocabulary::_EnumStructIdentifier:
 				l_root._enum_structs.emplace_back(build_enum_struct_node(u8"::", iterator, token_list_p.end()));
 				break;
@@ -167,7 +170,7 @@ namespace FHT::parser
 
 
 			case Vocabulary::_FrogmanEngineSystemMacro:
-				if (context_stack_p.back() == Context::_Class || context_stack_p.back() == Context::_Struct)
+				if (context_stack_p.back() == Context::_Class || context_stack_p.back() == Context::_StructIdentifier)
 				{
 					break; // skip the system macro if it is inside a class or struct.
 				}
@@ -181,18 +184,20 @@ namespace FHT::parser
 				l_node._nested_namespaces.emplace_back(build_namespace_node_recursive(l_node._target_namespace_name, out_token_iterator_p, end_p, context_stack_p));
 				break;
 
-			case Vocabulary::_Class:
-				context_stack_p.push_back(Context::_Class);
+			case Vocabulary::_FrogmanEngineClassReflectionMacro:
+				_FE_FALLTHROUGH_;
+			case Vocabulary::_ClassIdentifier:
 				l_node._classes.emplace_back(build_class_node(l_node._target_namespace_name, out_token_iterator_p, end_p));
-				context_stack_p.pop_back();
 				break;
 
-			case Vocabulary::_Struct:
-				context_stack_p.push_back(Context::_Struct);
+			case Vocabulary::_FrogmanEngineStructReflectionMacro:
+				_FE_FALLTHROUGH_;
+			case Vocabulary::_StructIdentifier:
 				l_node._structs.emplace_back(build_struct_node(l_node._target_namespace_name, out_token_iterator_p, end_p));
-				context_stack_p.pop_back();
 				break;
 
+			case Vocabulary::_FrogmanEngineEnumStructReflectionMacro:
+				_FE_FALLTHROUGH_;
 			case Vocabulary::_EnumStructIdentifier:
 				l_node._enum_structs.emplace_back(build_enum_struct_node(l_node._target_namespace_name, out_token_iterator_p, end_p));
 				break;
@@ -210,183 +215,247 @@ namespace FHT::parser
 
 
 
+	enum struct AccessModifierScope : FE::uint8
+	{
+		_Private = 0,
+		_Protected = 1,
+		_Public = 2
+	};
+
 	_FE_NODISCARD_ class_node build_class_node(const identifier& parent_namespace_p, typename std::pmr::list<token>::const_iterator& out_token_iterator_p, typename std::pmr::list<token>::const_iterator end_p)
 	{
-		FE_ASSERT(out_token_iterator_p->_vocabulary == Vocabulary::_Class);
+		FE_ASSERT(out_token_iterator_p->_vocabulary == Vocabulary::_FrogmanEngineClassReflectionMacro || out_token_iterator_p->_vocabulary == Vocabulary::_ClassIdentifier);
 		class_node l_node = 
 		{
-			._this_class_name{ out_token_iterator_p->_code, framework::get_framework().get_memory_resource() },
-			._base_class_name{ framework::get_framework().get_memory_resource() }
+			._this_class_name{ parent_namespace_p, framework::get_framework().get_memory_resource() }
 		};
 
-
-		{	// trim 'class'
-			constexpr auto l_class = u8"class";
-			auto l_class_keyword_len = l_node._this_class_name.find(l_class);
-			THROW_CPP_SYNTAX_ERROR(l_class_keyword_len == std::string::npos, "Frogman Engine C++ Syntax Error: 'class' keyword is missing from a class");
-
-			l_class_keyword_len += FE::algorithm::string::length(l_class);
-			l_node._this_class_name.erase(0, l_class_keyword_len);
-		}
-
-		auto l_attr_pos = l_node._this_class_name.rfind(u8']');
-		if (l_attr_pos != std::string::npos) // has attributes
+		if (out_token_iterator_p->_vocabulary == Vocabulary::_FrogmanEngineClassReflectionMacro)
 		{
-			l_node._this_class_name.erase(0, l_attr_pos + 1); // remove the attributes
-		}
-
-		{	// trim spaces at front
-			var::uint64 l_space_length = 0;
-			for (auto character : l_node._this_class_name)
+			l_node._has_marker = true;
+			while (out_token_iterator_p->_vocabulary != Vocabulary::_ClassIdentifier)
 			{
-				if ((character <= ' ') == false)
-				{
-					break;
-				}
-				++l_space_length;
-			}
-			l_node._this_class_name.erase(0, l_space_length);
-		}
-
-		{
-			auto l_class_extension = l_node._this_class_name.find(':');
-			if (l_class_extension != std::string::npos)
-			{
-				l_node._base_class_name.assign(l_node._this_class_name.c_str() + (l_class_extension + 1));
-				l_node._this_class_name.erase(l_class_extension, l_node._this_class_name.length() - l_class_extension);
+				THROW_CPP_SYNTAX_ERROR(out_token_iterator_p->_vocabulary == Vocabulary::_EndOfCode, "Reached the end of code before reaching to FE_CLASS() marker");
+				++out_token_iterator_p;
 			}
 		}
+		l_node._this_class_name += out_token_iterator_p->_code;
 
 
-		auto l_final_keyword_pos = l_node._this_class_name.find(u8"final");
-		if (l_final_keyword_pos != std::string::npos)
-		{
-			if (l_node._this_class_name[l_final_keyword_pos-1] <= ' ')
-			{
-				l_node._this_class_name.erase(l_final_keyword_pos, FE::algorithm::string::compiletime::length("final"));
-			}
-		}
+		file_buffer_t l_default_constructor = { out_token_iterator_p->_code, framework::get_framework().get_memory_resource() };
+		l_default_constructor += u8"()";
 
-		while (l_node._this_class_name.length() > 0)
-		{
-			if (l_node._this_class_name.back() <= ' ')
-			{
-				l_node._this_class_name.pop_back();
-				continue;
-			}
-			break;
-		}
-
-		l_node._this_class_name.insert(0, parent_namespace_p);
+		file_buffer_t l_constructor_variant = { out_token_iterator_p->_code, framework::get_framework().get_memory_resource() };
+		l_constructor_variant += u8"(";
 
 
-		std::pmr::vector<Vocabulary> l_stack{ framework::get_framework().get_memory_resource() };
 		++out_token_iterator_p;
+		if (out_token_iterator_p->_vocabulary == Vocabulary::_Semicolon)
+		{
+			l_node._is_forward_decl = true;
+			return l_node;
+		}
+
+
+
+
+		while (out_token_iterator_p->_vocabulary != Vocabulary::_AnyDecl)
+		{
+			++out_token_iterator_p;
+		}
+
+
+		std::pmr::vector<var::UTF8> l_inner_stack{ framework::get_framework().get_memory_resource() };
+		const auto l_scope_begin = out_token_iterator_p->_code.begin();
+		auto l_scope_end = l_scope_begin;
 		do
 		{
-			switch (out_token_iterator_p->_vocabulary)
+			switch (*l_scope_end)
 			{
-			case Vocabulary::_LeftCurlyBracket:
-				l_stack.push_back(out_token_iterator_p->_vocabulary);
+			case u8'{':
+				l_inner_stack.push_back(u8'{');
 				break;
 
-			case Vocabulary::_RightCurlyBracket:
-				l_stack.pop_back();
-				break;
-
-			case Vocabulary::_AnyDecl:
-				{
-					--out_token_iterator_p;
-					Vocabulary l_prev_token = out_token_iterator_p->_vocabulary;
-					++out_token_iterator_p;
-					if (l_prev_token != Vocabulary::_Virtual) // break if it does not contain "virtual"; and
-					{
-						break;
-					}
-
-					auto l_it = out_token_iterator_p->_code.rbegin();
-					while (*l_it != u8')')
-					{
-						if (l_it == out_token_iterator_p->_code.rend())
-						{
-							break;
-						}
-						++l_it;
-					}
-
-					if (FE::algorithm::string::space_insensitive_contains(l_it.operator->(), l_it.operator->() - out_token_iterator_p->_code.begin().operator->(), u8"=0") == false) // break if it does not contain "=0".
-					{
-						break;
-					}
-					l_node._has_pure_virtual = true;
-				}
+			case  u8'}':
+				l_inner_stack.pop_back();
 				break;
 
 			default:
 				THROW_CPP_SYNTAX_ERROR(out_token_iterator_p == end_p, "FHT C++ Syntax Error C1075: the curly braces in the current header file are not closed or properly organized; reached the end of the token stream while parsing a struct declaration.");
 				break;
 			}
-			++out_token_iterator_p;
-		} 
-		while (l_stack.size() > 0);
+			++l_scope_end;
+		} while (l_inner_stack.size() > 0);
+
+
+		file_buffer_t l_scope = { l_scope_begin, l_scope_end , framework::get_framework().get_memory_resource() };
+		std::pmr::list<token> l_tokens = FHT::tokenizer::tokenize_header(l_scope, L"");
+
+		FHT::tokenizer::purge_comments(l_tokens);// removes /**/ and // comments.
+		FHT::tokenizer::purge_preprocessor(l_tokens);// removes the # preprocessor directives and its contents.
+		FHT::tokenizer::purge_string_literals_and_backslashes(l_tokens); // removes the \, characters, and strings.
+		FHT::tokenizer::purge_template(l_tokens); // removes the template declarations.
+		std::erase_if(l_tokens, [](const token& token_p) -> FE::boolean { return token_p._vocabulary == Vocabulary::_LineEnd; });
+
+
+		AccessModifierScope l_current_access_modifier_scope = AccessModifierScope::_Private;
+		var::boolean l_is_current_func_virtual = false;
+		var::boolean l_is_probably_destructor = false;
+		for (const auto& token : l_tokens)
+		{
+			switch (token._vocabulary)
+			{
+			case Vocabulary::_Private:
+				l_current_access_modifier_scope = AccessModifierScope::_Private;
+				break;
+
+			case Vocabulary::_Protected:
+				l_current_access_modifier_scope = AccessModifierScope::_Protected;
+				break;
+
+			case Vocabulary::_Public:
+				l_current_access_modifier_scope = AccessModifierScope::_Public;
+				break;
+
+
+			case Vocabulary::_Virtual:
+				l_is_current_func_virtual = true;
+				break;
+
+			case Vocabulary::_BitwiseNot:
+				l_is_probably_destructor = true;
+				break;
+
+
+			case Vocabulary::_AnyDecl:
+				_FE_FALLTHROUGH_;
+			case Vocabulary::_ClassStructEnumMethodForwardDeclaration:
+			{
+				l_scope = token._code; // copy a function scope
+				auto l_func_tokens = FHT::tokenizer::tokenize_any_decl(l_scope);
+				FHT::tokenizer::purge_comments(l_func_tokens);// removes /**/ and // comments.
+				FHT::tokenizer::purge_preprocessor(l_func_tokens);// removes the # preprocessor directives and its contents.
+				FHT::tokenizer::purge_string_literals_and_backslashes(l_func_tokens); // removes the \, characters, and strings.
+				FHT::tokenizer::purge_template(l_func_tokens); // removes the template declarations.
+				std::erase_if(l_func_tokens, [](const auto& token_p) -> FE::boolean { return token_p._vocabulary == Vocabulary::_LineEnd; });
+
+
+				if (l_is_current_func_virtual)
+				{
+					var::boolean l_is_probably_pure_virtual = false;
+					for (auto func_token = l_func_tokens.rbegin(); func_token != l_func_tokens.rend(); ++func_token)
+					{
+						switch (func_token->_vocabulary)
+						{
+						case Vocabulary::_AssignmentOperator:
+							if (l_is_probably_pure_virtual /*&& l_prev_token == Vocabulary::_Virtual*/)
+							{
+								l_node._has_pure_virtual = true;
+								goto EscapeLoopA;
+							}
+							break;
+
+						default:
+							if (func_token->_code == u8"0")
+							{
+								l_is_probably_pure_virtual = true;
+								break;
+							}
+							l_is_probably_pure_virtual = false;
+							break;
+						}
+					}
+				EscapeLoopA:
+					break;
+				}
+
+
+				identifier l_function{ framework::get_framework().get_memory_resource() };
+				for (const auto& func_token : l_func_tokens)
+				{
+					if (func_token._vocabulary == Vocabulary::_Semicolon || func_token._vocabulary == Vocabulary::_LeftCurlyBracket)
+					{
+						break;
+					}
+					l_function += func_token._code;
+					l_function += u8' ';
+				}
+
+				if (l_is_probably_destructor && FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), l_default_constructor.c_str()))
+				{
+					if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), u8"=delete"))
+					{
+						l_node._is_destructor_deleted_or_not_public = true;
+					}
+					else
+					{
+						l_node._is_destructor_deleted_or_not_public = l_current_access_modifier_scope != AccessModifierScope::_Public;
+					}
+					break;
+				}
+
+				if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), l_default_constructor.c_str()))
+				{
+					if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), u8"=delete"))
+					{
+						l_node._has_explicit_default_public_constructor = false;
+					}
+					else
+					{
+						l_node._has_explicit_default_public_constructor = l_current_access_modifier_scope == AccessModifierScope::_Public;
+					}
+					break;
+				}
+
+				if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), l_constructor_variant.c_str()))
+				{
+					l_node._has_constructor_variants = true;
+				}
+				break;
+			}
+
+
+			default:
+				l_is_current_func_virtual = false;
+				l_is_probably_destructor = false;
+				break;
+			}
+		}
 		return l_node;
 	}
 
 	_FE_NODISCARD_ struct_node build_struct_node(const identifier& parent_namespace_p, typename std::pmr::list<token>::const_iterator& out_token_iterator_p, typename std::pmr::list<token>::const_iterator end_p)
 	{
-		FE_ASSERT(out_token_iterator_p->_vocabulary == Vocabulary::_Struct);
+		FE_ASSERT(out_token_iterator_p->_vocabulary == Vocabulary::_FrogmanEngineStructReflectionMacro || out_token_iterator_p->_vocabulary == Vocabulary::_StructIdentifier);
 		struct_node l_node =
 		{
-			._identifier{ out_token_iterator_p->_code, framework::get_framework().get_memory_resource() }
+			._identifier{ parent_namespace_p, framework::get_framework().get_memory_resource() }
 		};
-
+		if (out_token_iterator_p->_vocabulary == Vocabulary::_FrogmanEngineStructReflectionMacro)
 		{
-			{	// trim 'struct'
-				constexpr auto l_struct = u8"struct";
-				auto l_struct_keyword_len = l_node._identifier.find(l_struct);
-				THROW_CPP_SYNTAX_ERROR(l_struct_keyword_len == std::string::npos, "Frogman Engine C++ Syntax Error: 'struct' keyword is missing from a struct");
-
-				l_struct_keyword_len += FE::algorithm::string::length(l_struct);
-				l_node._identifier.erase(0, l_struct_keyword_len);
-			}
-
-			auto l_attr_pos = l_node._identifier.rfind(u8']');
-			if (l_attr_pos != std::string::npos) // has attributes
+			l_node._has_marker = true;
+			while (out_token_iterator_p->_vocabulary != Vocabulary::_StructIdentifier)
 			{
-				l_node._identifier.erase(0, l_attr_pos + 1); // remove the attributes
+				THROW_CPP_SYNTAX_ERROR(out_token_iterator_p->_vocabulary == Vocabulary::_EndOfCode, "Reached the end of code before reaching to FE_STRUCT() marker");
+				++out_token_iterator_p;
 			}
+		}
+		l_node._identifier += out_token_iterator_p->_code;
 
-			{	// trim spaces at front
-				var::uint64 l_space_length = 0;
-				for (auto character : l_node._identifier)
-				{
-					if ((character <= ' ') == false)
-					{
-						break;
-					}
-					++l_space_length;
-				}
-				l_node._identifier.erase(0, l_space_length);
-			}
+		file_buffer_t l_default_constructor = { out_token_iterator_p->_code, framework::get_framework().get_memory_resource() };
+		l_default_constructor += u8"()";
 
-			THROW_CPP_SYNTAX_ERROR(l_node._identifier.find(':') != std::string::npos, "Frogman Engine C++ Syntax Error: structs must not be polymorphic.");
+		file_buffer_t l_constructor_variant = { out_token_iterator_p->_code, framework::get_framework().get_memory_resource() };
+		l_constructor_variant += u8"(";
 
-			while (l_node._identifier.length() > 0)
-			{
-				if (l_node._identifier.back() <= ' ')
-				{
-					l_node._identifier.pop_back();
-					continue;
-				}
-				break;
-			}
-	
-			l_node._identifier.insert(0, parent_namespace_p);
+		++out_token_iterator_p;
+		if (out_token_iterator_p->_vocabulary == Vocabulary::_Semicolon)
+		{
+			l_node._is_forward_decl = true;
+			return l_node;
 		}
 
-
 		std::pmr::vector<Vocabulary> l_stack{ framework::get_framework().get_memory_resource() };
-		++out_token_iterator_p;
 		do
 		{
 			switch (out_token_iterator_p->_vocabulary)
@@ -394,68 +463,188 @@ namespace FHT::parser
 			case Vocabulary::_LeftCurlyBracket:
 				l_stack.push_back(out_token_iterator_p->_vocabulary);
 				break;
-				
+
 			case Vocabulary::_RightCurlyBracket:
 				l_stack.pop_back();
 				break;
+
+
+			case Vocabulary::_AnyDecl:
+			{
+				std::pmr::vector<var::UTF8> l_inner_stack{ framework::get_framework().get_memory_resource() };
+				const auto l_scope_begin = out_token_iterator_p->_code.begin();
+				auto l_scope_end = l_scope_begin;
+				do
+				{
+					switch (*l_scope_end)
+					{
+					case u8'{':
+						l_inner_stack.push_back(u8'{');
+						break;
+
+					case  u8'}':
+						l_inner_stack.pop_back();
+						break;
+
+					default:
+						THROW_CPP_SYNTAX_ERROR(out_token_iterator_p == end_p, "FHT C++ Syntax Error C1075: the curly braces in the current header file are not closed or properly organized; reached the end of the token stream while parsing a struct declaration.");
+						break;
+					}
+					++l_scope_end;
+				} while (l_inner_stack.size() > 0);
+
+
+				file_buffer_t l_scope = { l_scope_begin, l_scope_end , framework::get_framework().get_memory_resource() };
+				std::pmr::list<token> l_tokens = FHT::tokenizer::tokenize_header(l_scope, L"");
+
+				FHT::tokenizer::purge_comments(l_tokens);// removes /**/ and // comments.
+				FHT::tokenizer::purge_preprocessor(l_tokens);// removes the # preprocessor directives and its contents.
+				FHT::tokenizer::purge_string_literals_and_backslashes(l_tokens); // removes the \, characters, and strings.
+				FHT::tokenizer::purge_template(l_tokens); // removes the template declarations.
+				std::erase_if(l_tokens, [](const token& token_p) -> FE::boolean { return token_p._vocabulary == Vocabulary::_LineEnd; });
+
+
+				AccessModifierScope l_current_access_modifier_scope = AccessModifierScope::_Public;
+				var::boolean l_is_current_func_virtual = false;
+				var::boolean l_is_probably_destructor = false;
+				for (const auto& token : l_tokens)
+				{
+					switch (token._vocabulary)
+					{
+					case Vocabulary::_Private:
+						l_current_access_modifier_scope = AccessModifierScope::_Private;
+						break;
+
+					case Vocabulary::_Protected:
+						l_current_access_modifier_scope = AccessModifierScope::_Protected;
+						break;
+
+					case Vocabulary::_Public:
+						l_current_access_modifier_scope = AccessModifierScope::_Public;
+						break;
+
+
+					case Vocabulary::_BitwiseNot:
+						l_is_probably_destructor = true;
+						break;
+
+
+					case Vocabulary::_AnyDecl:
+						_FE_FALLTHROUGH_;
+					case Vocabulary::_ClassStructEnumMethodForwardDeclaration:
+					{
+						l_scope = token._code; // copy a function scope
+						auto l_func_tokens = FHT::tokenizer::tokenize_any_decl(l_scope);
+						FHT::tokenizer::purge_comments(l_func_tokens);// removes /**/ and // comments.
+						FHT::tokenizer::purge_preprocessor(l_func_tokens);// removes the # preprocessor directives and its contents.
+						FHT::tokenizer::purge_string_literals_and_backslashes(l_func_tokens); // removes the \, characters, and strings.
+						FHT::tokenizer::purge_template(l_func_tokens); // removes the template declarations.
+						std::erase_if(l_func_tokens, [](const auto& token_p) -> FE::boolean { return token_p._vocabulary == Vocabulary::_LineEnd; });
+
+
+						THROW_CPP_SYNTAX_ERROR(l_is_current_func_virtual, "the virtual function declaration is not allowed inside a struct in Frogman C++.");
+
+
+						identifier l_function{ framework::get_framework().get_memory_resource() };
+						for (const auto& func_token : l_func_tokens)
+						{
+							if (func_token._vocabulary == Vocabulary::_Semicolon || func_token._vocabulary == Vocabulary::_LeftCurlyBracket)
+							{
+								break;
+							}
+							l_function += func_token._code;
+							l_function += u8' ';
+						}
+
+						if (l_is_probably_destructor && FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), l_default_constructor.c_str()))
+						{
+							if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), u8"=delete"))
+							{
+								l_node._is_destructor_deleted_or_not_public = true;
+							}
+							else
+							{
+								l_node._is_destructor_deleted_or_not_public = l_current_access_modifier_scope != AccessModifierScope::_Public;
+							}
+							break;
+						}
+
+						if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), l_default_constructor.c_str()))
+						{
+							if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), u8"=delete"))
+							{
+								l_node._has_explicit_default_public_constructor = false;
+							}
+							else
+							{
+								l_node._has_explicit_default_public_constructor = l_current_access_modifier_scope == AccessModifierScope::_Public;
+							}
+							break;
+						}
+
+						if (FE::algorithm::string::space_insensitive_contains(l_function.c_str(), l_function.length(), l_constructor_variant.c_str()))
+						{
+							l_node._has_constructor_variants = true;
+						}
+						break;
+					}
+
+
+					default:
+						l_is_probably_destructor = false;
+						break;
+					}
+				}
+			}
+			break;
 
 			default:
 				THROW_CPP_SYNTAX_ERROR(out_token_iterator_p == end_p, "FHT C++ Syntax Error C1075: the curly braces in the current header file are not closed or properly organized; reached the end of the token stream while parsing a struct declaration.");
 				break;
 			}
 			++out_token_iterator_p;
-		} 
-		while (l_stack.size() > 0);
+		} while (l_stack.size() > 0);
 		return l_node;
 	}
 
 	_FE_NODISCARD_ enum_struct_node build_enum_struct_node(const identifier& parent_namespace_p, typename std::pmr::list<token>::const_iterator& out_token_iterator_p, typename std::pmr::list<token>::const_iterator end_p)
 	{
-		FE_ASSERT(out_token_iterator_p->_vocabulary == Vocabulary::_EnumStructIdentifier, "Assertion Failed: Enum struct identifier is missing.");
+		FE_ASSERT(out_token_iterator_p->_vocabulary == Vocabulary::_FrogmanEngineEnumStructReflectionMacro ||out_token_iterator_p->_vocabulary == Vocabulary::_EnumStructIdentifier, "Assertion Failed: Enum struct identifier is missing.");
 		enum_struct_node l_node =
 		{
-			._target_enum_struct_name{ out_token_iterator_p->_code, framework::get_framework().get_memory_resource() },
+			._target_enum_struct_name{ parent_namespace_p , framework::get_framework().get_memory_resource() },
 			._enum_struct_fields{ framework::get_framework().get_memory_resource() }
 		};
-
-		{	// trim spaces at front
-			var::uint64 l_space_length = 0;
-			for (auto character : l_node._target_enum_struct_name)
-			{
-				if ((character <= ' ') == false)
-				{
-					break;
-				}
-				++l_space_length;
-			}
-			l_node._target_enum_struct_name.erase(0, l_space_length);
-		}
-
-		while (l_node._target_enum_struct_name.length() > 0)
+		if (out_token_iterator_p->_vocabulary == Vocabulary::_FrogmanEngineEnumStructReflectionMacro)
 		{
-			if (l_node._target_enum_struct_name.back() <= ' ')
+			l_node._has_marker = true;
+			while (out_token_iterator_p->_vocabulary != Vocabulary::_EnumStructIdentifier)
 			{
-				l_node._target_enum_struct_name.pop_back();
-				continue;
+				THROW_CPP_SYNTAX_ERROR(out_token_iterator_p->_vocabulary == Vocabulary::_EndOfCode, "Reached the end of code before reaching to FE_ENUM_STRUCT() marker");
+				++out_token_iterator_p;
 			}
-			break;
 		}
-		
-
-		l_node._target_enum_struct_name.insert(0, parent_namespace_p);
+		l_node._target_enum_struct_name += out_token_iterator_p->_code;
 
 
 		while (out_token_iterator_p != end_p)
 		{
-			if (out_token_iterator_p->_vocabulary == Vocabulary::_RightCurlyBracket)
+			switch (out_token_iterator_p->_vocabulary)
 			{
+			case Vocabulary::_RightCurlyBracket:
 				++out_token_iterator_p;
+				l_node._is_forward_decl = false;
 				return l_node;
-			}
 
-			if (out_token_iterator_p->_vocabulary == Vocabulary::_EnumStructField)
-			{
+			case Vocabulary::_EnumStructField:
 				l_node._enum_struct_fields.emplace_back(out_token_iterator_p->_code);
+				break;
+
+			case Vocabulary::_Semicolon:
+				return l_node;
+
+			default:
+				break;
 			}
 			++out_token_iterator_p;
 		}

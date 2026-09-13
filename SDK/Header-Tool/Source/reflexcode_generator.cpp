@@ -33,10 +33,15 @@ namespace FHT::reflexcode_generator
 {
 	_FE_NODISCARD_ metadata generate_metadata(const header_file_root& tree_p) noexcept
 	{
-		metadata l_metadata;
-		l_metadata._class_and_structs = std::pmr::vector<std::pmr::wstring>(::framework::get_framework().get_memory_resource());
-		l_metadata._header_file_path = std::pmr::wstring(tree_p._path_to_the_header_file.data(), framework::get_framework().get_memory_resource());
-
+		metadata l_metadata =
+		{
+			._header_file_path = std::pmr::wstring(tree_p._path_to_the_header_file.data(), framework::get_framework().get_memory_resource()),
+			._classes = std::pmr::vector<metadata::class_info>(::framework::get_framework().get_memory_resource()),
+			._structs = std::pmr::vector<metadata::struct_info>(::framework::get_framework().get_memory_resource()),
+			._enum_structs = std::pmr::vector< std::pmr::vector<std::pmr::wstring> >(::framework::get_framework().get_memory_resource()),
+			._system_fptrs = std::pmr::vector<metadata::system_info>(::framework::get_framework().get_memory_resource())
+		};
+	
 		for (const std::optional<class_node>& node : tree_p._classes)
 		{
 			if (node == std::nullopt)
@@ -44,9 +49,9 @@ namespace FHT::reflexcode_generator
 				continue;
 			}
 
-			if (node->_has_pure_virtual == true)
+			if (node->_has_pure_virtual || node->_is_forward_decl)
 			{
-				continue; // skip pure virtual classes
+				continue; 
 			}
 
 			if (header_tool::get_program_options().get_frequire_reflection_marker() == true)
@@ -67,6 +72,11 @@ namespace FHT::reflexcode_generator
 				continue;
 			}
 
+			if (node->_is_forward_decl)
+			{
+				continue; 
+			}
+
 			if (header_tool::get_program_options().get_frequire_reflection_marker() == true)
 			{
 				if (node->_has_marker == false)
@@ -81,6 +91,11 @@ namespace FHT::reflexcode_generator
 		for (const std::optional<enum_struct_node>& node : tree_p._enum_structs)
 		{
 			if (node == std::nullopt)
+			{
+				continue;
+			}
+
+			if (node->_is_forward_decl)
 			{
 				continue;
 			}
@@ -145,7 +160,7 @@ namespace FHT::reflexcode_generator
 				continue;
 			}
 
-			if (node->_has_pure_virtual == true)
+			if (node->_has_pure_virtual || node->_is_forward_decl)
 			{
 				continue; // skip pure virtual classes
 			}
@@ -168,6 +183,11 @@ namespace FHT::reflexcode_generator
 				continue;
 			}
 
+			if (node->_is_forward_decl)
+			{
+				continue;
+			}
+
 			if (header_tool::get_program_options().get_frequire_reflection_marker() == true)
 			{
 				if (node->_has_marker == false)
@@ -182,6 +202,11 @@ namespace FHT::reflexcode_generator
 		for (const std::optional<enum_struct_node>& node : node_p._enum_structs)
 		{
 			if (node == std::nullopt)
+			{
+				continue;
+			}
+
+			if (node->_is_forward_decl)
 			{
 				continue;
 			}
@@ -241,7 +266,11 @@ namespace FHT::reflexcode_generator
 
 		std::mbstowcs(l_identifier.data(), reinterpret_cast<const char*>(node_p._this_class_name.data()), node_p._this_class_name.length());
 
-		out_return_p._class_and_structs.push_back(std::move(l_identifier));
+		out_return_p._classes.emplace_back();
+		out_return_p._classes.back()._identifier = std::move(l_identifier);
+		out_return_p._classes.back()._has_explicit_default_public_constructor = node_p._has_explicit_default_public_constructor;
+		out_return_p._classes.back()._has_constructor_variants = node_p._has_constructor_variants;
+		out_return_p._classes.back()._is_destructor_deleted_or_not_public = node_p._is_destructor_deleted_or_not_public;
 	}
 
 
@@ -251,7 +280,12 @@ namespace FHT::reflexcode_generator
 		l_identifier.resize(node_p._identifier.length());
 
 		std::mbstowcs(l_identifier.data(), reinterpret_cast<const char*>(node_p._identifier.data()), node_p._identifier.length());
-		out_return_p._class_and_structs.push_back(std::move(l_identifier));
+
+		out_return_p._structs.emplace_back();
+		out_return_p._structs.back()._identifier = std::move(l_identifier);
+		out_return_p._structs.back()._has_explicit_default_public_constructor = node_p._has_explicit_default_public_constructor;
+		out_return_p._structs.back()._has_constructor_variants = node_p._has_constructor_variants;
+		out_return_p._structs.back()._is_destructor_deleted_or_not_public = node_p._is_destructor_deleted_or_not_public;
 	}
 
 	void output_enum_struct_metadata(metadata& out_return_p, const enum_struct_node& node_p) noexcept
@@ -309,29 +343,86 @@ namespace FHT::reflexcode_generator
 				l_generated_code += L");\n";
 			}
 
-
+			
 			constexpr FE::wchar* l_class_and_structs_reflection_frame = L"    ::FE::framework::framework_base::get_framework().get_method_reflection().register_task< ::FE::c_style_task<";
-			for (const std::pmr::wstring& identifier : header_file._class_and_structs) // Classes and structs reflection
+			for (const metadata::class_info& class_info : header_file._classes) // classes reflection
 			{
+#pragma warning(push)
+#pragma warning(disable: 4244)
+				if (class_info._has_explicit_default_public_constructor == false && class_info._has_constructor_variants)
+				{
+					_FE_MAYBE_UNUSED_ std::pmr::string l_log_buffer(class_info._identifier.begin(), class_info._identifier.end(), framework::get_framework().get_memory_resource());
+					FE_LOG(FE::log::Severity::_Warning, "Warning C2512; no appropriate default constructor available for ${%s@0}. FHT will not output the Reflexcode for this class.", l_log_buffer.c_str());
+					continue;
+				}
+
+				if (class_info._is_destructor_deleted_or_not_public)
+				{
+					_FE_MAYBE_UNUSED_ std::pmr::string l_log_buffer(class_info._identifier.begin(), class_info._identifier.end(), framework::get_framework().get_memory_resource());
+					FE_LOG(FE::log::Severity::_Warning, "Warning C2248/C2280; destructor is deleted or is not defined as public in ${%s@0}. FHT will not output the Reflexcode for this class.", l_log_buffer.c_str());
+					continue;
+				}
+#pragma warning(pop)
 				l_generated_code += l_class_and_structs_reflection_frame;
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
 				l_generated_code += L"*(";
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
 				l_generated_code += L"*)> >(\"construct ";
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
 				l_generated_code += L"\", ";
 				l_generated_code += L"&::std::construct_at<";
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
 				l_generated_code += L">);\n";
 
 				l_generated_code += l_class_and_structs_reflection_frame;
 				l_generated_code += L"void(";
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
 				l_generated_code += L"*)> >(\"destruct ";
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
 				l_generated_code += L"\", ";
 				l_generated_code += L"&::std::destroy_at<";
-				l_generated_code += identifier;
+				l_generated_code += class_info._identifier;
+				l_generated_code += L">);\n";
+			}
+
+
+			for (const metadata::struct_info& struct_info : header_file._structs) // structs reflection
+			{
+#pragma warning(push)
+#pragma warning(disable: 4244)
+				if (struct_info._has_constructor_variants && struct_info._has_explicit_default_public_constructor == false)
+				{
+					_FE_MAYBE_UNUSED_ std::pmr::string l_log_buffer(struct_info._identifier.begin(), struct_info._identifier.end(), framework::get_framework().get_memory_resource());
+					FE_LOG(FE::log::Severity::_Warning, "Warning C2512; no appropriate default constructor available for ${%s@0}. FHT will not output the Reflexcode for this struct.", l_log_buffer.c_str());
+					continue;
+				}
+
+				if (struct_info._is_destructor_deleted_or_not_public)
+				{
+					_FE_MAYBE_UNUSED_ std::pmr::string l_log_buffer(struct_info._identifier.begin(), struct_info._identifier.end(), framework::get_framework().get_memory_resource());
+					FE_LOG(FE::log::Severity::_Warning, "Warning C2248/C2280; destructor is deleted or is not defined as public in ${%s@0}. FHT will not output the Reflexcode for this struct.", l_log_buffer.c_str());
+					continue;
+				}
+#pragma warning(pop)
+				l_generated_code += l_class_and_structs_reflection_frame;
+				l_generated_code += struct_info._identifier;
+				l_generated_code += L"*(";
+				l_generated_code += struct_info._identifier;
+				l_generated_code += L"*)> >(\"construct ";
+				l_generated_code += struct_info._identifier;
+				l_generated_code += L"\", ";
+				l_generated_code += L"&::std::construct_at<";
+				l_generated_code += struct_info._identifier;
+				l_generated_code += L">);\n";
+
+				l_generated_code += l_class_and_structs_reflection_frame;
+				l_generated_code += L"void(";
+				l_generated_code += struct_info._identifier;
+				l_generated_code += L"*)> >(\"destruct ";
+				l_generated_code += struct_info._identifier;
+				l_generated_code += L"\", ";
+				l_generated_code += L"&::std::destroy_at<";
+				l_generated_code += struct_info._identifier;
 				l_generated_code += L">);\n";
 			}
 

@@ -635,10 +635,10 @@ protected:
 	pointer m_iterator;
 
 public:
-	_FE_CONSTEXPR17_ contiguous_iterator() noexcept : m_iterator() {}
-	_FE_CONSTEXPR17_ contiguous_iterator(const_pointer const value_p) noexcept : m_iterator(const_cast<pointer>(value_p)) {}
-	_FE_CONSTEXPR17_ contiguous_iterator(const contiguous_iterator& other_p) noexcept : m_iterator(other_p.m_iterator) {}
-	_FE_CONSTEXPR17_ contiguous_iterator(contiguous_iterator&& other_p) noexcept : m_iterator(other_p.m_iterator) { other_p.m_iterator = nullptr; }
+	constexpr contiguous_iterator() noexcept : m_iterator() {}
+	constexpr contiguous_iterator(const_pointer const value_p) noexcept : m_iterator(const_cast<pointer>(value_p)) {}
+	constexpr contiguous_iterator(const contiguous_iterator& other_p) noexcept : m_iterator(other_p.m_iterator) {}
+	constexpr contiguous_iterator(contiguous_iterator&& other_p) noexcept : m_iterator(other_p.m_iterator) { other_p.m_iterator = nullptr; }
 	constexpr ~contiguous_iterator() noexcept {}
 
 	_FE_FORCE_INLINE_ constexpr boolean is_null() const noexcept { return m_iterator == nullptr; }

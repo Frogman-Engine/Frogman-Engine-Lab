@@ -38,8 +38,27 @@ namespace FHT::reflexcode_generator
 			std::pmr::wstring _world_tag_enum;
 		};
 
+		struct class_info
+		{
+			std::pmr::wstring _identifier;
+
+			var::boolean _has_explicit_default_public_constructor = false;
+			var::boolean _has_constructor_variants = false;
+			var::boolean _is_destructor_deleted_or_not_public = false;
+		};
+
+		struct struct_info
+		{
+			std::pmr::wstring _identifier;
+
+			var::boolean _has_explicit_default_public_constructor = false;
+			var::boolean _has_constructor_variants = false;
+			var::boolean _is_destructor_deleted_or_not_public = false;
+		};
+
 		directory_t _header_file_path;
-		std::pmr::vector<std::pmr::wstring> _class_and_structs;
+		std::pmr::vector<class_info> _classes;
+		std::pmr::vector<struct_info> _structs;
 		std::pmr::vector< std::pmr::vector<std::pmr::wstring> > _enum_structs;
 		std::pmr::vector<system_info> _system_fptrs;
 	};

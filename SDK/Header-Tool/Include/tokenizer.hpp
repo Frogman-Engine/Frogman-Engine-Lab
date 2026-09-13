@@ -36,7 +36,9 @@ namespace FHT::tokenizer
 {
 	FE::boolean is_a_valid_letter_for_identifiers(FE::UTF8 char_p) noexcept;
 
+
 	_FE_NODISCARD_ std::pmr::list<token> tokenize_header(file_buffer_t& file_p, const directory_t& path_p);
+
 
 	// const char* p = "/* text */", f = "//text"; the 'text' is recognized as comments by FHT are purged from the token list.
 	void purge_comments(std::pmr::list<token>& out_list_p) noexcept;
@@ -55,6 +57,13 @@ namespace FHT::tokenizer
 	_FE_NODISCARD_ token tokenize_unidentifiable(typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
 
+	_FE_NODISCARD_ std::pmr::list<token> tokenize_any_decl(file_buffer_t& file_p);
+
+	_FE_NODISCARD_ token tokenize_identifiable_any_decl(typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
+
+	_FE_NODISCARD_ token tokenize_unidentifiable_any_decl(typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
+
+
 	void tokenize_comment(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p) noexcept;
 
 	void tokenize_preprocessor(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p) noexcept;
@@ -68,19 +77,19 @@ namespace FHT::tokenizer
 	void tokenize_template(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
 	
-	void tokenize_other(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p) noexcept;
+	void tokenize_other(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
 
 	void tokenize_reflection_macros(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
 
-	void tokenize_class(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
-
-	void tokenize_struct(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
+	void tokenize_namespace(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
 	void tokenize_enum_struct(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
-	void tokenize_namespace(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
+	void tokenize_struct(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
+
+	void tokenize_class(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 
 	void tokenize_class_struct_enum_forward_decl_and_using_namespace(token& out_token_p, typename file_buffer_t::const_pointer code_iterator_p, FHT::context_stack_t& context_stack_p);
 

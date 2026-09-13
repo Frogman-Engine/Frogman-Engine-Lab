@@ -45,6 +45,17 @@ void system4(FE::world& comptr_p)
 
 }
 
+class StaticClass
+{
+	FE_SYSTEM(_EngineInitialization, WorldTagEnumType); // must be ignored
+	void system4(FE::world& comptr_p) /* try filter me */
+	{
+
+	}
+
+	virtual void pure_virtual_method(float) /* try filter me */ =/* try filter me */ 0;
+};
+
 
 
 
@@ -54,16 +65,16 @@ void system4(FE::world& comptr_p)
 
 // Global enum struct with FE macro
 FE_ENUM_STRUCT();
-enum struct GlobalGameState : int
-{
-	MainMenu,
-	InGame,
-	Paused,
-	GameOver
+enum /* try filter me */struct/* try filter me */ GlobalGameState/* try filter me */ :/* try filter me */ int/* try filter me */
+{/* try filter me */
+	/* try filter me */MainMenu,/* try filter me */
+	/* try filter me */InGame,/* try filter me */
+	/* try filter me */Paused,/* try filter me */
+	/* try filter me */GameOver/* try filter me */
 };
 
 FE_ENUM_STRUCT();
-enum struct [[nodiscard]] GlobalGameState2
+enum struct [/* try filter me */[nodiscard]/* try filter me */] GlobalGameState2
 {
 	MainMenu,
 	InGame,
@@ -81,7 +92,7 @@ enum struct _NODISCARD_ GlobalGameState3
 };
 
 FE_ENUM_STRUCT();
-enum struct _NODISCARD_ _MAYBE_UNUSED_ GlobalGameState4
+enum struct _NODISCARD_/* try filter me */ _MAYBE_UNUSED_ GlobalGameState4
 {
 	MainMenu,
 	InGame,
@@ -90,7 +101,7 @@ enum struct _NODISCARD_ _MAYBE_UNUSED_ GlobalGameState4
 };
 
 FE_ENUM_STRUCT();
-enum struct [[nodiscard]] _MAYBE_UNUSED_ GlobalGameState5
+enum struct [[deprecated("FooBar! Eat This, lol")]] _MAYBE_UNUSED_ GlobalGameState5
 {
 	MainMenu,
 	InGame,
@@ -152,8 +163,8 @@ enum struct _NODISCARD_ _MAYBE_UNUSED_ GlobalEntityType4 : uint16_t
 
 // Global struct with FE macro - POD style
 FE_STRUCT();
-struct GlobalTransform2D
-{
+struct/* try filter me */GlobalTransform2D/* try filter me */
+{/* try filter me */
 	ENABLE_SERIALIZATION();
 	float _x;
 	float _y;
@@ -164,7 +175,8 @@ struct GlobalTransform2D
 
 
 // Global struct with FE macro - with methods
-struct GlobalVelocity
+struct/* try filter me */
+	/* try filter me */GlobalVelocity/* try filter me */
 {
 	ENABLE_SERIALIZATION();
 	float _vx;
@@ -197,12 +209,12 @@ struct GlobalRigidBody
 
 // Global class with FE macro - simple
 FE_CLASS();
-class GlobalGameObject
+class/* try filter me */GlobalGameObject/* try filter me */
 {
 	ENABLE_SERIALIZATION();
 public:
-	GlobalGameObject();
-	~GlobalGameObject();
+	GlobalGameObject(float vx_p, float vy_p);
+	~GlobalGameObject() = delete;
 
 	void set_active(bool active_p);
 	bool is_active() const;
@@ -214,10 +226,11 @@ private:
 };
 
 // Global class with FE macro - attr
-class GlobalGameObject2
-{
+class/* try filter me */
+	/* try filter me */GlobalGameObject2/* try filter me */
+{/* try filter me */
 	ENABLE_SERIALIZATION();
-public:
+
 	GlobalGameObject2();
 	~GlobalGameObject2();
 
@@ -230,7 +243,7 @@ private:
 	GlobalGameState _state;
 };
 
-class [[maybe_unused]] GlobalGameObject3
+class [/* try filter me */[/* try filter me */maybe_unused/* try filter me */]/* try filter me */] GlobalGameObject3
 {
 	ENABLE_SERIALIZATION();
 public:
@@ -321,7 +334,7 @@ protected:
 	bool _enabled;
 	uint64_t _component_id;
 
-public:
+
 	GlobalComponentBase() {}
 	virtual ~GlobalComponentBase() {}
 
@@ -512,7 +525,7 @@ struct AnimatedTransform
 	float _current_frame;
 
 	AnimatedTransform();
-	virtual ~AnimatedTransform();
+	virtual ~AnimatedTransform() = delete;
 	virtual void update(float delta_p);
 	virtual void reset_animation();
 };
@@ -577,7 +590,7 @@ public:
 	PhysicsComponent();
 	~PhysicsComponent();
 
-	void apply_impulse(float x_p, float y_p);
+	virtual void apply_impulse(float x_p, float y_p) = 0;
 	float mass;
 
 protected:
@@ -701,19 +714,19 @@ protected:
 	uint32_t _render_layer;
 };
 
-class UpdatableRenderable : public IUpdatable, public IRenderable
-{
-	ENABLE_SERIALIZATION();
-public:
-	UpdatableRenderable();
-	~UpdatableRenderable() override;
-
-	void update(float delta_p) override;
-	void render() override;
-
-private:
-	bool _dirty;
-};
+//class UpdatableRenderable : public IUpdatable, public IRenderable
+//{
+//	ENABLE_SERIALIZATION();
+//public:
+//	UpdatableRenderable();
+//	~UpdatableRenderable() override;
+//
+//	void update(float delta_p) override;
+//	void render() override;
+//
+//private:
+//	bool _dirty;
+//};
 
 // Class with FE macro - abstract interface
 
@@ -892,7 +905,8 @@ enum struct CharacterEnum : char
 {
 	TypeA = 'A',
 	TypeB = 'B',
-	TypeC = 'C'
+	TypeC = 'C',
+	TypeF = '}'
 };
 
 // Struct with FE macro - array members

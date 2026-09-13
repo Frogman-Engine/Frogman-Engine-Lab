@@ -47,15 +47,15 @@ namespace FHT::symbol_counter
 				++l_count._namespaces;
 				break;
 
-			case Vocabulary::_Class:
+			case Vocabulary::_ClassIdentifier:
 				++l_count._classes;
 				break;
 
-			case Vocabulary::_Struct:
+			case Vocabulary::_StructIdentifier:
 				++l_count._structs;
 				break;
 
-			case Vocabulary::_EnumStruct:
+			case Vocabulary::_EnumStructIdentifier:
 				++l_count._enum_structs;
 				break;
 
@@ -101,15 +101,15 @@ namespace FHT::symbol_counter
 				break;
 
 
-			case Vocabulary::_Class:
+			case Vocabulary::_ClassIdentifier:
 				++l_count._classes;
 				break;
 
-			case Vocabulary::_Struct:
+			case Vocabulary::_StructIdentifier:
 				++l_count._structs;
 				break;
 
-			case Vocabulary::_EnumStruct:
+			case Vocabulary::_EnumStructIdentifier:
 				++l_count._enum_structs;
 				break;
 
